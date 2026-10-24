@@ -40,12 +40,14 @@ src/about.md              about/submit/maiden page ({{title}}, {{catalog}}, {{re
 tools/lib.mjs             config, PLATFORMS, entry loading, front matter, VALIDATION RULES (single source of truth)
 tools/validate.mjs        CLI validator (GitHub Actions annotations when GITHUB_ACTIONS is set)
 tools/enrich.mjs          GitHub API metadata + README cache (20h TTL); likes (👍❤️🎉🚀 reactions on giscus discussions, GraphQL) → .cache/discussions.json
-tools/import.mjs          importers: maiden catalogs, awesome lists (incl. p3r7/awesome-monome-norns tables), GitHub topics
+tools/import.mjs          importers: maiden catalogs, awesome lists (incl. p3r7/awesome-monome-norns tables), GitHub topics + keyword search, lines (llllllll.co) library threads (rate-limited, recent only)
+tools/from-issue.mjs      [submit]/[claim] issue form → entry file + pr-body.md/comment.md (issue-entry.yml); field labels must match .github/ISSUE_TEMPLATE
+tools/health.mjs          follows moved repos (rewrites `repo`), reports gone/archived → health.md (health.yml)
 tools/build.mjs           renders everything into dist/
 tools/serve.mjs           local static server honoring basePath
 tools/new-entry.mjs       scaffolder behind `npm run new`
 site.config.json          title, siteUrl, basePath, cname, repo, giscus, import sources
-.github/workflows/        validate.yml (PRs), deploy.yml (push/daily → Pages), import.yml (weekly → PR)
+.github/workflows/        validate.yml (PRs), deploy.yml (push/daily → Pages), import.yml (weekly → PR), health.yml (weekly → PR + issue), issue-entry.yml (issue forms → PR)
 ```
 
 ## Data model (entry front matter)
@@ -61,7 +63,7 @@ site.config.json          title, siteUrl, basePath, cname, repo, giscus, import 
 | `requires` | | hardware from `KNOWN_REQUIRES` in `lib.mjs` (grid, arc, crow, midi, …) |
 | `ai` | ✓ | `none` \| `assisted`; `unknown` is allowed **only** with `source: imported` |
 | `source` | | `submitted` (default) \| `imported` |
-| `origin` | | where an import came from, e.g. `catalog:community`, `github-topic:norns` |
+| `origin` | | where an import came from, e.g. `catalog:community`, `github-topic:norns`, `github-search`, `lines` |
 | `added` | ✓* | `YYYY-MM-DD`, drives `/new/` and its feed. Required unless `source: imported`; the initial seed import has none so it doesn't flood "new". `npm run new` fills it in |
 | `license`, `discussion`, `docs`, `cover` | | optional; URLs must be https |
 
@@ -71,7 +73,7 @@ READMEs are rendered by `renderReadme()` in `build.mjs`: raw HTML is never passe
 
 The URL slug is the folder name: `/scripts/<name>/`, stable even if the platform changes. Duplicate names and duplicate repos (per platform) are rejected by `validate.mjs`. Adding a platform is one line in `PLATFORMS`.
 
-When adding a field: update `validateEntry` in `lib.mjs`, `templates/entry.md`, the table in `README.md`/`src/about.md`, the record built in `build.mjs`, and, if relevant, `index.json`/`catalog.json`.
+When adding a field: update `validateEntry` in `lib.mjs`, `templates/entry.md`, the issue forms (`.github/ISSUE_TEMPLATE/*.yml` + `from-issue.mjs`), the table in `README.md`/`src/about.md`, the record built in `build.mjs`, and, if relevant, `index.json`/`catalog.json`.
 
 ## Conventions and constraints
 
@@ -79,8 +81,8 @@ When adding a field: update `validateEntry` in `lib.mjs`, `templates/entry.md`, 
 - **Cards are prerendered.** `app.js` only filters and sorts existing DOM nodes using `data-*` attributes on each `.card`. If you add a filter, add the `data-*` attribute in `card()` in `build.mjs` and the group in `app.js` (`PARAM` = URL param name, `MODE` = `any`/`all`). Filter state lives in the URL query (shareable links).
 - **Everything user-supplied is untrusted.** Escape with `esc()` in templates. Markdown goes through the custom `marked` renderer that escapes raw HTML and neutralizes non-http(s) links. Never use `innerHTML` with entry data in `app.js`.
 - **`catalog.json` shape is a contract with maiden.** Keep `file_info`, `catalog_name`, `date`, `entries[]` with `project_name`, `project_url`, `author`, `description`, `discussion_url?`, `documentation_url?`, `tags`. Only `PLATFORMS[platform].maiden === true` entries (norns) go in it.
-- **Paths:** always build site URLs with `href()` (prefixes `basePath`). `basePath` is `""` now that the site is on its custom domain (`splines.vfmod.com`); a project Pages site would use `/<repo>`.
-- **Importer never overwrites** existing entries and dedupes by normalized repo URL. Imported entries are reviewed via the PR that `import.yml` opens.
+- **Paths:** always build site URLs with `href()` (prefixes `basePath`). `basePath` is `""` now that the site is on its custom domain (`splines.cc`); a project Pages site would use `/<repo>`.
+- **Importer never overwrites** existing entries and dedupes by normalized repo URL. Imported entries are reviewed via the PR that `import.yml` opens. Repos in `site.config.json → import.ignore` are never imported: when you remove a dead entry or merge a duplicate, add the old URL there, or the next import brings it back.
 - **Likes, not star ratings.** The site is static, so "rating" = positive reactions on each script's giscus discussion (titled with the page path, e.g. `scripts/NEVE/`), counted by `enrich.mjs` and shown as ♥ on cards plus a "most liked" sort. ★ means GitHub stars; keep the two distinct.
 - **The build must work offline.** GitHub metadata and READMEs come only from `.cache/` (written by `enrich.mjs`). Missing cache just means fewer stats on cards and no README on script pages.
 - Styling: CSS custom properties on `:root`, with dark mode via `prefers-color-scheme` plus a `data-theme` override (toggle in header). Keep both themes working and the layout fine at 390px width.
@@ -91,7 +93,6 @@ When adding a field: update `validateEntry` in `lib.mjs`, `templates/entry.md`, 
 
 - Confirm how maiden is configured with an extra catalog URL on the device, then document the exact steps in `src/about.md` (the `## installing with maiden` section).
 - Some imported "norns" entries are really crow scripts, Max patches, editor plugins or libraries (e.g. `crow-scripts`, `trio_for_crow`, `m4l-monome-norns`, `norns.el`). Re-platform or remove them during curation.
-- Final name/domain: update `title`, `catalogName`, `siteUrl`, `basePath`, `cname`.
 - giscus is wired but inactive until `site.config.json → giscus` is filled in.
 
 ## Roadmap (under discussion, not decided)
@@ -105,4 +106,4 @@ Proposals for the open ideas. Check with the maintainer before implementing any 
 5. ~~**Minimal PRs**~~: done; the body is optional catalog notes.
 6. **Author filter/pages**: clickable author on cards (`?author=` filter) plus `/authors/<author>/` pages.
 7. ~~**New & updated**~~: done. `/new/` + `feed-new.xml` (by `added`), `/updated/` + `feed-updated.xml` (by upstream push date), 50 items each.
-8. **Dynamic description**: don't rewrite entry files automatically. At build time, fall back to the GitHub repo description when `description` is missing, and keep the curated line when present.
+8. ~~**Dynamic description**~~: done. Entries keep their curated line; the importer's placeholder (`PLACEHOLDER_DESCRIPTION` in `lib.mjs`) is replaced at build time by the GitHub repo description.

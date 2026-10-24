@@ -1,6 +1,6 @@
 // Validate every entry. `--online` also checks that each repo exists and has a .lua script at its root.
 // `--changed a.md,b.md` limits online checks to those files (used on pull requests).
-import { PLATFORMS, loadEntries, validateEntry, normalizeRepo, githubSlug, gh } from './lib.mjs';
+import { PLATFORMS, loadEntries, validateEntry, normalizeRepo, githubSlug, gh, hasNornsLayout } from './lib.mjs';
 
 const args = process.argv.slice(2);
 const online = args.includes('--online');
@@ -53,13 +53,9 @@ if (online) {
       continue;
     }
     if (PLATFORMS[e.platform]?.luaRoot) {
-      const c = await gh(`/repos/${slug}/contents/`);
-      if (c.ok) {
-        const files = await c.json();
-        // mods have no script at the root; norns loads them from lib/mod.lua
-        if (!files.some((f) => f.type === 'file' && f.name.endsWith('.lua')) && !(await gh(`/repos/${slug}/contents/lib/mod.lua`)).ok) {
-          report(e, 'no .lua file at the repo root (or lib/mod.lua for a mod); norns needs the main script at the top level');
-        }
+      // mods have no script at the root; norns loads them from lib/mod.lua
+      if ((await hasNornsLayout(slug)) === false) {
+        report(e, 'no .lua file at the repo root (or lib/mod.lua for a mod); norns needs the main script at the top level');
       }
     }
   }

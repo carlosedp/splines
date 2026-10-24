@@ -2,9 +2,9 @@
   "title": "splines",
   "tagline": "a community catalog of monome scripts",
   "description": "Discover, search and install scripts for monome norns, grid, iii, crow and teletype. Handmade or AI-assisted, always disclosed.",
-  "siteUrl": "https://splines.vfmod.com",
+  "siteUrl": "https://splines.cc",
   "basePath": "",
-  "cname": "splines.vfmod.com",
+  "cname": "splines.cc",
   "repo": "VoltageFoundryMod/splines",
   "branch": "main",
   "catalogName": "splines",
@@ -21,6 +21,29 @@
     "awesomeLists": [
       "https://raw.githubusercontent.com/p3r7/awesome-monome-norns/main/README.md"
     ],
-    "githubTopics": ["norns", "monome-norns", "norns-script"]
+    "githubTopics": ["norns", "monome-norns", "norns-script"],
+    "githubSearch": {
+      "queries": [
+        "norns in:name,description,readme language:Lua"
+      ],
+      "days": 30
+    },
+    "lines": {
+      "url": "https://llllllll.co/tags/c/library/18/norns/15",
+      "days": 45,
+      "maxTopics": 30,
+      "delayMs": 3000
+    },
+    "ignore": [
+      "https://github.com/AndrewShike/wrms",
+      "https://github.com/moapacha/sonde",
+      "https://github.com/vicimity-dndrks/less_concepts",
+      "https://github.com/dndrks/less_concepts",
+      "https://github.com/yotamorimoto/norns_grd",
+      "https://github.com/Quixotic7/particles",
+      "https://github.com/distropolis/pixelss",
+      "https://github.com/nattog/vials",
+      "https://github.com/jaseknighter/semiconductor"
+    ]
   }
 }

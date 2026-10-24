@@ -1,0 +1,73 @@
+name: entry from issue
+
+# "[submit]" and "[claim]" issues (forms in .github/ISSUE_TEMPLATE) become pull requests.
+# Editing the issue runs it again and updates the same pull request.
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  entry:
+    if: startsWith(github.event.issue.title, '[submit]') || startsWith(github.event.issue.title, '[claim]')
+    runs-on: ubuntu-latest
+    concurrency: issue-${{ github.event.issue.number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Write entry from the issue
+        id: entry
+        env:
+          # issue text is untrusted: pass it through the environment, never into the script itself
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node tools/from-issue.mjs
+      - name: Validate
+        id: validate
+        if: steps.entry.outputs.file != ''
+        env:
+          FILE: ${{ steps.entry.outputs.file }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if node tools/validate.mjs --online --changed "$FILE" 2> errors.log; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            { echo "Thanks! The entry didn't pass validation yet:"; echo; grep '^✗' errors.log | sed 's/^✗ /- /'; echo; echo "Edit the issue to fix it and this runs again."; } > comment.md
+          fi
+      - name: Open pull request
+        id: pr
+        if: steps.validate.outputs.ok == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: entry/issue-${{ github.event.issue.number }}
+          delete-branch: true
+          add-paths: scripts/**
+          commit-message: 'scripts: ${{ steps.entry.outputs.name }} (#${{ github.event.issue.number }})'
+          title: 'scripts: ${{ github.event.issue.title }}'
+          body-path: pr-body.md
+          labels: ${{ startsWith(github.event.issue.title, '[claim]') && 'claim' || 'submission' }}
+      - name: Comment on the issue
+        if: always() && steps.entry.conclusion == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUMBER: ${{ github.event.issue.number }}
+          PR_URL: ${{ steps.pr.outputs.pull-request-url }}
+          PR_OP: ${{ steps.pr.outputs.pull-request-operation }}
+        run: |
+          case "$PR_OP" in
+            created) echo "Thanks! Opened a pull request for review: $PR_URL. The script goes live once it's merged." > comment.md ;;
+            updated) echo "Updated the pull request: $PR_URL" > comment.md ;;
+            none) rm -f comment.md ;; # an edit that changed nothing in the entry
+          esac
+          if [ -f comment.md ]; then gh issue comment "$NUMBER" --repo "$GITHUB_REPOSITORY" --body-file comment.md; fi

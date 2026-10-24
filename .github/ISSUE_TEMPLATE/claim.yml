@@ -1,0 +1,57 @@
+# Field labels are read by tools/from-issue.mjs: keep them in sync when renaming.
+name: Claim an imported script
+description: Your script was imported automatically? Claim it, disclose AI use and fix its details.
+title: "[claim] "
+labels: [claim]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Imported scripts show as **undisclosed** until their author claims them. A bot turns this form into a pull request; leave a field empty to keep what's there.
+  - type: input
+    id: script
+    attributes:
+      label: Script
+      description: Its name in the catalog, or a link to its page.
+      placeholder: https://splines.cc/scripts/my-script/
+    validations:
+      required: true
+  - type: dropdown
+    id: ai
+    attributes:
+      label: AI disclosure
+      description: Required. See https://splines.cc/about/#ai-disclosure
+      options:
+        - "none: written without AI code generation (autocomplete-level help is fine)"
+        - "assisted: made with meaningful help from AI tools, reviewed and tested by me"
+    validations:
+      required: true
+  - type: input
+    id: description
+    attributes:
+      label: Description
+      description: Optional. One line, 160 characters max.
+  - type: input
+    id: tags
+    attributes:
+      label: Tags
+      description: Optional. Replaces the current tags; separate with commas.
+  - type: input
+    id: requires
+    attributes:
+      label: Hardware it needs
+      description: Optional. Replaces the current list; separate with commas (grid, arc, crow, midi, audio-in, keyboard, jf, ansible, teletype, hid, osc, txo, er-301).
+  - type: input
+    id: author
+    attributes:
+      label: Author
+      description: Optional. How you'd like to be credited.
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: The one rule
+      options:
+        - label: I'm the author of this script
+          required: true
+        - label: I understand the code well enough to answer questions and fix bugs
+          required: true

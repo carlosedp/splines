@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
     inputs:
       only:
-        description: 'Sources to import (community,awesome,github)'
-        default: 'community,awesome,github'
+        description: 'Sources to import (community,awesome,github,search,lines)'
+        default: 'community,awesome,github,search,lines'
 
 permissions:
   contents: write
@@ -26,8 +26,24 @@ jobs:
       - name: Import
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node tools/import.mjs --only "${{ inputs.only || 'community,awesome,github' }}" | tee import.log
+        run: node tools/import.mjs --only "${{ inputs.only || 'community,awesome,github,search,lines' }}" 2>&1 | tee import.log
       - run: npm run validate
+      - name: Write PR body
+        run: |
+          {
+            echo 'Automated weekly import. Every new entry is marked `source: imported` and `ai: unknown`.'
+            echo 'Please skim for things that are not norns scripts (libraries, nb voices, forks, crow scripts) and delete those folders before merging.'
+            echo
+            echo '`origin: github-search` entries come from a keyword search and are the noisiest; `origin: lines` entries link their lines thread.'
+            echo 'Lines threads marked `~` below had no installable GitHub repo in the first post; add them by hand if they belong.'
+            echo
+            echo '<details><summary>import log</summary>'
+            echo
+            echo '```'
+            cat import.log
+            echo '```'
+            echo '</details>'
+          } > pr-body.md
       - name: Open pull request
         uses: peter-evans/create-pull-request@v7
         with:
@@ -37,6 +53,4 @@ jobs:
           commit-message: 'import: new scripts from external sources'
           title: 'import: new scripts from external sources'
           labels: import
-          body: |
-            Automated import. Every new entry is marked `source: imported` and `ai: unknown`.
-            Please skim for things that aren't norns scripts (libraries, mods, forks) and delete those folders before merging.
+          body-path: pr-body.md

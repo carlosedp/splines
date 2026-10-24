@@ -24,6 +24,8 @@ export const AI_VALUES = ['none', 'assisted', 'unknown'];
 export const SOURCE_VALUES = ['submitted', 'imported'];
 export const KNOWN_REQUIRES = ['grid', 'arc', 'crow', 'midi', 'audio-in', 'keyboard', 'jf', 'ansible', 'teletype', 'hid', 'osc', 'txo', 'er-301'];
 // Case is kept (the norns install folder is case-sensitive); uniqueness is checked ignoring case.
+// what the importer writes when a source has no description; the build shows the repo's description instead
+export const PLACEHOLDER_DESCRIPTION = 'no description yet';
 export const SLUG_RE = /^[A-Za-z0-9_][A-Za-z0-9_.-]*$/;
 export const TAG_RE = /^[a-z0-9][a-z0-9-]*$/;
 
@@ -39,6 +41,18 @@ export function parseFrontMatter(text) {
 
 export function stringifyFrontMatter(data, body = '') {
   return `---\n${YAML.stringify(data, { lineWidth: 0 }).trimEnd()}\n---\n${body.trim() ? `\n${body.trim()}\n` : ''}`;
+}
+
+/** Set (or, with undefined, delete) front matter fields in an entry file's text, keeping comments and order. */
+export function updateFrontMatter(text, changes) {
+  const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---(\r?\n[\s\S]*)?$/);
+  if (!m) throw new Error('missing front matter');
+  const doc = YAML.parseDocument(m[1]);
+  for (const [k, v] of Object.entries(changes)) {
+    if (v === undefined) doc.delete(k);
+    else doc.set(k, v);
+  }
+  return `---\n${doc.toString({ lineWidth: 0 }).trimEnd()}\n---${m[2] ?? '\n'}`;
 }
 
 export function normalizeRepo(url) {
@@ -129,4 +143,12 @@ export async function gh(pathname, { token = process.env.GITHUB_TOKEN, accept = 
   if (token) headers.Authorization = `Bearer ${token}`;
   const res = await fetch(`https://api.github.com${pathname}`, { headers });
   return res;
+}
+
+/** Whether a GitHub repo ("owner/repo") looks installable on norns: a .lua at the root, or lib/mod.lua for a mod. */
+export async function hasNornsLayout(slug) {
+  const c = await gh(`/repos/${slug}/contents/`);
+  if (!c.ok) return null; // unknown (missing repo or rate limit)
+  const files = await c.json();
+  return files.some((f) => f.type === 'file' && f.name.endsWith('.lua')) || (await gh(`/repos/${slug}/contents/lib/mod.lua`)).ok;
 }

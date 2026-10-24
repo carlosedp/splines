@@ -43,6 +43,7 @@ for (const e of loadEntries()) {
     }
     const r = await res.json();
     info = {
+      description: r.description || null,
       stars: r.stargazers_count,
       pushedAt: r.pushed_at,
       license: r.license?.spdx_id && r.license.spdx_id !== 'NOASSERTION' ? r.license.spdx_id : null,

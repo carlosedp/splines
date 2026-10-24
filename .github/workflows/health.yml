@@ -1,0 +1,50 @@
+name: catalog health
+
+# Weekly: fix moved repos with a pull request, and keep one "catalog health" issue listing
+# deleted, unreachable and archived repos for a human to decide on.
+on:
+  schedule:
+    - cron: '23 6 * * 3' # weekly, Wednesday
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check repositories
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node tools/health.mjs
+      - run: npm run validate
+      - name: Open pull request for moved repos
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: health/automated
+          delete-branch: true
+          add-paths: scripts/**
+          commit-message: 'scripts: follow moved repositories'
+          title: 'scripts: follow moved repositories'
+          body-path: health.md
+          labels: health
+      - name: Update the catalog health issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create health --color BFD4F2 --description 'catalog maintenance' --force
+          number=$(gh issue list --label health --state open --search 'catalog health in:title' --json number --jq '.[0].number')
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body-file health.md
+          else
+            gh issue create --title 'catalog health' --label health --body-file health.md
+          fi

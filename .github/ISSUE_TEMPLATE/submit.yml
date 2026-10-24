@@ -1,0 +1,109 @@
+# Field labels are read by tools/from-issue.mjs: keep them in sync when renaming.
+name: Add a script
+description: List your script on splines. No git needed; a bot turns this into a pull request.
+title: "[submit] "
+labels: [submission]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Fill this in and a bot opens the pull request for you. If something's off it comments here; edit the issue and it runs again.
+        Your repository's README is shown on the script page, so there's no need to repeat your docs.
+  - type: input
+    id: repo
+    attributes:
+      label: Repository
+      description: Public https URL. For norns, the main .lua script must be at the root of the repo.
+      placeholder: https://github.com/you/my-script
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      description: Where the code runs. Grid and arc are hardware; pick them below.
+      options:
+        - "norns"
+        - "iii"
+        - "crow"
+        - "teletype"
+      default: 0
+    validations:
+      required: true
+  - type: input
+    id: description
+    attributes:
+      label: Description
+      description: One line, 160 characters max.
+      placeholder: generative ambient sequencer for grid and arc
+    validations:
+      required: true
+  - type: input
+    id: tags
+    attributes:
+      label: Tags
+      description: A few, separated by commas. For example sequencer, generative, looper, sampler, delay, granular, synth, drums, utility, game.
+      placeholder: sequencer, generative
+    validations:
+      required: true
+  - type: checkboxes
+    id: requires
+    attributes:
+      label: Hardware it needs
+      description: Leave empty if it runs on norns alone.
+      options:
+        - label: grid
+        - label: arc
+        - label: crow
+        - label: midi
+        - label: audio-in
+        - label: keyboard
+        - label: jf
+        - label: ansible
+        - label: teletype
+        - label: hid
+        - label: osc
+        - label: txo
+        - label: er-301
+  - type: dropdown
+    id: ai
+    attributes:
+      label: AI disclosure
+      description: Required. See https://splines.cc/about/#ai-disclosure
+      options:
+        - "none: written without AI code generation (autocomplete-level help is fine)"
+        - "assisted: made with meaningful help from AI tools, reviewed and tested by me"
+    validations:
+      required: true
+  - type: input
+    id: name
+    attributes:
+      label: Name
+      description: Optional. Defaults to the repo name, with its exact upper/lowercase (for norns, the folder it installs into).
+  - type: input
+    id: author
+    attributes:
+      label: Author
+      description: Optional. How you'd like to be credited; defaults to the repo owner.
+  - type: input
+    id: license
+    attributes:
+      label: License
+      description: Optional. Defaults to the license GitHub detects.
+  - type: input
+    id: discussion
+    attributes:
+      label: Discussion
+      description: Optional. A thread about the script, e.g. on lines.
+      placeholder: https://llllllll.co/t/…
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: The one rule
+      options:
+        - label: I'm the author, or I have the author's OK to list it
+          required: true
+        - label: It runs on real hardware and does what the entry says
+          required: true
+        - label: I understand the code well enough to answer questions and fix bugs
+          required: true

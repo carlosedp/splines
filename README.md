@@ -3,10 +3,11 @@
 A community catalog of scripts for monome norns, grid, iii, crow and teletype, published as a static site on GitHub Pages. Handmade and AI-assisted scripts are both welcome, and every entry discloses which it is.
 
 - **One folder per script**: `scripts/<name>/index.md` with YAML front matter and free-form notes. A `platform` field says where it runs.
-- **Submissions by pull request**: CI validates the entry and checks the repo.
+- **Submissions by issue form or pull request**: the submit and claim forms are turned into PRs by a workflow; CI validates the entry and checks the repo.
 - **Search and filters run in the browser**: text, tags, hardware, AI disclosure and sort, with shareable URLs (`?tag=grid&req=crow`).
 - **Maiden-compatible catalog**: `catalog.json` uses the same shape as monome's `community.json`.
-- **Importer**: proposes new scripts weekly from the official community catalog, awesome lists and GitHub topics.
+- **Importer**: proposes new scripts weekly from the official community catalog, awesome lists, GitHub topics, a GitHub keyword search (recent Lua repos mentioning norns) and new threads in the lines norns library (lightly: one listing page, recent topics only, a pause between requests).
+- **Health check**: weekly, follows moved repos with a PR and lists deleted or archived ones in a "catalog health" issue.
 - **Optional discussions per script** with [giscus](https://giscus.app), backed by GitHub Discussions, so there's no database.
 
 No framework: one Node build script and two dependencies (`yaml`, `marked`).
@@ -34,6 +35,8 @@ tools/
   validate.mjs            schema + duplicates; --online checks repos exist and have a root .lua
   enrich.mjs              stars / last push / license / cover / README → .cache/
   import.mjs              pull new entries from external sources
+  from-issue.mjs          submit/claim issue form → entry (used by issue-entry.yml)
+  health.mjs              follow moved repos, report deleted/archived ones
   build.mjs               HTML pages, catalog.json, index.json, sitemap
   serve.mjs               local preview server
 site.config.json          title, URLs, giscus, import sources
@@ -64,8 +67,9 @@ Optional short "catalog notes", shown above the repo's README on the script page
 1. Push to GitHub and enable **Settings → Pages → Source: GitHub Actions**.
 2. Set `siteUrl` and `basePath` in `site.config.json`. For a custom domain, set `cname`, use `siteUrl: https://your.domain` and `basePath: ""`.
 3. `deploy.yml` builds on every push to `main` and daily, to refresh stars and last-push dates.
-4. `import.yml` runs weekly (or manually) and opens a PR with newly found scripts.
-5. Allow Actions to create PRs: **Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests**.
+4. `import.yml` runs weekly (or manually) and opens a PR with newly found scripts. `health.yml` runs weekly too: a PR for moved repos, and a "catalog health" issue for deleted and archived ones.
+5. `issue-entry.yml` turns `[submit]` and `[claim]` issues (forms in `.github/ISSUE_TEMPLATE`) into PRs and comments back on the issue. PRs opened by Actions don't trigger `validate.yml`, so that workflow validates the entry itself.
+6. Allow Actions to create PRs: **Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests**.
 
 ### Discussions (optional)
 
@@ -79,5 +83,5 @@ Threads are created on first comment and mapped to each page's path.
 
 - [ ] **Maiden catalog source config**: confirm where maiden reads extra catalog URLs on the device (its config file) and document the exact steps in `src/about.md`.
 - [x] **awesome lists**: p3r7/awesome-monome-norns is imported (frozen since 2021, so it rarely adds anything new).
-- [ ] Pick the final name and domain, then update `title`, `catalogName`, `siteUrl`, `basePath` and `cname`.
+- [x] Name and domain: splines, at splines.cc.
 - [ ] Decide whether imported entries for mods and libraries should get their own `platform` value (or a `type:` field).

@@ -1,13 +1,13 @@
 // Import scripts from external sources as new entries (never overwrites existing ones).
 //
-//   node tools/import.mjs [--dry-run] [--only community,awesome,github] [--limit N]
+//   node tools/import.mjs [--dry-run] [--only community,awesome,github,search,lines] [--limit N]
 //
 // Sources are configured in site.config.json -> import. Imported entries get
 // `source: imported` and `ai: unknown`, and are proposed through a pull request
-// by the nightly workflow so a human reviews them before they go live.
+// by the weekly workflow so a human reviews them before they go live.
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT, ENTRIES_DIR, loadConfig, loadEntries, normalizeRepo, stringifyFrontMatter, gh, TAG_RE, KNOWN_REQUIRES } from './lib.mjs';
+import { ROOT, ENTRIES_DIR, loadConfig, loadEntries, normalizeRepo, stringifyFrontMatter, gh, hasNornsLayout, TAG_RE, PLACEHOLDER_DESCRIPTION, KNOWN_REQUIRES } from './lib.mjs';
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
@@ -18,8 +18,11 @@ const want = (s) => !only || only.has(s);
 const cfg = loadConfig().import || {};
 // every source here lists norns scripts; names are unique across all platforms
 const existing = loadEntries();
-const knownRepos = new Set(existing.filter((e) => e.platform === 'norns').map((e) => normalizeRepo(e.data?.repo)));
+// plus repos that must not come back: old URLs of moved scripts, deleted repos (see health.mjs)
+const knownRepos = new Set([...existing.filter((e) => e.platform === 'norns').map((e) => normalizeRepo(e.data?.repo)), ...(cfg.ignore || []).map(normalizeRepo)]);
 const usedSlugs = new Set(existing.map((e) => e.slug.toLowerCase())); // names are unique ignoring case
+// lines topics already linked from an entry, by topic id
+const knownTopics = new Set(existing.map((e) => String(e.data?.discussion || '').match(/llllllll\.co\/t\/(?:[^/]+\/)?(\d+)/)?.[1]).filter(Boolean));
 const today = new Date().toISOString().slice(0, 10);
 const added = [];
 
@@ -33,7 +36,7 @@ const cleanTags = (tags) => {
 };
 const clip = (s, n = 160) => {
   s = String(s || '').replace(/\s+/g, ' ').trim();
-  return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s || 'no description yet';
+  return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s || PLACEHOLDER_DESCRIPTION;
 };
 
 function add({ name, repo, author, description, tags, requires, discussion, docs, origin, onNameClash = 'suffix' }) {
@@ -74,6 +77,8 @@ async function fetchText(url) {
   if (!res.ok) throw new Error(`${url} -> HTTP ${res.status}`);
   return res.text();
 }
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const daysAgo = (n) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
 
 // 1. maiden-format catalogs (norns.community's community.json and friends)
 if (want('community')) {
@@ -208,6 +213,86 @@ if (want('github')) {
       console.log(`· topic:${topic} page ${page}: ${items.length} repos`);
       if (items.length < 100) break;
     }
+  }
+}
+
+// 4. GitHub keyword search for norns scripts that have no topic. Noisier than topics, so only recently
+//    created repos are considered and each must look like a norns script (.lua at the root, or a mod).
+if (want('search')) {
+  const { queries = [], days = 30 } = cfg.githubSearch || {};
+  for (const q of queries) {
+    const res = await gh(`/search/repositories?q=${encodeURIComponent(`${q} fork:false archived:false created:>=${daysAgo(days)}`)}&sort=updated&per_page=100`);
+    if (!res.ok) {
+      console.warn(`! GitHub search "${q}" returned ${res.status}`);
+      continue;
+    }
+    const { items = [] } = await res.json();
+    let n = 0;
+    for (const r of items) {
+      if (knownRepos.has(normalizeRepo(r.html_url))) continue;
+      if (!(await hasNornsLayout(r.full_name))) continue;
+      add({ name: r.name, repo: r.html_url, author: r.owner?.login, description: r.description, tags: r.topics, origin: 'github-search' });
+      n++;
+    }
+    console.log(`· search "${q}": ${items.length} repos, ${n} look like norns scripts`);
+  }
+}
+
+// 5. lines (llllllll.co) library threads. Discourse is a community forum, so stay light: one listing page,
+//    only recent topics, one request per topic and a pause between requests.
+if (want('lines')) {
+  const { url, days = 45, maxTopics = 30, delayMs = 3000 } = cfg.lines || {};
+  try {
+    const list = JSON.parse(await fetchText(`${url.replace(/\/$/, '')}.json?order=created`));
+    const since = daysAgo(days);
+    const topics = (list.topic_list?.topics || [])
+      .filter((t) => !t.pinned && t.created_at.slice(0, 10) >= since && !knownTopics.has(String(t.id)))
+      .slice(0, maxTopics);
+    console.log(`· lines: ${topics.length} recent topics not in the catalog yet`);
+    for (const t of topics) {
+      await sleep(delayMs);
+      const discussion = `https://llllllll.co/t/${t.slug}/${t.id}`;
+      let topic;
+      try {
+        topic = JSON.parse(await fetchText(`https://llllllll.co/t/${t.id}.json`));
+      } catch (err) {
+        console.warn(`! ${err.message}`);
+        continue;
+      }
+      const post = topic.post_stream?.posts?.[0];
+      // repo roots linked from the first post; the poster's own repos first (others are often inspirations or deps)
+      const repos = [...new Set([...(post?.cooked || '').matchAll(/href="https:\/\/github\.com\/([\w.-]+)\/([\w.-]+?)(?:\.git)?(?:[/#?][^"]*)?"/g)].map((m) => `${m[1]}/${m[2]}`))]
+        .filter((r) => !/^(monome|tehn)\/(norns|dust|maiden)$/i.test(r))
+        .sort((a, b) => (b.split('/')[0].toLowerCase() === post?.username?.toLowerCase()) - (a.split('/')[0].toLowerCase() === post?.username?.toLowerCase()))
+        .slice(0, 3);
+      let found = false;
+      for (const slug of repos) {
+        if (knownRepos.has(normalizeRepo(`https://github.com/${slug}`))) {
+          found = true; // already listed under another discussion link
+          break;
+        }
+        const r = await gh(`/repos/${slug}`);
+        if (!r.ok) continue;
+        const info = await r.json();
+        if (info.fork || info.archived || !(await hasNornsLayout(info.full_name))) continue;
+        // "NEVE - generative ambient sequencer" -> description after the separator, else the repo's own
+        const fromTitle = topic.title.match(/^[^:–—-]+\s*[:–—-]\s+(.+)$/)?.[1];
+        add({
+          name: info.name,
+          repo: info.html_url,
+          author: info.owner?.login,
+          description: fromTitle || info.description || topic.title,
+          tags: [...(t.tags || []).map((x) => x.name || x), ...(info.topics || [])],
+          discussion,
+          origin: 'lines',
+        });
+        found = true;
+        break;
+      }
+      if (!found) console.log(`  ~ ${discussion}: no installable GitHub repo linked from the first post`);
+    }
+  } catch (err) {
+    console.warn(`! ${err.message}`);
   }
 }
 

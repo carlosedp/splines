@@ -17,6 +17,7 @@ import {
   githubSlug,
   readJSON,
   readmeFile,
+  PLACEHOLDER_DESCRIPTION,
 } from "./lib.mjs";
 
 const cfg = loadConfig();
@@ -178,7 +179,9 @@ for (const e of loadEntries()) {
     slug: e.slug,
     name: d.name,
     author: d.author,
-    description: d.description,
+    // imported entries may only have a placeholder; the repo's own description is better than nothing
+    description:
+      (d.description === PLACEHOLDER_DESCRIPTION && gh.description) || d.description,
     tags: d.tags.map(String),
     requires: d.requires || [],
     ai: d.ai,
@@ -417,6 +420,14 @@ for (const r of records) {
   const editUrl = esc(
     `https://github.com/${cfg.repo}/edit/${cfg.branch}/${ENTRIES_DIR}/${r.slug}/index.md`,
   );
+  const claimUrl = esc(
+    `https://github.com/${cfg.repo}/issues/new?template=claim.yml&title=${encodeURIComponent(`[claim] ${r.slug}`)}&script=${encodeURIComponent(r.slug)}`,
+  );
+  // a "listed on" badge for the script's README: links back here and tells readers where to find more
+  const badgeMd = `[![listed on ${cfg.title}](${siteUrl}/assets/badge.svg)](${siteUrl}/${r.path})`;
+  const badge = siteUrl
+    ? `<details class="badge-snippet"><summary>README badge</summary><p class="hint">Add this to your README:</p><div class="copy-row"><code class="cmd">${esc(badgeMd)}</code><button type="button" class="copy" data-copy="${esc(badgeMd)}">copy</button></div></details>`
+    : "";
   const install =
     r.platform === "norns"
       ? `<section class="install">
@@ -489,8 +500,9 @@ for (const r of records) {
     <aside class="entry-side">
       <dl>${meta.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>
       <div class="card-tags">${r.tags.map(tagLink).join("")}</div>
-      ${r.source === "imported" ? `<p class="claim">Is this your script? <a href="${editUrl}">Claim it</a>: set <code>source: submitted</code> and fill in the <code>ai</code> disclosure.</p>` : ""}
+      ${r.source === "imported" ? `<p class="claim">Is this your script? <a href="${claimUrl}">Claim it</a> to disclose AI use and fix its details. It's a short form, no git needed.</p>` : ""}
       <p class="edit"><a href="${editUrl}">suggest an edit</a></p>
+      ${badge}
     </aside>
   </div>
 </article>`,

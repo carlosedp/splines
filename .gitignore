@@ -3,3 +3,6 @@ dist/
 .cache/
 *.log
 .DS_Store
+health.md
+comment.md
+pr-body.md

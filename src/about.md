@@ -24,6 +24,10 @@ Every entry carries one of these labels, and the list can be filtered by them, s
 
 ## submitting a script
 
+**The easy way:** fill in the [submission form](https://github.com/{{repo}}/issues/new?template=submit.yml). No git needed, just a GitHub account. A bot turns it into a pull request; if something needs fixing it comments on your issue, and editing the issue runs it again.
+
+**With a pull request:**
+
 1. Fork [{{repo}}](https://github.com/{{repo}}).
 2. Create `scripts/<your-script>/index.md`. Names are unique across the whole catalog. For norns, the folder name must match the name the script installs as, usually the repo name.
 3. Fill in the front matter (copy `templates/entry.md`):
@@ -49,7 +53,9 @@ The script page shows your repository's README, so there's no need to copy your 
 
 4. Open a pull request. A check validates the entry and confirms the repo exists (for norns, that it has a `.lua` script at its root). Once merged, the site rebuilds in a minute or two.
 
-Already listed through an import? Claim it: edit the entry, set `source: submitted`, and fill in `ai`.
+Already listed through an import? Use the "claim it" link on the script's page (or the [claim form](https://github.com/{{repo}}/issues/new?template=claim.yml)) to disclose AI use and fix its details.
+
+Once it's listed, the script page has a README badge you can copy, linking readers back to the catalog.
 
 ## installing with maiden
 
@@ -69,7 +75,9 @@ maiden's project manager reads its catalogs from its configuration on the device
 
 ## where the scripts come from
 
-Besides direct submissions, a nightly job looks for scripts in the official community catalog, curated lists and GitHub repositories tagged `norns`. New finds are proposed as a pull request and reviewed before they appear here. They're marked **undisclosed** until their authors claim them.
+Besides direct submissions, a weekly job looks for scripts in the official community catalog, curated lists, GitHub repositories tagged or mentioning `norns`, and new threads in the [lines norns library](https://llllllll.co/tags/c/library/18/norns/15). New finds are proposed as a pull request and reviewed before they appear here. They're marked **undisclosed** until their authors claim them.
+
+Another weekly job checks that every listed repository still exists: moved repos are followed automatically, and deleted ones are flagged for removal.
 
 ## discussions
 

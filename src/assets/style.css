@@ -165,3 +165,6 @@ code, .cmd { font-family: var(--mono); font-size: .9em; }
 .prose table { border-collapse: collapse; display: block; overflow-x: auto; }
 .prose th, .prose td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; }
 .about { padding-top: 12px; }
+.badge-snippet { margin: 12px 0 0; font-size: 13px; }
+.badge-snippet summary { cursor: pointer; color: var(--muted); font: 12px var(--mono); }
+.badge-snippet .cmd { font-size: 12px; }
