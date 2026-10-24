@@ -21,7 +21,11 @@
     "awesomeLists": [
       "https://raw.githubusercontent.com/p3r7/awesome-monome-norns/main/README.md"
     ],
-    "githubTopics": ["norns", "monome-norns", "norns-script"],
+    "githubTopics": [
+      "norns",
+      "monome-norns",
+      "norns-script"
+    ],
     "githubSearch": {
       "queries": [
         "norns in:name,description,readme language:Lua"
@@ -43,7 +47,21 @@
       "https://github.com/Quixotic7/particles",
       "https://github.com/distropolis/pixelss",
       "https://github.com/nattog/vials",
-      "https://github.com/jaseknighter/semiconductor"
+      "https://github.com/jaseknighter/semiconductor",
+      "https://github.com/tyleretters/athenaeum",
+      "https://github.com/ryleelyman/bitters",
+      "https://github.com/ryleelyman/choukanzu",
+      "https://github.com/ryleelyman/faeng",
+      "https://github.com/lukes-anger/jiffy",
+      "https://github.com/ryleelyman/lamination",
+      "https://github.com/moapacha/leslie",
+      "https://github.com/notjustmat/mangl",
+      "https://github.com/P1505/orbital",
+      "https://github.com/unit-cell/practice",
+      "https://github.com/unit-cell/skylines",
+      "https://github.com/notjustmat/strides",
+      "https://github.com/ryleelyman/waver",
+      "https://github.com/ryleelyman/xD1"
     ]
   }
 }

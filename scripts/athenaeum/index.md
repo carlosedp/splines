@@ -1,7 +1,7 @@
 ---
 name: athenaeum
 platform: norns
-repo: https://github.com/tyleretters/athenaeum
+repo: https://github.com/northern-information/athenaeum
 author: tyleretters
 description: generates MIDI delay with visual feedback
 tags:

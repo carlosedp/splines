@@ -1,7 +1,7 @@
 ---
 name: skylines
 platform: norns
-repo: https://github.com/unit-cell/skylines
+repo: https://github.com/markelmart/skylines
 author: markel_m
 description: a sequencer inspired on the M185/Intellijel Metropolis
 tags:

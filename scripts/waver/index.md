@@ -1,7 +1,7 @@
 ---
 name: waver
 platform: norns
-repo: https://github.com/ryleelyman/waver
+repo: https://github.com/robbielyman/waver
 author: alanza
 description: assemble a song from TAPE
 tags:

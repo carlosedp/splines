@@ -1,7 +1,7 @@
 ---
 name: orbital
 platform: norns
-repo: https://github.com/P1505/orbital
+repo: https://github.com/P580C/orbital
 author: P1505
 description: orbital is an experiment in simple sequences and interface design
 tags:

@@ -1,7 +1,7 @@
 ---
 name: wrms
 platform: norns
-repo: https://github.com/AndrewShike/wrms
+repo: https://github.com/andr-ew/wrms
 author: andrew
 description: dual asyncronous time-wigglers / echo loopers
 tags:

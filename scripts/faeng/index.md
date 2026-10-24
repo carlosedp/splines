@@ -1,7 +1,7 @@
 ---
 name: faeng
 platform: norns
-repo: https://github.com/ryleelyman/faeng
+repo: https://github.com/robbielyman/faeng
 author: alanza
 description: faeng is a sequencer. inspired by kria. powered by timber.
 tags:

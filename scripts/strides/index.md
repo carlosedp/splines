@@ -1,7 +1,7 @@
 ---
 name: strides
 platform: norns
-repo: https://github.com/notjustmat/strides
+repo: https://github.com/justmat/strides
 author: justmat
 description: a collection of pattern recorders
 tags:

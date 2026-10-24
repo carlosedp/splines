@@ -1,7 +1,7 @@
 ---
 name: leslie
 platform: norns
-repo: https://github.com/moapacha/leslie
+repo: https://github.com/simonsunyiming/leslie
 author: sym
 description: doppler, tremolo, and the slow spin-up
 tags:

@@ -1,7 +1,7 @@
 ---
 name: bitters
 platform: norns
-repo: https://github.com/ryleelyman/bitters
+repo: https://github.com/robbielyman/bitters
 author: alanza
 description: lo-fi FM capable mono/poly
 tags:

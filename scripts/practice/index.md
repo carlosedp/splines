@@ -1,7 +1,7 @@
 ---
 name: practice
 platform: norns
-repo: https://github.com/unit-cell/practice
+repo: https://github.com/markelmart/practice
 author: unit-cell
 description: musical scale quizz
 tags:

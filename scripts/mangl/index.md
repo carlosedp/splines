@@ -1,7 +1,7 @@
 ---
 name: mangl
 platform: norns
-repo: https://github.com/notjustmat/mangl
+repo: https://github.com/justmat/mangl
 author: justmat
 description: a 7 track granular sample player
 tags:

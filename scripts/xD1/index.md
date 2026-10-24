@@ -1,7 +1,7 @@
 ---
 name: xD1
 platform: norns
-repo: https://github.com/ryleelyman/xD1
+repo: https://github.com/robbielyman/xD1
 author: alanza
 description: xD1 is an FM synth
 tags:

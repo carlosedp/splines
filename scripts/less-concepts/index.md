@@ -1,7 +1,7 @@
 ---
 name: less-concepts
 platform: norns
-repo: https://github.com/vicimity-dndrks/less_concepts
+repo: https://github.com/vicimity-dndrks/less-concepts
 author: vicimity dani_derks
 description: 1d cellular automata sequencer
 tags:

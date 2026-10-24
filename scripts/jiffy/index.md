@@ -1,7 +1,7 @@
 ---
 name: jiffy
 platform: norns
-repo: https://github.com/lukes-anger/jiffy
+repo: https://github.com/sloth-father/jiffy
 author: Molotov
 description: 16 second looper
 tags:

@@ -1,7 +1,7 @@
 ---
 name: lamination
 platform: norns
-repo: https://github.com/ryleelyman/lamination
+repo: https://github.com/robbielyman/lamination
 author: alanza
 description: substitution sequencer
 tags:
