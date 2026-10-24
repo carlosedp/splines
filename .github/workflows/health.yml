@@ -32,7 +32,9 @@ jobs:
         with:
           branch: health/automated
           delete-branch: true
-          add-paths: scripts/**
+          add-paths: |
+            scripts/**
+            site.config.json
           commit-message: 'scripts: follow moved repositories'
           title: 'scripts: follow moved repositories'
           body-path: health.md

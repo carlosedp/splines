@@ -2,13 +2,14 @@
 //
 //   node tools/health.mjs [--dry-run]
 //
-// Renamed or transferred GitHub repos are fixed in place (the API redirects to the new location).
+// Renamed or transferred GitHub repos are fixed in place (the API redirects to the new location), and the
+// old URL goes into site.config.json -> import.ignore so sources that still list it don't re-import it.
 // Deleted, unreachable and archived repos are only reported: removing an entry is a human decision.
 // The report goes to health.md, used by .github/workflows/health.yml for the pull request and the
 // "catalog health" issue.
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT, PLATFORMS, loadEntries, githubSlug, gh, updateFrontMatter } from './lib.mjs';
+import { ROOT, PLATFORMS, loadEntries, normalizeRepo, githubSlug, gh, updateFrontMatter } from './lib.mjs';
 
 const dryRun = process.argv.includes('--dry-run');
 const moved = [];
@@ -66,6 +67,17 @@ for (const e of entries) {
     }
   }
   if (r.archived) archived.push({ e, pushed: r.pushed_at?.slice(0, 10) });
+}
+
+if (moved.length && !dryRun) {
+  const file = path.join(ROOT, 'site.config.json');
+  const cfg = JSON.parse(fs.readFileSync(file, 'utf8'));
+  cfg.import = cfg.import || {};
+  const ignore = new Set(cfg.import.ignore || []);
+  const known = new Set([...ignore].map(normalizeRepo));
+  for (const m of moved) if (!known.has(normalizeRepo(m.e.data.repo))) ignore.add(m.e.data.repo);
+  cfg.import.ignore = [...ignore];
+  fs.writeFileSync(file, `${JSON.stringify(cfg, null, 2)}\n`);
 }
 
 const link = (e) => `[${e.slug}](${e.data.repo})`;
