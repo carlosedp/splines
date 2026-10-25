@@ -25,6 +25,8 @@ const DIST = path.join(ROOT, "dist");
 const base = (cfg.basePath || "").replace(/\/+$/, "");
 const siteUrl = (cfg.siteUrl || "").replace(/\/+$/, "");
 const href = (p) => `${base}/${p.replace(/^\/+/, "")}`;
+// the submission issue form (.github/ISSUE_TEMPLATE/submit.yml): no git needed, a workflow opens the PR
+const submitUrl = `https://github.com/${cfg.repo}/issues/new?template=submit.yml&title=${encodeURIComponent("[submit] ")}`;
 const cache = readJSON(path.join(ROOT, ".cache", "github.json"), {});
 // likes = 👍/❤️/🎉/🚀 reactions on each script's giscus discussion, keyed by page path (written by enrich.mjs)
 const discussions = readJSON(path.join(ROOT, ".cache", "discussions.json"), {});
@@ -253,7 +255,8 @@ ${
     <a href="${href("")}">scripts</a>
     <a href="${href("new/")}">new</a>
     <a href="${href("updated/")}">updated</a>
-    <a href="${href("about/")}">about &amp; submit</a>
+    <a href="${href("about/")}">about</a>
+    <a class="nav-submit" href="${esc(submitUrl)}">+ submit</a>
     <a href="https://github.com/${esc(cfg.repo)}">github</a>
     <button class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle theme"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
   </nav>
@@ -263,7 +266,7 @@ ${body}
 </main>
 <footer class="site-footer">
   <p>Unofficial and community-run. Not affiliated with or endorsed by monome. Scripts belong to their authors; check each repo's license.</p>
-  <p><a href="${href("catalog.json")}">maiden catalog</a> · <a href="${href("index.json")}">index.json</a> · <a href="https://github.com/${esc(cfg.repo)}/blob/${esc(cfg.branch)}/CONTRIBUTING.md">contribute</a></p>
+  <p><a href="${href("catalog.json")}">maiden catalog</a> · <a href="${href("index.json")}">index.json</a> · <a href="${esc(submitUrl)}">submit a script</a> · <a href="https://github.com/${esc(cfg.repo)}/blob/${esc(cfg.branch)}/CONTRIBUTING.md">contribute</a></p>
 </footer>
 <script src="${href("assets/app.js")}" defer></script>
 </body>
@@ -364,7 +367,7 @@ write(
     body: `
 <section class="hero">
   <h1>${esc(cfg.tagline)}</h1>
-  <p>${records.length} scripts. Search, filter by tag or hardware, and install straight from maiden. Handmade or AI-assisted, always disclosed. <a href="${href("about/")}">How it works</a></p>
+  <p>${records.length} scripts. Search, filter by tag or hardware, and install straight from maiden. Handmade or AI-assisted, always disclosed. <a href="${esc(submitUrl)}">Add your script</a> with a short form, or read <a href="${href("about/")}">how it works</a>.</p>
 </section>
 <section class="fresh" aria-label="What's new">
   ${freshPanel("just added", "new/", "feed-new.xml", latest("added", 5), (r) => r.added)}
@@ -407,7 +410,7 @@ write(
 <ul id="results" class="cards">
 ${records.map(card).join("\n")}
 </ul>
-<p id="empty" class="empty" hidden>Nothing matches. Try fewer filters, or <a href="${href("about/")}">add the script you were looking for</a>.</p>
+<p id="empty" class="empty" hidden>Nothing matches. Try fewer filters, or <a href="${esc(submitUrl)}">add the script you were looking for</a>.</p>
 `,
   }),
 );
