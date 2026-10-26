@@ -194,6 +194,7 @@ for (const e of loadEntries()) {
     repo: d.repo,
     discussion: d.discussion || null,
     docs: d.docs || null,
+    install: d.install || null,
     license: d.license || gh.license || null,
     cover: d.cover || gh.cover || null,
     stars: gh.stars ?? null,
@@ -447,8 +448,8 @@ for (const r of records) {
       ? `<section class="install">
   <h2>install</h2>
   <p>In maiden's REPL (the <code>&gt;&gt;</code> prompt at the bottom of the editor), run:</p>
-  <div class="copy-row"><code class="cmd">;install ${esc(r.repo)}</code><button type="button" class="copy" data-copy=";install ${esc(r.repo)}">copy</button></div>
-  <p class="hint">Or add the <a href="${href("about/#installing-with-maiden")}">${esc(cfg.title)} catalog</a> to maiden and install it from the project manager. Restart norns if the script ships a new engine.</p>
+  <div class="copy-row"><code class="cmd">;install ${esc(r.install || r.repo)}</code><button type="button" class="copy" data-copy=";install ${esc(r.install || r.repo)}">copy</button></div>
+  ${r.install ? "" : `<p class="hint">Or add the <a href="${href("about/#installing-with-maiden")}">${esc(cfg.title)} catalog</a> to maiden and install it from the project manager. Restart norns if the script ships a new engine.</p>`}
   ${r.kind === "mod" ? `<p class="hint">This is a <strong>mod</strong>: after installing, enable it in SYSTEM &gt; MODS (select it with E2, turn E3 until it shows a +), then restart norns. <a href="https://monome.org/docs/norns/mods/">About mods</a>.</p>` : ""}
 </section>`
       : `<section class="install"><h2>install</h2><p>Get the script from <a href="${esc(r.repo)}">its repository</a> and follow its README.</p></section>`;
@@ -635,7 +636,8 @@ const catalog = {
   catalog_name: cfg.catalogName,
   date: buildDate,
   entries: records
-    .filter((r) => PLATFORMS[r.platform].maiden)
+    // entries with their own install URL (a release zip) can't be installed from project_url
+    .filter((r) => PLATFORMS[r.platform].maiden && !r.install)
     .map((r) => ({
       project_name: r.name,
       project_url: r.repo,

@@ -67,6 +67,7 @@ site.config.json          title, siteUrl, basePath, cname, repo, giscus, import 
 | `origin` | | where an import came from, e.g. `catalog:community`, `github-topic:norns`, `github-search`, `lines` |
 | `added` | ✓* | `YYYY-MM-DD`, drives `/new/` and its feed. Required unless `source: imported`; the initial seed import has none so it doesn't flood "new". `npm run new` fills it in |
 | `license`, `discussion`, `docs`, `cover` | | optional; URLs must be https |
+| `install` | | optional https URL for `;install` when the repo isn't what gets installed (e.g. a release zip of a compiled mod). Skips the online layout check and keeps the entry out of `catalog.json` |
 
 The entry body is optional **catalog notes**, rendered above the upstream README on the script page. PRs only need front matter; the README is the documentation. HTML comments in the body are not published (the template hint is one).
 

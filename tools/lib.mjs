@@ -137,7 +137,7 @@ export function validateEntry(entry) {
   // drives the /new/ page and feed; the initial import has no date, so it doesn't flood them
   if (d.added !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(String(d.added))) errs.push('"added" must be a date like 2026-10-21');
   if (d.added === undefined && d.source !== 'imported') errs.push('"added" is required: the date the entry is submitted, like 2026-10-21');
-  for (const k of ['discussion', 'docs', 'cover']) {
+  for (const k of ['discussion', 'docs', 'cover', 'install']) {
     if (d[k] !== undefined && !/^https:\/\/[^\s]+$/.test(String(d[k]))) errs.push(`"${k}" must be an https URL`);
   }
   return errs;

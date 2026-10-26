@@ -23,6 +23,7 @@ added: 2026-01-01
 # discussion: https://...   (an existing thread anywhere)
 # docs: https://...         (documentation page)
 # cover: https://...        (screenshot URL; or drop a cover.png in your repo root)
+# install: https://...      (only if it installs from something other than the repo, like a release zip)
 ---
 
 <!--
