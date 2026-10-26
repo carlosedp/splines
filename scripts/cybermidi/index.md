@@ -6,7 +6,6 @@ repo: https://github.com/dstroud/cybermidi
 author: modularbeat
 description: mod to send MIDI notes between Norns over IP
 tags:
-  - mod
   - utility
   - midi
 requires:

@@ -10,7 +10,6 @@ tags:
   - crow
   - arc
   - grid
-  - mod
 requires:
   - jf
   - crow

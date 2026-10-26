@@ -6,7 +6,6 @@ repo: https://github.com/notrobintaylor/fx_reflex
 author: notrobintaylor
 description: Creative reverb with two built-in modulators for the fx mod framework
 tags:
-  - mod
   - fx
   - audio-fx
   - reverb

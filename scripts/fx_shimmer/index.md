@@ -6,7 +6,6 @@ repo: https://github.com/sonocircuit/fx_shimmer
 author: sonocircuit
 description: A shimmer reverb for the fx framework
 tags:
-  - mod
   - fx
   - audio-fx
   - reverb

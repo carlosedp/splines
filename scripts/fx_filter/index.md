@@ -6,7 +6,6 @@ repo: https://github.com/xmacex/fx_filter
 author: xmacex
 description: Filter effect for norns fx framework
 tags:
-  - mod
   - fx
   - audio-fx
   - filter

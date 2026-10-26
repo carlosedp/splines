@@ -6,7 +6,6 @@ repo: https://github.com/sixolet/toolkit
 author: sixolet
 description: Your great aunt Pam's old toolkit
 tags:
-  - mod
   - utility
 ai: unknown
 source: imported

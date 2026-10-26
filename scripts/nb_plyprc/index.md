@@ -6,7 +6,6 @@ repo: https://github.com/sonocircuit/nb_plyprc
 author: sonoCircuit
 description: a norns classic as nb player
 tags:
-  - mod
   - synth
   - nb
 ai: unknown

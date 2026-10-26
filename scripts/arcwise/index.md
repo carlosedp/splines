@@ -7,7 +7,6 @@ author: alanza
 description: arcwise
 tags:
   - arc
-  - mod
 requires:
   - arc
 ai: unknown

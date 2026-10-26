@@ -6,7 +6,6 @@ repo: https://github.com/sonocircuit/fx_rele
 author: sonoCircuit
 description: Multimode delay for the norns fx mod
 tags:
-  - mod
   - fx
   - audio-fx
   - delay

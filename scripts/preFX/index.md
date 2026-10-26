@@ -6,7 +6,6 @@ repo: https://github.com/sonocircuit/preFX
 author: sonoCircuit
 description: a pre-insert-fx boilerplate
 tags:
-  - mod
   - audio-fx
 ai: unknown
 source: imported

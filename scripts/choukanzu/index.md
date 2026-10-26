@@ -6,7 +6,8 @@ repo: https://github.com/robbielyman/choukanzu
 author: alanza
 description: take a bird's-eye view of norns script params
 tags:
-  - mod
+  - utility
+  - params
 ai: unknown
 source: imported
 origin: catalog:community

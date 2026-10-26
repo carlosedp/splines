@@ -329,14 +329,14 @@ function freshPanel(title, page, feed, items, date) {
   </div>`;
 }
 
-function chipGroup(name, label, counts, min = 1) {
+function chipGroup(name, label, counts, min = 1, text = (v) => v) {
   const items = [...counts]
     .filter(([, n]) => n >= min)
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   if (!items.length) return "";
   return `<fieldset class="chips" data-group="${name}">
   <legend>${esc(label)}</legend>
-  ${items.map(([v, n]) => `<button type="button" class="chip" data-value="${esc(v)}" aria-pressed="false">${esc(v)} <span class="count">${n}</span></button>`).join("")}
+  ${items.map(([v, n]) => `<button type="button" class="chip" data-value="${esc(v)}" aria-pressed="false">${esc(text(v))} <span class="count">${n}</span></button>`).join("")}
 </fieldset>`;
 }
 
@@ -399,7 +399,7 @@ write(
   </div>
   <div class="filter-row">
     ${chipGroup("platform", "platform", new Map([...platformCounts].filter(([, n]) => n > 0)))}
-    ${chipGroup("kind", "kind", new Map([...kindCounts].filter(([, n]) => n > 0)))}
+    ${chipGroup("kind", "type", new Map([...kindCounts].filter(([, n]) => n > 0)), 1, (k) => KINDS[k].plural)}
     <fieldset class="chips" data-group="ai">
       <legend>AI disclosure</legend>
       ${[...aiCounts]
@@ -493,7 +493,7 @@ for (const r of records) {
       canonical: r.path,
       body: `
 <article class="entry">
-  <p class="crumbs"><a class="back" href="${href("")}" data-back>← all scripts</a> <span class="crumb-sep">/</span> ${esc(PLATFORMS[r.platform].label)}${r.kind !== "script" ? ` <span class="crumb-sep">/</span> <a href="${href(`?kind=${encodeURIComponent(r.kind)}`)}">${esc(KINDS[r.kind].label)}s</a>` : ""}</p>
+  <p class="crumbs"><a class="back" href="${href("")}" data-back>← all scripts</a> <span class="crumb-sep">/</span> ${esc(PLATFORMS[r.platform].label)}${r.kind !== "script" ? ` <span class="crumb-sep">/</span> <a href="${href(`?kind=${encodeURIComponent(r.kind)}`)}">${esc(KINDS[r.kind].plural)}</a>` : ""}</p>
   <header class="entry-head">
     <h1>${esc(r.name)}${isNew(r) ? ` <span class="badge new" title="Added ${esc(r.added)}">new</span>` : ""}</h1>
     <p class="lede">${esc(r.description)}</p>

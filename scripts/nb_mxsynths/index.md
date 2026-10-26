@@ -6,7 +6,6 @@ repo: https://github.com/sonocircuit/nb_mxsynths
 author: sonoCircuit
 description: mx.synths as an nb player
 tags:
-  - mod
   - synth
   - nb
 ai: unknown

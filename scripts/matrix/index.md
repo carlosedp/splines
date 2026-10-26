@@ -6,7 +6,8 @@ repo: https://github.com/sixolet/matrix
 author: sixolet
 description: MOD MATRIX FOR THE MATRIX MOD
 tags:
-  - mod
+  - modulation
+  - params
 ai: unknown
 source: imported
 origin: lines

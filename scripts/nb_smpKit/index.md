@@ -6,7 +6,6 @@ repo: https://github.com/sonocircuit/nb_smpKit
 author: sonoCircuit
 description: sample playback as an nb player
 tags:
-  - mod
   - sampler
   - nb
 ai: unknown

@@ -7,7 +7,6 @@ author: xmacex
 description: a fixed filter bank
 tags:
   - audio-fx
-  - mod
   - fx
   - filter
 ai: unknown

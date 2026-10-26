@@ -5,7 +5,6 @@ repo: https://github.com/Dewb/ndi-mod
 author: Dewb
 description: norns system mod to share screen via the NDI streaming video standard
 tags:
-  - mod
   - utility
 ai: unknown
 source: imported

@@ -9,7 +9,6 @@ tags:
   - midi
   - utilities
   - clock
-  - mod
 requires:
   - midi
 ai: unknown

@@ -6,7 +6,6 @@ repo: https://github.com/entzmingerc/nb_drumcrow
 author: postsolarpunk
 description: norns mod that turns crow into a synth using nb
 tags:
-  - mod
   - synth
   - crow
   - drum

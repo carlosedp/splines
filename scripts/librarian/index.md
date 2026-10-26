@@ -7,7 +7,6 @@ author: p3r7
 description: no description yet
 tags:
   - midi
-  - mod
 requires:
   - midi
 ai: unknown

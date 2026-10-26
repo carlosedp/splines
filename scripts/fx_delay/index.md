@@ -6,7 +6,6 @@ repo: https://github.com/sixolet/fx_delay
 author: sixolet
 description: A simple SuperCollider delay for the fx framework
 tags:
-  - mod
   - fx
   - audio-fx
   - delay

@@ -6,7 +6,6 @@ repo: https://github.com/carlosedp/fx_miUGens
 author: carlosedp
 description: Eurorack-born effects for the norns fx mod
 tags:
-  - mod
   - fx
   - audio-fx
 ai: assisted

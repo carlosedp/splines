@@ -8,7 +8,6 @@ description: midi cc looper mod
 tags:
   - looper
   - midi
-  - mod
 requires:
   - midi
 ai: unknown

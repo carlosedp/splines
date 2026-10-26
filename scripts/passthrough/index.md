@@ -7,7 +7,6 @@ author: nattog
 description: midi passthrough library with examples
 tags:
   - utility
-  - mod
   - midi
 requires:
   - midi

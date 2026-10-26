@@ -8,7 +8,6 @@ description: Use launchpads and other midi grid devices w/ Norns
 tags:
   - utility
   - midi
-  - mod
 requires:
   - midi
 ai: unknown

@@ -6,7 +6,6 @@ repo: https://github.com/sonocircuit/nb_sidewalk
 author: sonoCircuit
 description: just passing by
 tags:
-  - mod
   - nb
 ai: unknown
 source: imported

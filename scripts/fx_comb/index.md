@@ -6,7 +6,6 @@ repo: https://github.com/xmacex/fx_comb
 author: xmacex
 description: Comb filter as norns fx effect
 tags:
-  - mod
   - fx
   - audio-fx
   - filter

@@ -6,7 +6,6 @@ repo: https://github.com/sonocircuit/fx_spring
 author: sonocircuit
 description: A spring reverb for the fx framework
 tags:
-  - mod
   - fx
   - audio-fx
   - reverb

@@ -9,7 +9,6 @@ tags:
   - keyboard
   - sequencer
   - grid
-  - mod
   - nb
 requires:
   - keyboard

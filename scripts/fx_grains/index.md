@@ -6,7 +6,6 @@ repo: https://github.com/sixolet/fx_grains
 author: sixolet
 description: Granular effect for the norns fx framework, based on MI Clouds
 tags:
-  - mod
   - fx
   - audio-fx
   - granulator

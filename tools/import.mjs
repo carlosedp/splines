@@ -37,7 +37,7 @@ const slugify = (s) =>
 // entry names keep their case: on norns the name is the install folder, and paths are case-sensitive
 const toName = (s) => String(s).replace(/[^A-Za-z0-9_.-]+/g, '-').replace(/^[-.]+|[-.]+$/g, '') || 'script';
 const cleanTags = (tags) => {
-  const out = [...new Set((tags || []).map((t) => slugify(t).replace(/[_.]/g, '-')).filter((t) => TAG_RE.test(t) && !['norns', 'monome', 'monome-norns', 'norns-script', 'lua', 'iii'].includes(t)))];
+  const out = [...new Set((tags || []).map((t) => slugify(t).replace(/[_.]/g, '-')).filter((t) => TAG_RE.test(t) && !['norns', 'monome', 'monome-norns', 'norns-script', 'lua', 'iii', 'mod', 'mods'].includes(t)))]; // mods get `kind: mod` instead
   return out.length ? out.slice(0, 8) : ['uncategorized'];
 };
 const clip = (s, n = 160) => {

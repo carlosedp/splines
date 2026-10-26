@@ -7,7 +7,6 @@ author: new_moon
 description: Telexo (Norns Mod)
 tags:
   - crow
-  - mod
 requires:
   - crow
 ai: unknown

@@ -6,7 +6,6 @@ repo: https://github.com/xmacex/monomaniac
 author: xmacex
 description: A mod to toggle stereo and mono input
 tags:
-  - mod
   - utility
 ai: unknown
 source: imported
