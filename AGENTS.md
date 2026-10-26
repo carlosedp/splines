@@ -40,7 +40,7 @@ src/about.md              about/submit/maiden page ({{title}}, {{catalog}}, {{re
 tools/lib.mjs             config, PLATFORMS, entry loading, front matter, VALIDATION RULES (single source of truth)
 tools/validate.mjs        CLI validator (GitHub Actions annotations when GITHUB_ACTIONS is set)
 tools/enrich.mjs          GitHub API metadata + README cache (20h TTL); likes (👍❤️🎉🚀 reactions on giscus discussions, GraphQL) → .cache/discussions.json
-tools/import.mjs          importers: maiden catalogs, awesome lists (incl. p3r7/awesome-monome-norns tables), GitHub topics + keyword search, lines (llllllll.co) library threads (rate-limited, recent only)
+tools/import.mjs          importers: maiden catalogs, awesome lists (incl. p3r7/awesome-monome-norns tables), GitHub topics + keyword search, lines (llllllll.co) threads per source with a `platform` (norns library, iii tag; rate-limited, recent only, `--days N` to backfill)
 tools/from-issue.mjs      [submit]/[claim] issue form → entry file + pr-body.md/comment.md (issue-entry.yml); field labels must match .github/ISSUE_TEMPLATE
 tools/health.mjs          follows moved repos (rewrites `repo`), reports gone/archived → health.md (health.yml)
 tools/build.mjs           renders everything into dist/
