@@ -256,6 +256,7 @@ ${
     <a href="${href("new/")}">new</a>
     <a href="${href("updated/")}">updated</a>
     <a href="${href("about/")}">about</a>
+    ${cfg.forum ? `<a href="${esc(cfg.forum)}">forum</a>` : ""}
     <a class="nav-submit" href="${esc(submitUrl)}">+ submit</a>
     <a href="https://github.com/${esc(cfg.repo)}">github</a>
     <button class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle theme"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
@@ -266,7 +267,7 @@ ${body}
 </main>
 <footer class="site-footer">
   <p>Unofficial and community-run. Not affiliated with or endorsed by monome. Scripts belong to their authors; check each repo's license.</p>
-  <p><a href="${href("catalog.json")}">maiden catalog</a> · <a href="${href("index.json")}">index.json</a> · <a href="${esc(submitUrl)}">submit a script</a> · <a href="https://github.com/${esc(cfg.repo)}/blob/${esc(cfg.branch)}/CONTRIBUTING.md">contribute</a></p>
+  <p><a href="${href("catalog.json")}">maiden catalog</a> · <a href="${href("index.json")}">index.json</a> · <a href="${esc(submitUrl)}">submit a script</a>${cfg.forum ? ` · <a href="${esc(cfg.forum)}">forum</a>` : ""} · <a href="https://github.com/${esc(cfg.repo)}/blob/${esc(cfg.branch)}/CONTRIBUTING.md">contribute</a></p>
 </footer>
 <script src="${href("assets/app.js")}" defer></script>
 </body>
@@ -367,7 +368,7 @@ write(
     body: `
 <section class="hero">
   <h1>${esc(cfg.tagline)}</h1>
-  <p>${records.length} scripts. Search, filter by tag or hardware, and install straight from maiden. Handmade or AI-assisted, always disclosed. <a href="${esc(submitUrl)}">Add your script</a> with a short form, or read <a href="${href("about/")}">how it works</a>.</p>
+  <p>${records.length} scripts. Search, filter by tag or hardware, and install straight from maiden. Handmade or AI-assisted, always disclosed. <a href="${esc(submitUrl)}">Add your script</a> with a short form, or read <a href="${href("about/")}">how it works</a>.${cfg.forum ? ` Questions, ideas or work in progress? Join the <a href="${esc(cfg.forum)}">forum</a>.` : ""}</p>
 </section>
 <section class="fresh" aria-label="What's new">
   ${freshPanel("just added", "new/", "feed-new.xml", latest("added", 5), (r) => r.added)}
@@ -597,7 +598,8 @@ const aboutMd = fs
   .replaceAll("{{title}}", cfg.title)
   .replaceAll("{{catalog}}", `${siteUrl}/catalog.json`)
   .replaceAll("{{repo}}", cfg.repo)
-  .replaceAll("{{branch}}", cfg.branch);
+  .replaceAll("{{branch}}", cfg.branch)
+  .replaceAll("{{forum}}", cfg.forum || `https://github.com/${cfg.repo}/discussions`);
 write(
   "about/index.html",
   layout({

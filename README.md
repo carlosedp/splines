@@ -6,7 +6,7 @@ A community catalog of scripts for monome norns, grid, iii, crow and teletype, p
 - **Submissions by issue form or pull request**: the submit and claim forms are turned into PRs by a workflow; CI validates the entry and checks the repo.
 - **Search and filters run in the browser**: text, tags, hardware, AI disclosure and sort, with shareable URLs (`?tag=grid&req=crow`).
 - **Maiden-compatible catalog**: `catalog.json` uses the same shape as monome's `community.json`.
-- **Importer**: proposes new scripts weekly from the official community catalog, awesome lists, GitHub topics, a GitHub keyword search (recent Lua repos mentioning norns) and new threads in the lines norns library (lightly: one listing page, recent topics only, a pause between requests).
+- **Importer**: proposes new scripts weekly from the official community catalog, awesome lists, GitHub topics and a GitHub keyword search (recent Lua repos mentioning norns).
 - **Health check**: weekly, follows moved repos with a PR and lists deleted or archived ones in a "catalog health" issue.
 - **Optional discussions per script** with [giscus](https://giscus.app), backed by GitHub Discussions, so there's no database.
 

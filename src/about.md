@@ -75,10 +75,12 @@ maiden's project manager reads its catalogs from its configuration on the device
 
 ## where the scripts come from
 
-Besides direct submissions, a weekly job looks for scripts in the official community catalog, curated lists, GitHub repositories tagged or mentioning `norns`, and new threads in the [lines norns library](https://llllllll.co/tags/c/library/18/norns/15). New finds are proposed as a pull request and reviewed before they appear here. They're marked **undisclosed** until their authors claim them.
+Besides direct submissions, a weekly job looks for scripts in the official community catalog, curated lists and public GitHub repositories. New finds are proposed as a pull request and reviewed before they appear here. They're marked **undisclosed** until their authors claim them.
 
 Another weekly job checks that every listed repository still exists: moved repos are followed automatically, and deleted ones are flagged for removal.
 
 ## discussions
 
 Script pages can have a discussion thread backed by GitHub Discussions, so no extra account or database is needed beyond GitHub.
+
+For everything else (questions about the catalog, script ideas, work in progress, feedback on the site), there's the [{{title}} forum]({{forum}}). Script-specific talk usually belongs in the script's own lines thread or repo; the forum is for the catalog and the people around it.
