@@ -1,6 +1,6 @@
 // Import scripts from external sources as new entries (never overwrites existing ones).
 //
-//   node tools/import.mjs [--dry-run] [--only community,awesome,github,search,lines] [--limit N]
+//   node tools/import.mjs [--dry-run] [--only community,awesome,github,search,lines] [--limit N] [--days N]
 //
 // Sources are configured in site.config.json -> import. Imported entries get
 // `source: imported` and `ai: unknown`, and are proposed through a pull request
@@ -13,13 +13,19 @@ const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
 const only = args.includes('--only') ? new Set(args[args.indexOf('--only') + 1].split(',')) : null;
 const limit = args.includes('--limit') ? Number(args[args.indexOf('--limit') + 1]) : Infinity;
+// overrides the configured look-back of the lines and search sources, for a one-off backfill
+const daysArg = args.includes('--days') ? Number(args[args.indexOf('--days') + 1]) : null;
 const want = (s) => !only || only.has(s);
 
 const cfg = loadConfig().import || {};
-// every source here lists norns scripts; names are unique across all platforms
+// sources list norns scripts unless they say otherwise (lines sources have a `platform`); names are unique across all platforms
 const existing = loadEntries();
-// plus repos that must not come back: old URLs of moved scripts, deleted repos (see health.mjs)
-const knownRepos = new Set([...existing.filter((e) => e.platform === 'norns').map((e) => normalizeRepo(e.data?.repo)), ...(cfg.ignore || []).map(normalizeRepo)]);
+// repos are deduped per platform (one repo can hold a norns and an iii version)
+const repoKey = (platform, repo) => `${platform} ${normalizeRepo(repo)}`;
+const knownRepos = new Set(existing.map((e) => repoKey(e.platform, e.data?.repo)));
+// plus repos that must not come back on any platform: old URLs of moved scripts, deleted repos (see health.mjs)
+const ignored = new Set((cfg.ignore || []).map(normalizeRepo));
+const isKnown = (platform, repo) => ignored.has(normalizeRepo(repo)) || knownRepos.has(repoKey(platform, repo));
 const usedSlugs = new Set(existing.map((e) => e.slug.toLowerCase())); // names are unique ignoring case
 // lines topics already linked from an entry, by topic id
 const knownTopics = new Set(existing.map((e) => String(e.data?.discussion || '').match(/llllllll\.co\/t\/(?:[^/]+\/)?(\d+)/)?.[1]).filter(Boolean));
@@ -31,7 +37,7 @@ const slugify = (s) =>
 // entry names keep their case: on norns the name is the install folder, and paths are case-sensitive
 const toName = (s) => String(s).replace(/[^A-Za-z0-9_.-]+/g, '-').replace(/^[-.]+|[-.]+$/g, '') || 'script';
 const cleanTags = (tags) => {
-  const out = [...new Set((tags || []).map((t) => slugify(t).replace(/[_.]/g, '-')).filter((t) => TAG_RE.test(t) && !['norns', 'monome', 'monome-norns', 'norns-script', 'lua'].includes(t)))];
+  const out = [...new Set((tags || []).map((t) => slugify(t).replace(/[_.]/g, '-')).filter((t) => TAG_RE.test(t) && !['norns', 'monome', 'monome-norns', 'norns-script', 'lua', 'iii'].includes(t)))];
   return out.length ? out.slice(0, 8) : ['uncategorized'];
 };
 const clip = (s, n = 160) => {
@@ -39,10 +45,10 @@ const clip = (s, n = 160) => {
   return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s || PLACEHOLDER_DESCRIPTION;
 };
 
-function add({ name, repo, author, description, tags, requires, discussion, docs, origin, onNameClash = 'suffix' }) {
+function add({ name, repo, author, description, tags, requires, discussion, docs, origin, platform = 'norns', onNameClash = 'suffix' }) {
   if (added.length >= limit) return;
   const norm = normalizeRepo(repo);
-  if (!norm.startsWith('https://') || knownRepos.has(norm)) return;
+  if (!norm.startsWith('https://') || isKnown(platform, norm)) return;
   const owner = norm.split('/')[3] || 'unknown';
   let slug = toName(name);
   if (usedSlugs.has(slug.toLowerCase()) && onNameClash === 'skip') {
@@ -54,7 +60,7 @@ function add({ name, repo, author, description, tags, requires, discussion, docs
 
   const data = {
     name: slug,
-    platform: 'norns',
+    platform,
     repo: repo.replace(/\.git$/, '').replace(/\/+$/, ''),
     author: author || owner,
     description: clip(description),
@@ -67,7 +73,7 @@ function add({ name, repo, author, description, tags, requires, discussion, docs
   if (discussion?.startsWith('https://')) data.discussion = discussion;
   if (docs?.startsWith('https://')) data.docs = docs;
 
-  knownRepos.add(norm);
+  knownRepos.add(repoKey(platform, norm));
   usedSlugs.add(slug.toLowerCase());
   added.push(data);
 }
@@ -219,7 +225,7 @@ if (want('github')) {
 // 4. GitHub keyword search for norns scripts that have no topic. Noisier than topics, so only recently
 //    created repos are considered and each must look like a norns script (.lua at the root, or a mod).
 if (want('search')) {
-  const { queries = [], days = 30 } = cfg.githubSearch || {};
+  const { queries = [], days = daysArg ?? 30 } = cfg.githubSearch || {};
   for (const q of queries) {
     const res = await gh(`/search/repositories?q=${encodeURIComponent(`${q} fork:false archived:false created:>=${daysAgo(days)}`)}&sort=updated&per_page=100`);
     if (!res.ok) {
@@ -229,7 +235,7 @@ if (want('search')) {
     const { items = [] } = await res.json();
     let n = 0;
     for (const r of items) {
-      if (knownRepos.has(normalizeRepo(r.html_url))) continue;
+      if (isKnown('norns', r.html_url)) continue;
       if (!(await hasNornsLayout(r.full_name))) continue;
       add({ name: r.name, repo: r.html_url, author: r.owner?.login, description: r.description, tags: r.topics, origin: 'github-search' });
       n++;
@@ -238,17 +244,20 @@ if (want('search')) {
   }
 }
 
-// 5. lines (llllllll.co) library threads. Discourse is a community forum, so stay light: one listing page,
-//    only recent topics, one request per topic and a pause between requests.
-if (want('lines')) {
-  const { url, days = 45, maxTopics = 30, delayMs = 3000 } = cfg.lines || {};
+// 5. lines (llllllll.co) threads, one listing per source (e.g. library/norns, the iii tag). Discourse is a
+//    community forum, so stay light: one listing page, only recent topics, one request per topic and a pause
+//    between requests. `category` keeps only that category's topics (18 = library), for tag listings.
+for (const src of want('lines') ? [cfg.lines || []].flat() : []) {
+  const { url, platform = 'norns', category, maxTopics = 30, delayMs = 3000 } = src;
+  const days = daysArg ?? src.days ?? 45;
   try {
     const list = JSON.parse(await fetchText(`${url.replace(/\/$/, '')}.json?order=created`));
     const since = daysAgo(days);
     const topics = (list.topic_list?.topics || [])
       .filter((t) => !t.pinned && t.created_at.slice(0, 10) >= since && !knownTopics.has(String(t.id)))
+      .filter((t) => category == null || t.category_id === category)
       .slice(0, maxTopics);
-    console.log(`· lines: ${topics.length} recent topics not in the catalog yet`);
+    console.log(`· lines ${url}: ${topics.length} recent topics not in the catalog yet`);
     for (const t of topics) {
       await sleep(delayMs);
       const discussion = `https://llllllll.co/t/${t.slug}/${t.id}`;
@@ -267,13 +276,14 @@ if (want('lines')) {
         .slice(0, 3);
       let found = false;
       for (const slug of repos) {
-        if (knownRepos.has(normalizeRepo(`https://github.com/${slug}`))) {
+        if (isKnown(platform, `https://github.com/${slug}`)) {
           found = true; // already listed under another discussion link
           break;
         }
         const r = await gh(`/repos/${slug}`);
         if (!r.ok) continue;
         const info = await r.json();
+        // iii scripts are single .lua files too, so a root .lua is a fair sanity check for both
         if (info.fork || info.archived || !(await hasNornsLayout(info.full_name))) continue;
         // "NEVE - generative ambient sequencer" -> description after the separator, else the repo's own
         const fromTitle = topic.title.match(/^[^:–—-]+\s*[:–—-]\s+(.+)$/)?.[1];
@@ -285,6 +295,7 @@ if (want('lines')) {
           tags: [...(t.tags || []).map((x) => x.name || x), ...(info.topics || [])],
           discussion,
           origin: 'lines',
+          platform,
         });
         found = true;
         break;

@@ -32,12 +32,22 @@
       ],
       "days": 30
     },
-    "lines": {
-      "url": "https://llllllll.co/tags/c/library/18/norns/15",
-      "days": 45,
-      "maxTopics": 30,
-      "delayMs": 3000
-    },
+    "lines": [
+      {
+        "url": "https://llllllll.co/tags/c/library/18/norns/15",
+        "days": 45,
+        "maxTopics": 30,
+        "delayMs": 3000
+      },
+      {
+        "url": "https://llllllll.co/tag/iii/36",
+        "platform": "iii",
+        "category": 18,
+        "days": 45,
+        "maxTopics": 30,
+        "delayMs": 3000
+      }
+    ],
     "ignore": [
       "https://github.com/AndrewShike/wrms",
       "https://github.com/moapacha/sonde",
