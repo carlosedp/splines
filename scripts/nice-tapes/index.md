@@ -1,6 +1,7 @@
 ---
 name: nice-tapes
 platform: norns
+kind: mod
 repo: https://github.com/MentalSandal/nice-tapes
 author: MentalSandal
 description: a norns mod for customised tape names

@@ -1,6 +1,7 @@
 ---
 name: warmreload
 platform: norns
+kind: mod
 repo: https://github.com/schollz/warmreload
 author: infinitedigits
 description: a norns mod to automatically reload a script after saving

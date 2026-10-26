@@ -1,6 +1,7 @@
 ---
 name: iiitoii
 platform: norns
+kind: mod
 repo: https://github.com/andr-ew/iiitoii
 author: andrew
 description: a collection of iii community scripts ported to norns + crow

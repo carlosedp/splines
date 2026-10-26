@@ -1,6 +1,7 @@
 ---
 name: preFX
 platform: norns
+kind: mod
 repo: https://github.com/sonocircuit/preFX
 author: sonoCircuit
 description: a pre-insert-fx boilerplate

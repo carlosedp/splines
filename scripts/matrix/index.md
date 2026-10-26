@@ -1,6 +1,7 @@
 ---
 name: matrix
 platform: norns
+kind: mod
 repo: https://github.com/sixolet/matrix
 author: sixolet
 description: MOD MATRIX FOR THE MATRIX MOD

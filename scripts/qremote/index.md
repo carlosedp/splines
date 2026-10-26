@@ -1,6 +1,7 @@
 ---
 name: qremote
 platform: norns
+kind: mod
 repo: https://github.com/Quixotic7/qremote
 author: Quixotic7
 description: Midi Remote Control Mod for Monome Norns

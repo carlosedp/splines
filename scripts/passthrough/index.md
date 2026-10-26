@@ -1,6 +1,7 @@
 ---
 name: passthrough
 platform: norns
+kind: mod
 repo: https://github.com/nattog/passthrough
 author: nattog
 description: midi passthrough library with examples

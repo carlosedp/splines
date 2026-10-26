@@ -1,6 +1,7 @@
 ---
 name: midigrid
 platform: norns
+kind: mod
 repo: https://github.com/jaggednz/midigrid
 author: Jaggednz
 description: Use launchpads and other midi grid devices w/ Norns

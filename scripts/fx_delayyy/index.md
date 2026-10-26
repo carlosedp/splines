@@ -1,6 +1,7 @@
 ---
 name: fx_delayyy
 platform: norns
+kind: mod
 repo: https://github.com/sonocircuit/fx_delayyy
 author: sonocircuit
 description: A delay for the fx framework

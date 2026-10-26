@@ -1,6 +1,7 @@
 ---
 name: fx_rele
 platform: norns
+kind: mod
 repo: https://github.com/sonocircuit/fx_rele
 author: sonoCircuit
 description: Multimode delay for the norns fx mod

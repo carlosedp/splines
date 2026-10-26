@@ -1,6 +1,7 @@
 ---
 name: midikit
 platform: norns
+kind: mod
 repo: https://github.com/xmacex/midikit
 author: xmacex
 description: MIDI CC output from norns Matrix mod

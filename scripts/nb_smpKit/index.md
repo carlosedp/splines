@@ -1,6 +1,7 @@
 ---
 name: nb_smpKit
 platform: norns
+kind: mod
 repo: https://github.com/sonocircuit/nb_smpKit
 author: sonoCircuit
 description: sample playback as an nb player

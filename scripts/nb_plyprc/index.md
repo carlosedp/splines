@@ -1,6 +1,7 @@
 ---
 name: nb_plyprc
 platform: norns
+kind: mod
 repo: https://github.com/sonocircuit/nb_plyprc
 author: sonoCircuit
 description: a norns classic as nb player

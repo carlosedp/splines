@@ -1,6 +1,7 @@
 ---
 name: nb_monamie
 platform: norns
+kind: mod
 repo: https://github.com/sonocircuit/nb_monamie
 author: sonoCircuit
 description: ... because friends are important

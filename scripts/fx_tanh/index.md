@@ -1,6 +1,7 @@
 ---
 name: fx_tanh
 platform: norns
+kind: mod
 repo: https://github.com/sixolet/fx_tanh
 author: sixolet
 description: Basic tanh saturator for the norns fx framework

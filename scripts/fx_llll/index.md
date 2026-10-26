@@ -1,6 +1,7 @@
 ---
 name: fx_llll
 platform: norns
+kind: mod
 repo: https://github.com/notrobintaylor/fx_llll
 author: notrobintaylor
 description: Creative multitap delay with two built-in modulators for the fx framework

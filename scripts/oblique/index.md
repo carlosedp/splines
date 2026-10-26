@@ -1,6 +1,7 @@
 ---
 name: oblique
 platform: norns
+kind: mod
 repo: https://github.com/stvnrlly/oblique
 author: stvnrlly
 description: a mod to insert oblique strategies into the params menu

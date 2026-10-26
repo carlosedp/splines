@@ -1,6 +1,7 @@
 ---
 name: choukanzu
 platform: norns
+kind: mod
 repo: https://github.com/robbielyman/choukanzu
 author: alanza
 description: take a bird's-eye view of norns script params

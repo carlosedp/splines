@@ -1,6 +1,7 @@
 ---
 name: playdate-norns
 platform: norns
+kind: mod
 repo: https://github.com/midouest/playdate-norns
 author: midouest
 description: Playdate integration for Monome Norns

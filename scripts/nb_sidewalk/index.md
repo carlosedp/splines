@@ -1,6 +1,7 @@
 ---
 name: nb_sidewalk
 platform: norns
+kind: mod
 repo: https://github.com/sonocircuit/nb_sidewalk
 author: sonoCircuit
 description: just passing by

@@ -48,6 +48,7 @@ site.config.json          title, URLs, giscus, import sources
 ---
 name: my-script            # = folder name = repo name, exact case (install folder on norns); unique ignoring case
 platform: norns            # norns | iii | crow | teletype (default norns; only norns goes into catalog.json)
+kind: mod                  # optional: script (default) | mod (norns only; repo has lib/mod.lua)
 repo: https://github.com/you/my-script
 author: you
 description: one line, ≤160 chars
@@ -84,4 +85,4 @@ Threads are created on first comment and mapped to each page's path.
 - [ ] **Maiden catalog source config**: confirm where maiden reads extra catalog URLs on the device (its config file) and document the exact steps in `src/about.md`.
 - [x] **awesome lists**: p3r7/awesome-monome-norns is imported (frozen since 2021, so it rarely adds anything new).
 - [x] Name and domain: splines, at splines.cc.
-- [ ] Decide whether imported entries for mods and libraries should get their own `platform` value (or a `type:` field).
+- [x] Mods get `kind: mod` (same platform, own filter and badge). Libraries could become another `kind` later.

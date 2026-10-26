@@ -1,6 +1,7 @@
 ---
 name: nb_drumcrow
 platform: norns
+kind: mod
 repo: https://github.com/entzmingerc/nb_drumcrow
 author: postsolarpunk
 description: norns mod that turns crow into a synth using nb

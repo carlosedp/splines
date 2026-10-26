@@ -1,6 +1,7 @@
 ---
 name: fx_comb
 platform: norns
+kind: mod
 repo: https://github.com/xmacex/fx_comb
 author: xmacex
 description: Comb filter as norns fx effect

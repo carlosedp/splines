@@ -1,6 +1,7 @@
 ---
 name: combiner
 platform: norns
+kind: mod
 repo: https://github.com/dstroud/combiner
 author: modularbeat
 description: mod to combine multiple Grids to operate as a single device

@@ -1,6 +1,7 @@
 ---
 name: nb_mxsynths
 platform: norns
+kind: mod
 repo: https://github.com/sonocircuit/nb_mxsynths
 author: sonoCircuit
 description: mx.synths as an nb player

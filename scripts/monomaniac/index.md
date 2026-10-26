@@ -1,6 +1,7 @@
 ---
 name: monomaniac
 platform: norns
+kind: mod
 repo: https://github.com/xmacex/monomaniac
 author: xmacex
 description: A mod to toggle stereo and mono input

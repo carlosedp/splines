@@ -1,6 +1,7 @@
 ---
 name: fixed-filter-banking-crisis
 platform: norns
+kind: mod
 repo: https://github.com/xmacex/fixed-filter-banking-crisis
 author: xmacex
 description: a fixed filter bank

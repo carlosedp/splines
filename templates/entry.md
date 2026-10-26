@@ -3,6 +3,8 @@
 name: my-script
 # Where the code runs: norns | iii | crow | teletype
 platform: norns
+# Uncomment for a norns mod (loads from lib/mod.lua, enabled in SYSTEM > MODS). Leave it out for a script.
+# kind: mod
 # Public repository (or other https link). For norns, the main .lua script must be at its root.
 repo: https://github.com/you/my-script
 author: you

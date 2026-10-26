@@ -1,6 +1,7 @@
 ---
 name: fx_miUGens
 platform: norns
+kind: mod
 repo: https://github.com/carlosedp/fx_miUGens
 author: carlosedp
 description: Eurorack-born effects for the norns fx mod
