@@ -1,11 +1,11 @@
 ---
 name: gridkeys
 platform: norns
+kind: mod
 repo: https://github.com/p3r7/gridkeys
 author: p3r7
 description: mod for monome norns, use grid as midi keyboard anywhere
 tags:
-  - mod
   - monome-grid
 ai: unknown
 source: imported

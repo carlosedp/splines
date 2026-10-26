@@ -1,11 +1,11 @@
 ---
 name: fx_bitcrusher
 platform: norns
+kind: mod
 repo: https://github.com/vehka/fx_bitcrusher
 author: vehka
 description: Bitcrusher for the norns fx mod
 tags:
-  - mod
   - fx
   - audio-fx
   - distortion

@@ -1,12 +1,12 @@
 ---
 name: norns-telexo
 platform: norns
+kind: mod
 repo: https://github.com/brokyo/norns-telexo
 author: new_moon
 description: Telexo (Norns Mod)
 tags:
   - crow
-  - mod
 requires:
   - crow
 ai: unknown

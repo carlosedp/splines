@@ -1,11 +1,11 @@
 ---
 name: nb_tonic
 platform: norns
+kind: mod
 repo: https://github.com/sonocircuit/nb_tonic
 author: sonoCircuit
 description: an eight voice supertonic port
 tags:
-  - mod
   - nb
   - synth
 ai: unknown

@@ -1,11 +1,11 @@
 ---
 name: fx_resonator
 platform: norns
+kind: mod
 repo: https://github.com/sixolet/fx_resonator
 author: sixolet
 description: Resonator for the norns fx framework
 tags:
-  - mod
   - fx
   - audio-fx
   - resonator

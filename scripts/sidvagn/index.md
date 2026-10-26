@@ -1,6 +1,7 @@
 ---
 name: sidvagn
 platform: norns
+kind: mod
 repo: https://github.com/sonocircuit/sidvagn
 author: sonoCircuit
 description: a creative canvas for a sidecar grid
@@ -8,7 +9,6 @@ tags:
   - keyboard
   - sequencer
   - grid
-  - mod
   - nb
 requires:
   - keyboard

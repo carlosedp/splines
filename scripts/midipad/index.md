@@ -1,6 +1,7 @@
 ---
 name: midipad
 platform: norns
+kind: mod
 repo: https://github.com/p3r7/midipad
 author: p3r7
 description: mod for norns - use gamepad for midi

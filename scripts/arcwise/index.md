@@ -1,12 +1,12 @@
 ---
 name: arcwise
 platform: norns
+kind: mod
 repo: https://github.com/robbielyman/arcwise
 author: alanza
 description: arcwise
 tags:
   - arc
-  - mod
 requires:
   - arc
 ai: unknown

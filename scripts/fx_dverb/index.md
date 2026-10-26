@@ -1,11 +1,11 @@
 ---
 name: fx_dverb
 platform: norns
+kind: mod
 repo: https://github.com/sonocircuit/fx_dverb
 author: sonocircuit
 description: Dattorro reverb for the fx mod
 tags:
-  - mod
   - fx
   - audio-fx
   - reverb

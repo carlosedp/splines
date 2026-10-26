@@ -20,6 +20,14 @@ export const PLATFORMS = {
 };
 export const DEFAULT_PLATFORM = 'norns';
 
+// What an entry is (front matter `kind`, default script). Mods extend norns itself: they load from lib/mod.lua and
+// are enabled in SYSTEM > MODS. They install like scripts, so they stay in catalog.json.
+export const KINDS = {
+  script: { label: 'script', plural: 'scripts' },
+  mod: { label: 'mod', plural: 'mods', platforms: ['norns'] },
+};
+export const DEFAULT_KIND = 'script';
+
 export const AI_VALUES = ['none', 'assisted', 'unknown'];
 export const SOURCE_VALUES = ['submitted', 'imported'];
 export const KNOWN_REQUIRES = ['grid', 'arc', 'crow', 'midi', 'audio-in', 'keyboard', 'jf', 'ansible', 'teletype', 'hid', 'osc', 'txo', 'er-301'];
@@ -84,7 +92,8 @@ export function loadEntries() {
     if (!fs.existsSync(file)) continue;
     const { data, body } = parseFrontMatter(fs.readFileSync(file, 'utf8'));
     const platform = data?.platform ?? DEFAULT_PLATFORM;
-    entries.push({ platform, slug, file: path.relative(ROOT, file).replaceAll('\\', '/'), data, body });
+    const kind = data?.kind ?? DEFAULT_KIND;
+    entries.push({ platform, kind, slug,file: path.relative(ROOT, file).replaceAll('\\', '/'), data, body });
   }
   return entries;
 }
@@ -108,6 +117,10 @@ export function validateEntry(entry) {
     errs.push(`"name" (${d.name}) must match the folder name (${entry.slug}); on norns it is the folder the script installs into`);
   }
   if (!PLATFORMS[entry.platform]) errs.push(`"platform" must be one of: ${Object.keys(PLATFORMS).join(', ')}`);
+  if (!KINDS[entry.kind]) errs.push(`"kind" must be one of: ${Object.keys(KINDS).join(', ')}`);
+  else if (KINDS[entry.kind].platforms && !KINDS[entry.kind].platforms.includes(entry.platform)) {
+    errs.push(`"kind: ${entry.kind}" is only for ${KINDS[entry.kind].platforms.join(', ')}`);
+  }
   if (typeof d.repo === 'string' && !/^https:\/\/[^\s]+$/.test(d.repo)) errs.push('"repo" must be an https URL');
   if (typeof d.description === 'string' && d.description.length > 160) errs.push('"description" should be 160 characters or fewer');
 
@@ -124,7 +137,7 @@ export function validateEntry(entry) {
   // drives the /new/ page and feed; the initial import has no date, so it doesn't flood them
   if (d.added !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(String(d.added))) errs.push('"added" must be a date like 2026-10-21');
   if (d.added === undefined && d.source !== 'imported') errs.push('"added" is required: the date the entry is submitted, like 2026-10-21');
-  for (const k of ['discussion', 'docs', 'cover']) {
+  for (const k of ['discussion', 'docs', 'cover', 'install']) {
     if (d[k] !== undefined && !/^https:\/\/[^\s]+$/.test(String(d[k]))) errs.push(`"${k}" must be an https URL`);
   }
   return errs;
@@ -150,5 +163,23 @@ export async function hasNornsLayout(slug) {
   const c = await gh(`/repos/${slug}/contents/`);
   if (!c.ok) return null; // unknown (missing repo or rate limit)
   const files = await c.json();
-  return files.some((f) => f.type === 'file' && f.name.endsWith('.lua')) || (await gh(`/repos/${slug}/contents/lib/mod.lua`)).ok;
+  return files.some((f) => f.type === 'file' && f.name.endsWith('.lua')) || (await isNornsMod(slug)) === true;
+}
+
+/** Whether a GitHub repo ("owner/repo") is a norns mod (has lib/mod.lua); null when GitHub can't tell. */
+export async function isNornsMod(slug) {
+  const res = await gh(`/repos/${slug}/contents/lib/mod.lua`);
+  return res.ok ? true : res.status === 404 ? false : null;
+}
+
+/**
+ * Whether a GitHub repo is only a norns mod: lib/mod.lua and no script at the root. Repos that ship both
+ * (a synth script with an nb voice mod, say) stay `kind: script` unless the entry says otherwise. Null when unknown.
+ */
+export async function isModOnly(slug) {
+  const mod = await isNornsMod(slug);
+  if (!mod) return mod;
+  const c = await gh(`/repos/${slug}/contents/`);
+  if (!c.ok) return null;
+  return !(await c.json()).some((f) => f.type === 'file' && f.name.endsWith('.lua'));
 }

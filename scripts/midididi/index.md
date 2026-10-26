@@ -1,13 +1,13 @@
 ---
 name: midididi
 platform: norns
+kind: mod
 repo: https://github.com/dwtong/midididi
 author: dwtong
 description: midi cc looper mod
 tags:
   - looper
   - midi
-  - mod
 requires:
   - midi
 ai: unknown

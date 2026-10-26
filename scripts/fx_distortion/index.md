@@ -1,11 +1,11 @@
 ---
 name: fx_distortion
 platform: norns
+kind: mod
 repo: https://github.com/vehka/fx_distortion
 author: vehka
 description: A distortion effect for the norns fx mod
 tags:
-  - mod
   - fx
   - audio-fx
   - distortion

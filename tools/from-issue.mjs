@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   ROOT, ENTRIES_DIR, PLATFORMS, DEFAULT_PLATFORM, KNOWN_REQUIRES, SLUG_RE, TAG_RE,
-  loadEntries, normalizeRepo, githubSlug, gh, stringifyFrontMatter, updateFrontMatter,
+  loadEntries, normalizeRepo, githubSlug, gh, isModOnly, stringifyFrontMatter, updateFrontMatter,
 } from './lib.mjs';
 
 const { ISSUE_TITLE = '', ISSUE_BODY = '', ISSUE_NUMBER = '0', ISSUE_AUTHOR = '' } = process.env;
@@ -90,6 +90,8 @@ try {
     data = {
       name,
       platform,
+      // not asked on the form: a norns repo with lib/mod.lua and no script at the root is a mod
+      ...(platform === 'norns' && slug && (await isModOnly(slug)) ? { kind: 'mod' } : {}),
       repo: info.html_url || repo,
       author: field('author') || info.owner?.login || ISSUE_AUTHOR,
       description: field('description').replace(/\s+/g, ' '),
@@ -105,7 +107,7 @@ try {
     file = `${ENTRIES_DIR}/${name}/index.md`;
     fs.mkdirSync(path.join(ROOT, ENTRIES_DIR, name), { recursive: true });
     fs.writeFileSync(path.join(ROOT, file), stringifyFrontMatter(data));
-    summary = `Adds **${name}** (${platform}) from ${data.repo}.`;
+    summary = `Adds **${name}** (${platform}${data.kind ? ` ${data.kind}` : ''}) from ${data.repo}.`;
   } else {
     const wanted = field('script').replace(/^.*\/scripts\/|\/.*$/g, ''); // a name, or a link to the script page
     const entry = entries.find((e) => e.slug.toLowerCase() === wanted.toLowerCase());

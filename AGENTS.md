@@ -56,6 +56,7 @@ site.config.json          title, siteUrl, basePath, cname, repo, giscus, import 
 |---|---|---|
 | `name` | ✓ | must equal the folder name; use the repo name with its **exact case** (for norns it's the install folder `dust/code/<name>`, and Linux paths are case-sensitive). Unique across the catalog ignoring case |
 | `platform` | | where the code runs, from `PLATFORMS` in `lib.mjs`: `norns` (default) \| `iii` \| `crow` \| `teletype`. Grid/arc are hardware (`requires`), not platforms |
+| `kind` | | what it is, from `KINDS` in `lib.mjs`: `script` (default) \| `mod` (norns only). A mod loads from `lib/mod.lua` and is enabled in SYSTEM > MODS; the importer and the submit form set it when a repo has `lib/mod.lua` and no root script. Repos with both stay `script` unless curated. Mods stay in `catalog.json` |
 | `repo` | ✓ | https URL; norns repos need the main `.lua` at the root (`luaRoot` in `PLATFORMS`) |
 | `author` | ✓ | display name / handle |
 | `description` | ✓ | one line, ≤160 chars |
@@ -66,6 +67,7 @@ site.config.json          title, siteUrl, basePath, cname, repo, giscus, import 
 | `origin` | | where an import came from, e.g. `catalog:community`, `github-topic:norns`, `github-search`, `lines` |
 | `added` | ✓* | `YYYY-MM-DD`, drives `/new/` and its feed. Required unless `source: imported`; the initial seed import has none so it doesn't flood "new". `npm run new` fills it in |
 | `license`, `discussion`, `docs`, `cover` | | optional; URLs must be https |
+| `install` | | optional https URL for `;install` when the repo isn't what gets installed (e.g. a release zip of a compiled mod). Skips the online layout check and keeps the entry out of `catalog.json` |
 
 The entry body is optional **catalog notes**, rendered above the upstream README on the script page. PRs only need front matter; the README is the documentation. HTML comments in the body are not published (the template hint is one).
 

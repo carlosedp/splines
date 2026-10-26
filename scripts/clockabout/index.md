@@ -1,6 +1,7 @@
 ---
 name: clockabout
 platform: norns
+kind: mod
 repo: https://github.com/niksilver/clockabout
 author: niksilver
 description: A non-linear MIDI clock
@@ -8,7 +9,6 @@ tags:
   - midi
   - utilities
   - clock
-  - mod
 requires:
   - midi
 ai: unknown

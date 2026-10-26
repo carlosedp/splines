@@ -11,6 +11,7 @@ import {
   ROOT,
   ENTRIES_DIR,
   PLATFORMS,
+  KINDS,
   loadConfig,
   loadEntries,
   validateEntry,
@@ -178,6 +179,7 @@ for (const e of loadEntries()) {
   const gh = cache[ghSlug] || {};
   records.push({
     platform: e.platform,
+    kind: e.kind,
     slug: e.slug,
     name: d.name,
     author: d.author,
@@ -192,6 +194,7 @@ for (const e of loadEntries()) {
     repo: d.repo,
     discussion: d.discussion || null,
     docs: d.docs || null,
+    install: d.install || null,
     license: d.license || gh.license || null,
     cover: d.cover || gh.cover || null,
     stars: gh.stars ?? null,
@@ -255,6 +258,7 @@ ${
     <a href="${href("")}">scripts</a>
     <a href="${href("new/")}">new</a>
     <a href="${href("updated/")}">updated</a>
+    <a href="${href("?kind=mod")}">mods</a>
     <a href="${href("about/")}">about</a>
     ${cfg.forum ? `<a href="${esc(cfg.forum)}">forum</a>` : ""}
     <a class="nav-submit" href="${esc(submitUrl)}">+ submit</a>
@@ -290,14 +294,14 @@ function card(r) {
   const search = [r.name, r.author, r.description, ...r.tags, ...r.requires]
     .join(" ")
     .toLowerCase();
-  return `<li class="card" data-platform="${esc(r.platform)}" data-ai="${esc(r.ai)}" data-tags="${esc(r.tags.join(" "))}" data-requires="${esc(r.requires.join(" "))}" data-name="${esc(r.name)}" data-stars="${r.stars ?? 0}" data-likes="${r.likes}" data-updated="${esc(r.updated || "")}" data-added="${esc(r.added || "")}" data-search="${esc(search)}">
+  return `<li class="card" data-platform="${esc(r.platform)}" data-kind="${esc(r.kind)}" data-ai="${esc(r.ai)}" data-tags="${esc(r.tags.join(" "))}" data-requires="${esc(r.requires.join(" "))}" data-name="${esc(r.name)}" data-stars="${r.stars ?? 0}" data-likes="${r.likes}" data-updated="${esc(r.updated || "")}" data-added="${esc(r.added || "")}" data-search="${esc(search)}">
   <a class="card-link" href="${href(r.path)}">
     <span class="card-title">${esc(r.name)}${isNew(r) ? ` <span class="badge new" title="Added ${esc(r.added)}">new</span>` : ""}</span>
     <span class="card-author">by ${esc(r.author)}</span>
   </a>
   <p class="card-desc">${esc(r.description)}</p>
   <div class="card-meta">
-    ${aiBadge(r.ai)}${r.platform !== "norns" ? `<span class="badge kind">${esc(PLATFORMS[r.platform].label)}</span>` : ""}
+    ${aiBadge(r.ai)}${r.platform !== "norns" ? `<span class="badge kind">${esc(PLATFORMS[r.platform].label)}</span>` : ""}${r.kind !== "script" ? `<span class="badge kind">${esc(KINDS[r.kind].label)}</span>` : ""}
     ${r.requires.map((q) => `<span class="badge req">${esc(q)}</span>`).join("")}
     ${likesStat(r)}
     ${r.stars != null ? `<span class="stat" title="GitHub stars">★ ${r.stars}</span>` : ""}
@@ -326,14 +330,14 @@ function freshPanel(title, page, feed, items, date) {
   </div>`;
 }
 
-function chipGroup(name, label, counts, min = 1) {
+function chipGroup(name, label, counts, min = 1, text = (v) => v) {
   const items = [...counts]
     .filter(([, n]) => n >= min)
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   if (!items.length) return "";
   return `<fieldset class="chips" data-group="${name}">
   <legend>${esc(label)}</legend>
-  ${items.map(([v, n]) => `<button type="button" class="chip" data-value="${esc(v)}" aria-pressed="false">${esc(v)} <span class="count">${n}</span></button>`).join("")}
+  ${items.map(([v, n]) => `<button type="button" class="chip" data-value="${esc(v)}" aria-pressed="false">${esc(text(v))} <span class="count">${n}</span></button>`).join("")}
 </fieldset>`;
 }
 
@@ -359,6 +363,12 @@ const platformCounts = new Map(
   Object.keys(PLATFORMS).map((k) => [
     k,
     records.filter((r) => r.platform === k).length,
+  ]),
+);
+const kindCounts = new Map(
+  Object.keys(KINDS).map((k) => [
+    k,
+    records.filter((r) => r.kind === k).length,
   ]),
 );
 write(
@@ -390,6 +400,7 @@ write(
   </div>
   <div class="filter-row">
     ${chipGroup("platform", "platform", new Map([...platformCounts].filter(([, n]) => n > 0)))}
+    ${chipGroup("kind", "type", new Map([...kindCounts].filter(([, n]) => n > 0)), 1, (k) => KINDS[k].plural)}
     <fieldset class="chips" data-group="ai">
       <legend>AI disclosure</legend>
       ${[...aiCounts]
@@ -437,8 +448,9 @@ for (const r of records) {
       ? `<section class="install">
   <h2>install</h2>
   <p>In maiden's REPL (the <code>&gt;&gt;</code> prompt at the bottom of the editor), run:</p>
-  <div class="copy-row"><code class="cmd">;install ${esc(r.repo)}</code><button type="button" class="copy" data-copy=";install ${esc(r.repo)}">copy</button></div>
-  <p class="hint">Or add the <a href="${href("about/#installing-with-maiden")}">${esc(cfg.title)} catalog</a> to maiden and install it from the project manager. Restart norns if the script ships a new engine.</p>
+  <div class="copy-row"><code class="cmd">;install ${esc(r.install || r.repo)}</code><button type="button" class="copy" data-copy=";install ${esc(r.install || r.repo)}">copy</button></div>
+  ${r.install ? "" : `<p class="hint">Or add the <a href="${href("about/#installing-with-maiden")}">${esc(cfg.title)} catalog</a> to maiden and install it from the project manager. Restart norns if the script ships a new engine.</p>`}
+  ${r.kind === "mod" ? `<p class="hint">This is a <strong>mod</strong>: after installing, enable it in SYSTEM &gt; MODS (select it with E2, turn E3 until it shows a +), then restart norns. <a href="https://monome.org/docs/norns/mods/">About mods</a>.</p>` : ""}
 </section>`
       : `<section class="install"><h2>install</h2><p>Get the script from <a href="${esc(r.repo)}">its repository</a> and follow its README.</p></section>`;
 
@@ -482,7 +494,7 @@ for (const r of records) {
       canonical: r.path,
       body: `
 <article class="entry">
-  <p class="crumbs"><a class="back" href="${href("")}" data-back>← all scripts</a> <span class="crumb-sep">/</span> ${esc(PLATFORMS[r.platform].label)}</p>
+  <p class="crumbs"><a class="back" href="${href("")}" data-back>← all scripts</a> <span class="crumb-sep">/</span> ${esc(PLATFORMS[r.platform].label)}${r.kind !== "script" ? ` <span class="crumb-sep">/</span> <a href="${href(`?kind=${encodeURIComponent(r.kind)}`)}">${esc(KINDS[r.kind].plural)}</a>` : ""}</p>
   <header class="entry-head">
     <h1>${esc(r.name)}${isNew(r) ? ` <span class="badge new" title="Added ${esc(r.added)}">new</span>` : ""}</h1>
     <p class="lede">${esc(r.description)}</p>
@@ -624,7 +636,8 @@ const catalog = {
   catalog_name: cfg.catalogName,
   date: buildDate,
   entries: records
-    .filter((r) => PLATFORMS[r.platform].maiden)
+    // entries with their own install URL (a release zip) can't be installed from project_url
+    .filter((r) => PLATFORMS[r.platform].maiden && !r.install)
     .map((r) => ({
       project_name: r.name,
       project_url: r.repo,

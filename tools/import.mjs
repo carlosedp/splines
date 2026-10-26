@@ -7,7 +7,7 @@
 // by the weekly workflow so a human reviews them before they go live.
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT, ENTRIES_DIR, loadConfig, loadEntries, normalizeRepo, stringifyFrontMatter, gh, hasNornsLayout, TAG_RE, PLACEHOLDER_DESCRIPTION, KNOWN_REQUIRES } from './lib.mjs';
+import { ROOT, ENTRIES_DIR, loadConfig, loadEntries, normalizeRepo, stringifyFrontMatter, gh, githubSlug, hasNornsLayout, isModOnly, TAG_RE, PLACEHOLDER_DESCRIPTION, KNOWN_REQUIRES } from './lib.mjs';
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
@@ -37,7 +37,7 @@ const slugify = (s) =>
 // entry names keep their case: on norns the name is the install folder, and paths are case-sensitive
 const toName = (s) => String(s).replace(/[^A-Za-z0-9_.-]+/g, '-').replace(/^[-.]+|[-.]+$/g, '') || 'script';
 const cleanTags = (tags) => {
-  const out = [...new Set((tags || []).map((t) => slugify(t).replace(/[_.]/g, '-')).filter((t) => TAG_RE.test(t) && !['norns', 'monome', 'monome-norns', 'norns-script', 'lua', 'iii'].includes(t)))];
+  const out = [...new Set((tags || []).map((t) => slugify(t).replace(/[_.]/g, '-')).filter((t) => TAG_RE.test(t) && !['norns', 'monome', 'monome-norns', 'norns-script', 'lua', 'iii', 'mod', 'mods'].includes(t)))]; // mods get `kind: mod` instead
   return out.length ? out.slice(0, 8) : ['uncategorized'];
 };
 const clip = (s, n = 160) => {
@@ -307,6 +307,12 @@ for (const src of want('lines') ? [cfg.lines || []].flat() : []) {
   }
 }
 
+// mods are norns repos with lib/mod.lua and no script at the root (lines lists them in the norns library too, tagged "mods")
+for (const [i, data] of added.entries()) {
+  const slug = data.platform === 'norns' && githubSlug(data.repo);
+  if (slug && (await isModOnly(slug))) added[i] = { name: data.name, platform: data.platform, kind: 'mod', ...data };
+}
+
 if (!dryRun) {
   for (const data of added) {
     const dir = path.join(ROOT, ENTRIES_DIR, data.name);
@@ -316,5 +322,5 @@ if (!dryRun) {
   }
 }
 console.log(`${dryRun ? '[dry run] would add' : '✓ added'} ${added.length} new entries.`);
-for (const d of added.slice(0, 20)) console.log(`  + ${d.name}  (${d.origin})`);
+for (const d of added.slice(0, 20)) console.log(`  + ${d.name}${d.kind ? ` [${d.kind}]` : ''}  (${d.origin})`);
 if (added.length > 20) console.log(`  … and ${added.length - 20} more`);

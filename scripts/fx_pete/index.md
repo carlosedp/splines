@@ -1,11 +1,11 @@
 ---
 name: fx_pete
 platform: norns
+kind: mod
 repo: https://github.com/sonocircuit/fx_pete
 author: sonoCircuit
 description: Multimode delay for the norns fx mod
 tags:
-  - mod
   - fx
   - audio-fx
   - delay

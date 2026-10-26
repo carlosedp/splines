@@ -1,11 +1,11 @@
 ---
 name: oilcan
 platform: norns
+kind: mod
 repo: https://github.com/zjb-s/oilcan
 author: zbs
 description: monophonic digital-style percussion voice
 tags:
-  - mod
   - drum
   - synth
   - nb
