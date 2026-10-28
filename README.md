@@ -7,7 +7,7 @@ A community catalog of scripts for monome norns, grid, iii, crow and teletype, p
 - **Search and filters run in the browser**: text, tags, hardware, AI disclosure and sort, with shareable URLs (`?tag=grid&req=crow`).
 - **Maiden-compatible catalog**: `catalog.json` uses the same shape as monome's `community.json`.
 - **Importer**: proposes new scripts weekly from the official community catalog, awesome lists, GitHub topics and a GitHub keyword search (recent Lua repos mentioning norns).
-- **Health check**: weekly, follows moved repos with a PR and lists deleted or archived ones in a "catalog health" issue.
+- **Health check**: weekly, opens a PR that follows moved repos and marks deleted or archived ones with a ⚠️ on the site.
 - **Optional discussions per script** with [giscus](https://giscus.app), backed by GitHub Discussions, so there's no database.
 
 No framework: one Node build script and two dependencies (`yaml`, `marked`).
@@ -36,7 +36,7 @@ tools/
   enrich.mjs              stars / last push / license / cover / README → .cache/
   import.mjs              pull new entries from external sources
   from-issue.mjs          submit/claim issue form → entry (used by issue-entry.yml)
-  health.mjs              follow moved repos, report deleted/archived ones
+  health.mjs              follow moved repos, flag deleted/archived ones
   build.mjs               HTML pages, catalog.json, index.json, sitemap
   serve.mjs               local preview server
 site.config.json          title, URLs, giscus, import sources
@@ -68,7 +68,7 @@ Optional short "catalog notes", shown above the repo's README on the script page
 1. Push to GitHub and enable **Settings → Pages → Source: GitHub Actions**.
 2. Set `siteUrl` and `basePath` in `site.config.json`. For a custom domain, set `cname`, use `siteUrl: https://your.domain` and `basePath: ""`.
 3. `deploy.yml` builds on every push to `main` and daily, to refresh stars and last-push dates.
-4. `import.yml` runs weekly (or manually) and opens a PR with newly found scripts. `health.yml` runs weekly too: a PR for moved repos, and a "catalog health" issue for deleted and archived ones.
+4. `import.yml` runs weekly (or manually) and opens a PR with newly found scripts. `health.yml` runs weekly too: a PR that follows moved repos and sets `status: gone` / `status: archived` on entries whose repo was deleted or archived (shown as ⚠️, with a tooltip). Removing an entry is decided in review.
 5. `issue-entry.yml` turns `[submit]` and `[claim]` issues (forms in `.github/ISSUE_TEMPLATE`) into PRs and comments back on the issue. PRs opened by Actions don't trigger `validate.yml`, so that workflow validates the entry itself.
 6. Allow Actions to create PRs: **Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests**.
 
