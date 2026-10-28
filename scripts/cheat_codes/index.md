@@ -11,4 +11,5 @@ source: imported
 origin: awesome:p3r7/awesome-monome-norns
 discussion: https://llllllll.co/t/31655
 docs: https://llllllll.co/uploads/short-url/mkkpeOUJCreIwVIP0Jdf8rpfYDJ.pdf
+status: archived
 ---

@@ -22,4 +22,5 @@ ai: unknown
 source: imported
 origin: catalog:community
 discussion: https://llllllll.co/t/schicksalslied/59227
+status: archived
 ---
