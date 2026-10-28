@@ -1,5 +1,5 @@
 {
-  "name": "norns-catalog",
+  "name": "splines",
   "version": "0.1.0",
   "private": true,
   "description": "A community catalog of norns & grid scripts, built as a static site with a maiden-compatible catalog.",

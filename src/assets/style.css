@@ -138,6 +138,7 @@ code, .cmd { font-family: var(--mono); font-size: .9em; }
 .lede { font-size: 18px; margin: 0 0 10px; max-width: 60ch; }
 .ai-note { color: var(--muted); font-size: 13px; }
 .warn { color: var(--warn); font-size: 14px; }
+.status-warn { cursor: help; font-size: 0.85em; vertical-align: middle; }
 .cover { display: block; max-width: 100%; margin: 20px 0 0; border-radius: var(--radius); border: 1px solid var(--line); image-rendering: pixelated; background: #000; }
 .entry-grid { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr) 280px; margin-top: 24px; }
 @media (max-width: 760px) { .entry-grid { grid-template-columns: minmax(0, 1fr); } .entry-side { order: -1; } }

@@ -12,6 +12,7 @@ import {
   ENTRIES_DIR,
   PLATFORMS,
   KINDS,
+  STATUSES,
   loadConfig,
   loadEntries,
   validateEntry,
@@ -200,7 +201,8 @@ for (const e of loadEntries()) {
     stars: gh.stars ?? null,
     likes: discussions[`${ENTRIES_DIR}/${e.slug}/`]?.likes ?? 0,
     updated: gh.pushedAt ? gh.pushedAt.slice(0, 10) : null,
-    archived: !!gh.archived,
+    // set by the weekly health check; the enrich cache catches archives between two checks
+    status: d.status || (gh.archived ? "archived" : null),
     added: d.added ? String(d.added).slice(0, 10) : null,
     path: `${ENTRIES_DIR}/${e.slug}/`,
     body: e.body.replace(/<!--[\s\S]*?(-->|$)/g, ""), // the template's hint is a comment; it must not count as notes
@@ -281,6 +283,10 @@ ${body}
 
 const aiBadge = (ai) =>
   `<span class="badge ai ai-${esc(ai)}" title="${esc(AI_LABEL[ai][1])}">${esc(AI_LABEL[ai][0])}</span>`;
+const statusIcon = (r) =>
+  r.status
+    ? ` <span class="status-warn" title="${esc(STATUSES[r.status])}" aria-label="${esc(STATUSES[r.status])}" role="img">⚠️</span>`
+    : "";
 const tagLink = (t) =>
   `<a class="tag" href="${href(`?tag=${encodeURIComponent(t)}`)}">${esc(t)}</a>`;
 const isNew = (r) =>
@@ -296,7 +302,7 @@ function card(r) {
     .toLowerCase();
   return `<li class="card" data-platform="${esc(r.platform)}" data-kind="${esc(r.kind)}" data-ai="${esc(r.ai)}" data-tags="${esc(r.tags.join(" "))}" data-requires="${esc(r.requires.join(" "))}" data-name="${esc(r.name)}" data-stars="${r.stars ?? 0}" data-likes="${r.likes}" data-updated="${esc(r.updated || "")}" data-added="${esc(r.added || "")}" data-search="${esc(search)}">
   <a class="card-link" href="${href(r.path)}">
-    <span class="card-title">${esc(r.name)}${isNew(r) ? ` <span class="badge new" title="Added ${esc(r.added)}">new</span>` : ""}</span>
+    <span class="card-title">${esc(r.name)}${statusIcon(r)}${isNew(r) ? ` <span class="badge new" title="Added ${esc(r.added)}">new</span>` : ""}</span>
     <span class="card-author">by ${esc(r.author)}</span>
   </a>
   <p class="card-desc">${esc(r.description)}</p>
@@ -496,10 +502,10 @@ for (const r of records) {
 <article class="entry">
   <p class="crumbs"><a class="back" href="${href("")}" data-back>← all scripts</a> <span class="crumb-sep">/</span> ${esc(PLATFORMS[r.platform].label)}${r.kind !== "script" ? ` <span class="crumb-sep">/</span> <a href="${href(`?kind=${encodeURIComponent(r.kind)}`)}">${esc(KINDS[r.kind].plural)}</a>` : ""}</p>
   <header class="entry-head">
-    <h1>${esc(r.name)}${isNew(r) ? ` <span class="badge new" title="Added ${esc(r.added)}">new</span>` : ""}</h1>
+    <h1>${esc(r.name)}${statusIcon(r)}${isNew(r) ? ` <span class="badge new" title="Added ${esc(r.added)}">new</span>` : ""}</h1>
     <p class="lede">${esc(r.description)}</p>
     <div class="card-meta">${aiBadge(r.ai)} <span class="ai-note">${esc(AI_LABEL[r.ai][1])}</span>${giscusReady ? ` <a class="like-link" href="#discussion" title="React in the discussion to like it">♥ ${r.likes || ""} like</a>` : likesStat(r)}</div>
-    ${r.archived ? '<p class="warn">This repository is archived and may no longer be maintained.</p>' : ""}
+    ${r.status ? `<p class="warn">⚠️ ${esc(STATUSES[r.status])}.</p>` : ""}
   </header>
   ${r.cover ? `<img class="cover" src="${esc(r.cover)}" alt="${esc(r.name)} screenshot" loading="lazy">` : ""}
   <div class="entry-grid">

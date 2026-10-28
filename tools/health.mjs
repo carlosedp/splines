@@ -4,9 +4,9 @@
 //
 // Renamed or transferred GitHub repos are fixed in place (the API redirects to the new location), and the
 // old URL goes into site.config.json -> import.ignore so sources that still list it don't re-import it.
-// Deleted, unreachable and archived repos are only reported: removing an entry is a human decision.
-// The report goes to health.md, used by .github/workflows/health.yml for the pull request and the
-// "catalog health" issue.
+// Deleted, unreachable and archived repos get `status: gone` / `status: archived`, which the site shows as a ⚠️;
+// removing an entry is a human decision. The status is cleared again when the repo is back to normal.
+// The report goes to health.md, the body of the pull request opened by .github/workflows/health.yml.
 import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT, PLATFORMS, loadEntries, normalizeRepo, githubSlug, gh, updateFrontMatter } from './lib.mjs';
@@ -17,6 +17,7 @@ const gone = [];
 const archived = [];
 const duplicates = [];
 const unchecked = [];
+const statuses = new Map(); // entry -> status found by this run (undefined = fine); unchecked entries keep theirs
 
 const entries = loadEntries();
 // "platform owner/repo" -> entry, to catch two entries that now lead to the same repo
@@ -29,6 +30,7 @@ for (const e of entries) {
     // other forges: a plain request is all we can do
     const res = await fetch(e.data.repo, { method: 'HEAD', redirect: 'follow', signal: AbortSignal.timeout(15000) }).catch(() => null);
     if (!res || res.status >= 400) gone.push({ e, why: res ? `HTTP ${res.status}` : 'unreachable' });
+    statuses.set(e, !res || res.status >= 400 ? 'gone' : undefined);
     continue;
   }
   const res = await gh(`/repos/${slug}`).catch((err) => err);
@@ -43,6 +45,7 @@ for (const e of entries) {
   }
   if (res.status === 404 || res.status === 451) {
     gone.push({ e, why: res.status === 404 ? 'not found (deleted or made private)' : 'unavailable for legal reasons' });
+    statuses.set(e, 'gone');
     continue;
   }
   if (!res.ok) {
@@ -60,13 +63,26 @@ for (const e of entries) {
     } else {
       moved.push({ e, to, renamed: r.name !== e.slug && PLATFORMS[e.platform]?.luaRoot });
       bySlug.set(key, e);
-      if (!dryRun) {
-        const file = path.join(ROOT, e.file);
-        fs.writeFileSync(file, updateFrontMatter(fs.readFileSync(file, 'utf8'), { repo: to }));
-      }
     }
   }
   if (r.archived) archived.push({ e, pushed: r.pushed_at?.slice(0, 10) });
+  statuses.set(e, r.archived ? 'archived' : undefined);
+}
+
+// write repo moves and status changes into the entries
+const changes = new Map(moved.map((m) => [m.e, { repo: m.to }]));
+const flagged = [];
+const cleared = [];
+for (const [e, status] of statuses) {
+  if (status === e.data.status) continue;
+  (status ? flagged : cleared).push({ e, from: e.data.status, to: status });
+  changes.set(e, { ...changes.get(e), status });
+}
+if (!dryRun) {
+  for (const [e, c] of changes) {
+    const file = path.join(ROOT, e.file);
+    fs.writeFileSync(file, updateFrontMatter(fs.readFileSync(file, 'utf8'), c));
+  }
 }
 
 if (moved.length && !dryRun) {
@@ -86,11 +102,13 @@ const report =
   `Weekly check of every entry's repository (${new Date().toISOString().slice(0, 10)}).\n\n` +
   section('moved', moved, (m) => `\`${m.e.slug}\`: ${m.e.data.repo} → ${m.to}${m.renamed ? ' ⚠️ the repo name changed, so the norns install folder may have too; consider renaming the entry' : ''}`) +
   section('duplicates', duplicates, (d) => `\`${d.e.slug}\`: ${d.e.data.repo} now leads to ${d.to}, which \`${d.other.slug}\` already lists. Remove one of them, and add the old URL to \`import.ignore\` in site.config.json`) +
+  section('warnings added', flagged, (f) => `\`${f.e.slug}\`: \`status: ${f.to}\`${f.from ? ` (was ${f.from})` : ''}, shown as ⚠️ on the site`) +
+  section('warnings cleared', cleared, (c) => `\`${c.e.slug}\`: no longer ${c.from}`) +
   section('gone', gone, (g) => `${link(g.e)}: ${g.why}. Remove the entry (and add its repo to \`import.ignore\` in site.config.json), or point it at a new home`) +
-  section('archived', archived, (a) => `${link(a.e)} (last push ${a.pushed || 'unknown'}). Shown with a warning on its page; fine to keep if it still works`) +
+  section('archived', archived, (a) => `${link(a.e)} (last push ${a.pushed || 'unknown'}). Fine to keep if it still works`) +
   section('not checked', unchecked, (u) => u) +
-  (moved.length || duplicates.length || gone.length || archived.length ? '' : 'Everything is where it should be. ✓\n');
+  (moved.length || duplicates.length || gone.length || archived.length || cleared.length ? '' : 'Everything is where it should be. ✓\n');
 
 fs.writeFileSync('health.md', report);
 console.log(report);
-console.log(`${dryRun ? '[dry run] ' : ''}moved ${moved.length}, duplicates ${duplicates.length}, gone ${gone.length}, archived ${archived.length}.`);
+console.log(`${dryRun ? '[dry run] ' : ''}moved ${moved.length}, duplicates ${duplicates.length}, gone ${gone.length}, archived ${archived.length}, warnings added ${flagged.length}, cleared ${cleared.length}.`);

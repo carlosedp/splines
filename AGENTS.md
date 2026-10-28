@@ -42,12 +42,12 @@ tools/validate.mjs        CLI validator (GitHub Actions annotations when GITHUB_
 tools/enrich.mjs          GitHub API metadata + README cache (20h TTL); likes (👍❤️🎉🚀 reactions on giscus discussions, GraphQL) → .cache/discussions.json
 tools/import.mjs          importers: maiden catalogs, awesome lists (incl. p3r7/awesome-monome-norns tables), GitHub topics + keyword search, lines (llllllll.co) threads per source with a `platform` (norns library, iii tag; rate-limited, recent only, `--days N` to backfill)
 tools/from-issue.mjs      [submit]/[claim] issue form → entry file + pr-body.md/comment.md (issue-entry.yml); field labels must match .github/ISSUE_TEMPLATE
-tools/health.mjs          follows moved repos (rewrites `repo`), reports gone/archived → health.md (health.yml)
+tools/health.mjs          follows moved repos (rewrites `repo`), sets/clears `status` for gone/archived → health.md (health.yml)
 tools/build.mjs           renders everything into dist/
 tools/serve.mjs           local static server honoring basePath
 tools/new-entry.mjs       scaffolder behind `npm run new`
 site.config.json          title, siteUrl, basePath, cname, repo, giscus, import sources
-.github/workflows/        validate.yml (PRs), deploy.yml (push/daily → Pages), import.yml (weekly → PR), health.yml (weekly → PR + issue), issue-entry.yml (issue forms → PR)
+.github/workflows/        validate.yml (PRs), deploy.yml (push/daily → Pages), import.yml (weekly → PR), health.yml (weekly → PR), issue-entry.yml (issue forms → PR)
 ```
 
 ## Data model (entry front matter)
@@ -68,6 +68,7 @@ site.config.json          title, siteUrl, basePath, cname, repo, giscus, import 
 | `added` | ✓* | `YYYY-MM-DD`, drives `/new/` and its feed. Required unless `source: imported`; the initial seed import has none so it doesn't flood "new". `npm run new` fills it in |
 | `license`, `discussion`, `docs`, `cover` | | optional; URLs must be https |
 | `install` | | optional https URL for `;install` when the repo isn't what gets installed (e.g. a release zip of a compiled mod). Skips the online layout check and keeps the entry out of `catalog.json` |
+| `status` | | `archived` | `gone` (`STATUSES` in `lib.mjs`). Written and cleared by `health.mjs`, not by submitters; shown as ⚠️ with a tooltip on cards and the script page |
 
 The entry body is optional **catalog notes**, rendered above the upstream README on the script page. PRs only need front matter; the README is the documentation. HTML comments in the body are not published (the template hint is one).
 

@@ -28,6 +28,12 @@ export const KINDS = {
 };
 export const DEFAULT_KIND = 'script';
 
+// Repo problems found by tools/health.mjs (front matter `status`): the build shows a ⚠️ with this as its tooltip.
+// health.mjs owns this field: it sets it, and clears it once the repo is fine again.
+export const STATUSES = {
+  archived: 'The repository is archived: it may no longer be maintained, or a newer script may have replaced it',
+  gone: 'The repository could not be found: it may have been deleted, made private or moved',
+};
 export const AI_VALUES = ['none', 'assisted', 'unknown'];
 export const SOURCE_VALUES = ['submitted', 'imported'];
 export const KNOWN_REQUIRES = ['grid', 'arc', 'crow', 'midi', 'audio-in', 'keyboard', 'jf', 'ansible', 'teletype', 'hid', 'osc', 'txo', 'er-301'];
@@ -133,6 +139,7 @@ export function validateEntry(entry) {
   }
   if (!AI_VALUES.includes(d.ai)) errs.push(`"ai" must be one of: ${AI_VALUES.join(', ')}`);
   if (d.source !== undefined && !SOURCE_VALUES.includes(d.source)) errs.push(`"source" must be one of: ${SOURCE_VALUES.join(', ')}`);
+  if (d.status !== undefined && !STATUSES[d.status]) errs.push(`"status" must be one of: ${Object.keys(STATUSES).join(', ')}`);
   if (d.source !== 'imported' && d.ai === 'unknown') errs.push('"ai: unknown" is only allowed for imported entries; submitters must disclose');
   // drives the /new/ page and feed; the initial import has no date, so it doesn't flood them
   if (d.added !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(String(d.added))) errs.push('"added" must be a date like 2026-10-21');
