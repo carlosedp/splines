@@ -15,4 +15,5 @@ ai: unknown
 source: imported
 origin: catalog:community
 discussion: https://llllllll.co/t/faeng-is-a-sequencer/57871
+status: archived
 ---
