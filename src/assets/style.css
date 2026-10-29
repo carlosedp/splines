@@ -177,3 +177,14 @@ code, .cmd { font-family: var(--mono); font-size: .9em; }
 .badge-snippet { margin: 12px 0 0; font-size: 13px; }
 .badge-snippet summary { cursor: pointer; color: var(--muted); font: 12px var(--mono); }
 .badge-snippet .cmd { font-size: 12px; }
+.fork-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.fork-list li { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; overflow-wrap: anywhere; }
+.fork-stats { color: var(--muted); font: 12px var(--mono); display: inline-flex; gap: 8px; align-items: baseline; }
+.fork-stats a { color: var(--muted); }
+.entry-side .forks { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
+.entry-side .forks h2 { font: 12px var(--mono); color: var(--muted); margin: 0 0 8px; font-weight: 400; }
+.fork-groups { display: grid; gap: 14px; }
+.fork-group { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; scroll-margin-top: 16px; }
+.fork-group h2 { font-size: 17px; margin: 0; display: flex; gap: 8px; align-items: baseline; }
+.fork-group .hint { margin: 2px 0 10px; font-size: 13px; }
+.fork-group:target { border-color: var(--accent); }
