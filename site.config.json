@@ -5,12 +5,12 @@
   "siteUrl": "https://splines.cc",
   "basePath": "",
   "cname": "splines.cc",
-  "repo": "VoltageFoundryMod/splines",
+  "repo": "carlosedp/splines",
   "branch": "main",
   "catalogName": "splines",
   "forum": "https://talk.splines.cc",
   "giscus": {
-    "repo": "VoltageFoundryMod/splines",
+    "repo": "carlosedp/splines",
     "repoId": "R_kgDOVSowcQ",
     "category": "Scripts",
     "categoryId": "DIC_kwDOVSowcc4DJR3U"
@@ -22,15 +22,9 @@
     "awesomeLists": [
       "https://raw.githubusercontent.com/p3r7/awesome-monome-norns/main/README.md"
     ],
-    "githubTopics": [
-      "norns",
-      "monome-norns",
-      "norns-script"
-    ],
+    "githubTopics": ["norns", "monome-norns", "norns-script"],
     "githubSearch": {
-      "queries": [
-        "norns in:name,description,readme language:Lua"
-      ],
+      "queries": ["norns in:name,description,readme language:Lua"],
       "days": 30
     },
     "lines": [
