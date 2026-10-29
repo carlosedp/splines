@@ -37,6 +37,7 @@ scripts/<name>/index.md   one entry per script, ANY platform (+ optional images 
 templates/entry.md        entry template used by `npm run new`
 src/assets/               style.css, app.js (client filtering), favicon.svg
 src/about.md              about/submit/maiden page ({{title}}, {{catalog}}, {{repo}} placeholders)
+src/start.md              /start/ getting-started guide for newcomers (same placeholders, plus {{base}} for site links)
 tools/lib.mjs             config, PLATFORMS, entry loading, front matter, VALIDATION RULES (single source of truth)
 tools/validate.mjs        CLI validator (GitHub Actions annotations when GITHUB_ACTIONS is set)
 tools/enrich.mjs          GitHub API metadata + README cache (20h TTL); likes (👍❤️🎉🚀 reactions on giscus discussions, GraphQL) → .cache/discussions.json

@@ -2,6 +2,7 @@
 //   index.html            searchable, filterable list (cards are prerendered; JS only filters/sorts)
 //   scripts/<slug>/       one page per script
 //   about/                submission guide, AI disclosure levels, maiden setup
+//   start/                getting started: installing a first script, choosing well-known ones
 //   catalog.json          maiden-compatible catalog (norns scripts only)
 //   index.json            the whole catalog as plain JSON, for other tools
 import fs from "node:fs";
@@ -186,7 +187,8 @@ for (const e of loadEntries()) {
     author: d.author,
     // imported entries may only have a placeholder; the repo's own description is better than nothing
     description:
-      (d.description === PLACEHOLDER_DESCRIPTION && gh.description) || d.description,
+      (d.description === PLACEHOLDER_DESCRIPTION && gh.description) ||
+      d.description,
     tags: d.tags.map(String),
     requires: d.requires || [],
     ai: d.ai,
@@ -258,6 +260,7 @@ ${
   <a class="brand" href="${href("")}"><img class="brand-mark" src="${href("assets/favicon.svg")}" alt="" width="28" height="28">${esc(cfg.title)}</a>
   <nav>
     <a href="${href("")}">scripts</a>
+    <a href="${href("start/")}">start here</a>
     <a href="${href("new/")}">new</a>
     <a href="${href("updated/")}">updated</a>
     <a href="${href("?kind=mod")}">mods</a>
@@ -324,7 +327,9 @@ function card(r) {
 const latest = (key, n) =>
   records
     .filter((r) => r[key])
-    .sort((a, b) => b[key].localeCompare(a[key]) || a.name.localeCompare(b.name))
+    .sort(
+      (a, b) => b[key].localeCompare(a[key]) || a.name.localeCompare(b.name),
+    )
     .slice(0, n);
 
 function freshPanel(title, page, feed, items, date) {
@@ -384,7 +389,14 @@ write(
     body: `
 <section class="hero">
   <h1>${esc(cfg.tagline)}</h1>
+  <div class="hero-row">
   <p>${records.length} scripts. Search, filter by tag or hardware, and install straight from maiden. Handmade or AI-assisted, always disclosed. <a href="${esc(submitUrl)}">Add your script</a> with a short form, or read <a href="${href("about/")}">how it works</a>.${cfg.forum ? ` Questions, ideas or work in progress? Join the <a href="${esc(cfg.forum)}">forum</a>.` : ""}</p>
+  <div class="start-callout">
+    <center>
+    <a class="start-button" href="${href("start/")}">new to norns? start here →</a>
+    </center>
+  </div>
+  </div>
 </section>
 <section class="fresh" aria-label="What's new">
   ${freshPanel("just added", "new/", "feed-new.xml", latest("added", 5), (r) => r.added)}
@@ -453,14 +465,15 @@ for (const r of records) {
     r.kind === "library"
       ? `<section class="install"><h2>use</h2><p>This is a <strong>library</strong> for script authors, not something to run on its own. Copy it into your script as <a href="${esc(r.repo)}">its README</a> explains.</p></section>`
       : r.platform === "norns"
-      ? `<section class="install">
+        ? `<section class="install">
   <h2>install</h2>
   <p>In maiden's REPL (the <code>&gt;&gt;</code> prompt at the bottom of the editor), run:</p>
   <div class="copy-row"><code class="cmd">;install ${esc(r.install || r.repo)}</code><button type="button" class="copy" data-copy=";install ${esc(r.install || r.repo)}">copy</button></div>
+  <p class="hint">First time? <a href="${href("start/")}">Getting started</a> walks through maiden and loading a script.</p>
   ${r.install ? "" : `<p class="hint">Or add the <a href="${href("about/#installing-with-maiden")}">${esc(cfg.title)} catalog</a> to maiden and install it from the project manager. Restart norns if the script ships a new engine.</p>`}
   ${r.kind === "mod" ? `<p class="hint">This is a <strong>mod</strong>: after installing, enable it in SYSTEM &gt; MODS (select it with E2, turn E3 until it shows a +), then restart norns. <a href="https://monome.org/docs/norns/mods/">About mods</a>.</p>` : ""}
 </section>`
-      : `<section class="install"><h2>install</h2><p>Get the script from <a href="${esc(r.repo)}">its repository</a> and follow its README.</p></section>`;
+        : `<section class="install"><h2>install</h2><p>Get the script from <a href="${esc(r.repo)}">its repository</a> and follow its README.</p></section>`;
 
   const discussion = giscusReady
     ? `<section class="discussion" id="discussion"><h2>discussion</h2>
@@ -612,20 +625,34 @@ ${entries.join("\n")}
   );
 }
 
-// about
-const aboutMd = fs
-  .readFileSync(path.join(ROOT, "src", "about.md"), "utf8")
-  .replaceAll("{{title}}", cfg.title)
-  .replaceAll("{{catalog}}", `${siteUrl}/catalog.json`)
-  .replaceAll("{{repo}}", cfg.repo)
-  .replaceAll("{{branch}}", cfg.branch)
-  .replaceAll("{{forum}}", cfg.forum || `https://github.com/${cfg.repo}/discussions`);
+// about, getting started
+const pageMd = (file) =>
+  fs
+    .readFileSync(path.join(ROOT, "src", file), "utf8")
+    .replaceAll("{{title}}", cfg.title)
+    .replaceAll("{{base}}", base)
+    .replaceAll("{{catalog}}", `${siteUrl}/catalog.json`)
+    .replaceAll("{{repo}}", cfg.repo)
+    .replaceAll("{{branch}}", cfg.branch)
+    .replaceAll(
+      "{{forum}}",
+      cfg.forum || `https://github.com/${cfg.repo}/discussions`,
+    );
 write(
   "about/index.html",
   layout({
     title: "about & submit",
     canonical: "about/",
-    body: `<article class="prose about">${md.parse(aboutMd)}</article>`,
+    body: `<article class="prose about">${md.parse(pageMd("about.md"))}</article>`,
+  }),
+);
+write(
+  "start/index.html",
+  layout({
+    title: "getting started",
+    description: `How to install your first monome norns script from ${cfg.title} with maiden, and how to pick reliable ones.`,
+    canonical: "start/",
+    body: `<article class="prose about">${md.parse(pageMd("start.md"))}</article>`,
   }),
 );
 
@@ -645,7 +672,12 @@ const catalog = {
   date: buildDate,
   entries: records
     // entries with their own install URL (a release zip) can't be installed from project_url; libraries aren't installed
-    .filter((r) => PLATFORMS[r.platform].maiden && KINDS[r.kind].maiden !== false && !r.install)
+    .filter(
+      (r) =>
+        PLATFORMS[r.platform].maiden &&
+        KINDS[r.kind].maiden !== false &&
+        !r.install,
+    )
     .map((r) => ({
       project_name: r.name,
       project_url: r.repo,
@@ -679,7 +711,7 @@ write(
 if (siteUrl) {
   write(
     "sitemap.xml",
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${["", "about/", "new/", "updated/", ...records.map((r) => r.path)].map((p) => `  <url><loc>${esc(`${siteUrl}/${p}`)}</loc></url>`).join("\n")}\n</urlset>\n`,
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${["", "start/", "about/", "new/", "updated/", ...records.map((r) => r.path)].map((p) => `  <url><loc>${esc(`${siteUrl}/${p}`)}</loc></url>`).join("\n")}\n</urlset>\n`,
   );
 }
 write(".nojekyll", "");
