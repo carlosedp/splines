@@ -1,6 +1,6 @@
-// Validate every entry. `--online` also checks that each repo exists and has a .lua script at its root.
+// Validate every entry. `--online` also checks that each repo exists and has a .lua script at its root (not libraries).
 // `--changed a.md,b.md` limits online checks to those files (used on pull requests).
-import { PLATFORMS, loadEntries, validateEntry, normalizeRepo, githubSlug, gh, hasNornsLayout, isNornsMod, isModOnly } from './lib.mjs';
+import { PLATFORMS, KINDS, loadEntries, validateEntry, normalizeRepo, githubSlug, gh, hasNornsLayout, isNornsMod, isModOnly } from './lib.mjs';
 
 const args = process.argv.slice(2);
 const online = args.includes('--online');
@@ -53,7 +53,7 @@ if (online) {
       continue;
     }
     // an `install` URL (a release zip, say) is what gets installed, so the repo's own layout doesn't matter
-    if (PLATFORMS[e.platform]?.luaRoot && !e.data.install) {
+    if (PLATFORMS[e.platform]?.luaRoot && !e.data.install && KINDS[e.kind]?.layout !== false) {
       // mods have no script at the root; norns loads them from lib/mod.lua
       if ((await hasNornsLayout(slug)) === false) {
         report(e, 'no .lua file at the repo root (or lib/mod.lua for a mod); norns needs the main script at the top level');
@@ -61,7 +61,7 @@ if (online) {
     }
     if (e.platform === 'norns') {
       if (e.kind === 'mod' && !e.data.install && (await isNornsMod(slug)) === false) report(e, '"kind: mod" but the repo has no lib/mod.lua');
-      if (e.kind !== 'mod' && (await isModOnly(slug))) console.warn(`! ${e.file}: the repo is a mod (lib/mod.lua, no script at the root); set "kind: mod"?`);
+      if (e.kind === 'script' && (await isModOnly(slug))) console.warn(`! ${e.file}: the repo is a mod (lib/mod.lua, no script at the root); set "kind: mod"?`);
     }
   }
 }

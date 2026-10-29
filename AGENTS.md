@@ -47,7 +47,8 @@ tools/build.mjs           renders everything into dist/
 tools/serve.mjs           local static server honoring basePath
 tools/new-entry.mjs       scaffolder behind `npm run new`
 site.config.json          title, siteUrl, basePath, cname, repo, giscus, import sources
-.github/workflows/        validate.yml (PRs), deploy.yml (push/daily → Pages), import.yml (weekly → PR), health.yml (weekly → PR), issue-entry.yml (issue forms → PR)
+.github/workflows/        validate.yml (PRs), deploy.yml (push/daily → Pages), import.yml (weekly → PR), health.yml (weekly → PR), issue-entry.yml (issue forms → PR), claude.yml (`@claude` mentions by maintainers → Claude Code)
+.claude/skills/add-script/ procedure for "add <repo url> to the catalog" (used locally, on claude.ai/code and by claude.yml)
 ```
 
 ## Data model (entry front matter)
@@ -56,7 +57,7 @@ site.config.json          title, siteUrl, basePath, cname, repo, giscus, import 
 |---|---|---|
 | `name` | ✓ | must equal the folder name; use the repo name with its **exact case** (for norns it's the install folder `dust/code/<name>`, and Linux paths are case-sensitive). Unique across the catalog ignoring case |
 | `platform` | | where the code runs, from `PLATFORMS` in `lib.mjs`: `norns` (default) \| `iii` \| `crow` \| `teletype`. Grid/arc are hardware (`requires`), not platforms |
-| `kind` | | what it is, from `KINDS` in `lib.mjs`: `script` (default) \| `mod` (norns only). A mod loads from `lib/mod.lua` and is enabled in SYSTEM > MODS; the importer and the submit form set it when a repo has `lib/mod.lua` and no root script. Repos with both stay `script` unless curated. Mods stay in `catalog.json` |
+| `kind` | | what it is, from `KINDS` in `lib.mjs`: `script` (default) \| `mod` (norns only) \| `library`. A mod loads from `lib/mod.lua` and is enabled in SYSTEM > MODS; the importer and the submit form set it when a repo has `lib/mod.lua` and no root script. Repos with both stay `script` unless curated. Mods stay in `catalog.json`. A library is code script authors copy into their own `lib/` (nothing to run): no layout check, not in `catalog.json`, set by curation only |
 | `repo` | ✓ | https URL; norns repos need the main `.lua` at the root (`luaRoot` in `PLATFORMS`) |
 | `author` | ✓ | display name / handle |
 | `description` | ✓ | one line, ≤160 chars |

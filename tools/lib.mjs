@@ -21,10 +21,13 @@ export const PLATFORMS = {
 export const DEFAULT_PLATFORM = 'norns';
 
 // What an entry is (front matter `kind`, default script). Mods extend norns itself: they load from lib/mod.lua and
-// are enabled in SYSTEM > MODS. They install like scripts, so they stay in catalog.json.
+// are enabled in SYSTEM > MODS. They install like scripts, so they stay in catalog.json. Libraries are code for
+// script authors to copy into their own scripts: nothing runs on its own, so they skip the layout check
+// (`layout: false`) and stay out of catalog.json (`maiden: false`).
 export const KINDS = {
   script: { label: 'script', plural: 'scripts' },
   mod: { label: 'mod', plural: 'mods', platforms: ['norns'] },
+  library: { label: 'library', plural: 'libraries', layout: false, maiden: false },
 };
 export const DEFAULT_KIND = 'script';
 
