@@ -36,7 +36,7 @@ Every entry carries one of these labels, and the list can be filtered by them, s
 ---
 name: my-script
 platform: norns          # norns | iii | crow | teletype
-kind: mod                # optional, only for norns mods (repo has lib/mod.lua)
+kind: mod                # optional: mod (norns, repo has lib/mod.lua) | library (code for other scripts)
 repo: https://github.com/you/my-script
 author: you
 description: one line, under 160 characters

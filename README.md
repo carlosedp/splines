@@ -48,7 +48,7 @@ site.config.json          title, URLs, giscus, import sources
 ---
 name: my-script            # = folder name = repo name, exact case (install folder on norns); unique ignoring case
 platform: norns            # norns | iii | crow | teletype (default norns; only norns goes into catalog.json)
-kind: mod                  # optional: script (default) | mod (norns only; repo has lib/mod.lua)
+kind: mod                  # optional: script (default) | mod (norns only; repo has lib/mod.lua) | library (code for other scripts; not in catalog.json)
 repo: https://github.com/you/my-script
 author: you
 description: one line, ≤160 chars
@@ -70,7 +70,8 @@ Optional short "catalog notes", shown above the repo's README on the script page
 3. `deploy.yml` builds on every push to `main` and daily, to refresh stars and last-push dates.
 4. `import.yml` runs weekly (or manually) and opens a PR with newly found scripts. `health.yml` runs weekly too: a PR that follows moved repos and sets `status: gone` / `status: archived` on entries whose repo was deleted or archived (shown as ⚠️, with a tooltip). Removing an entry is decided in review.
 5. `issue-entry.yml` turns `[submit]` and `[claim]` issues (forms in `.github/ISSUE_TEMPLATE`) into PRs and comments back on the issue. PRs opened by Actions don't trigger `validate.yml`, so that workflow validates the entry itself.
-6. Allow Actions to create PRs: **Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests**.
+6. `claude.yml` (optional) lets maintainers write `@claude add https://github.com/owner/repo to the catalog` in an issue or comment; Claude Code follows `.claude/skills/add-script/SKILL.md` and opens a PR, and `@claude` comments on that PR revise it. Setup: install the [Claude GitHub app](https://github.com/apps/claude) on the repo, run `claude setup-token` and save the token as the `CLAUDE_CODE_OAUTH_TOKEN` secret. Only users with write access can trigger it. The same skill works in a local session or on claude.ai/code ("add <url> to the catalog").
+7. Allow Actions to create PRs: **Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests**.
 
 ### Discussions (optional)
 
@@ -85,4 +86,4 @@ Threads are created on first comment and mapped to each page's path.
 - [ ] **Maiden catalog source config**: confirm where maiden reads extra catalog URLs on the device (its config file) and document the exact steps in `src/about.md`.
 - [x] **awesome lists**: p3r7/awesome-monome-norns is imported (frozen since 2021, so it rarely adds anything new).
 - [x] Name and domain: splines, at splines.cc.
-- [x] Mods get `kind: mod` (same platform, own filter and badge). Libraries could become another `kind` later.
+- [x] Mods get `kind: mod` (same platform, own filter and badge), libraries get `kind: library` (no layout check, not in `catalog.json`).

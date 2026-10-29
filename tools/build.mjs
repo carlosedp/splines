@@ -450,7 +450,9 @@ for (const r of records) {
     ? `<details class="badge-snippet"><summary>README badge</summary><p class="hint">Add this to your README:</p><div class="copy-row"><code class="cmd">${esc(badgeMd)}</code><button type="button" class="copy" data-copy="${esc(badgeMd)}">copy</button></div></details>`
     : "";
   const install =
-    r.platform === "norns"
+    r.kind === "library"
+      ? `<section class="install"><h2>use</h2><p>This is a <strong>library</strong> for script authors, not something to run on its own. Copy it into your script as <a href="${esc(r.repo)}">its README</a> explains.</p></section>`
+      : r.platform === "norns"
       ? `<section class="install">
   <h2>install</h2>
   <p>In maiden's REPL (the <code>&gt;&gt;</code> prompt at the bottom of the editor), run:</p>
@@ -642,8 +644,8 @@ const catalog = {
   catalog_name: cfg.catalogName,
   date: buildDate,
   entries: records
-    // entries with their own install URL (a release zip) can't be installed from project_url
-    .filter((r) => PLATFORMS[r.platform].maiden && !r.install)
+    // entries with their own install URL (a release zip) can't be installed from project_url; libraries aren't installed
+    .filter((r) => PLATFORMS[r.platform].maiden && KINDS[r.kind].maiden !== false && !r.install)
     .map((r) => ({
       project_name: r.name,
       project_url: r.repo,
