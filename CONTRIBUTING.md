@@ -31,4 +31,4 @@ Edit or delete your `scripts/<name>/` folder in a PR. Authors can always ask for
 
 ## Working on the site itself
 
-No framework: `tools/build.mjs` renders plain HTML, `src/assets/app.js` filters the prerendered cards. `npm run dev` builds, serves locally, and rebuilds and reloads the page when you edit an entry, `src/` or `tools/`.
+No framework: `tools/build.mjs` renders plain HTML from the page modules in `tools/site/pages/` (an escaping `html` tagged template, no engine), `src/assets/app.js` filters the prerendered cards. `npm run dev` builds, serves locally, and rebuilds and reloads the page when you edit an entry, `src/` or `tools/`.
