@@ -45,6 +45,7 @@ for (const e of loadEntries()) {
     info = {
       description: r.description || null,
       stars: r.stargazers_count,
+      forks: r.forks_count,
       pushedAt: r.pushed_at,
       license: r.license?.spdx_id && r.license.spdx_id !== 'NOASSERTION' ? r.license.spdx_id : null,
       archived: r.archived,
@@ -87,6 +88,62 @@ for (const e of loadEntries()) {
 fs.mkdirSync(path.dirname(cacheFile), { recursive: true });
 fs.writeFileSync(cacheFile, JSON.stringify(cache, null, 2));
 console.log(`✓ enriched ${fetched} repos, ${readmes} READMEs (${Object.keys(cache).length} cached).`);
+
+// Forks: for each repo with forks, the forks someone pushed to after forking, with how many commits they are
+// ahead of / behind upstream (compare API). Stored raw in .cache/forks.json; build.mjs decides which count as
+// active. Fork lists refresh weekly; a compare only reruns when the fork or upstream got new pushes.
+// Stops while some API budget is left, so a big first run spreads over a few days instead of starving the rest.
+const forksFile = path.join(ROOT, '.cache', 'forks.json');
+const forksCache = readJSON(forksFile, {});
+const forksMaxAgeMs = 7 * 24 * 60 * 60 * 1000;
+const RESERVE = 200;
+const lowOnBudget = (res) => res.status === 403 || res.status === 429 || Number(res.headers.get('x-ratelimit-remaining') ?? Infinity) < RESERVE;
+let forkLists = 0;
+let compares = 0;
+forks: for (const slug of seen) {
+  const info = cache[slug];
+  if (!info?.forks || info.missing) continue;
+  const prev = forksCache[slug];
+  if (prev && now - prev.fetchedAt < forksMaxAgeMs && prev.total === info.forks) continue;
+
+  const known = new Map((prev?.forks || []).map((f) => [f.slug, f]));
+  const touched = [];
+  for (let page = 1; page <= 3; page++) {
+    const res = await gh(`/repos/${slug}/forks?sort=newest&per_page=100&page=${page}`);
+    if (!res.ok) break;
+    const list = await res.json();
+    // a fresh fork inherits the parent's pushed_at, so a push after creation means someone worked on it
+    touched.push(...list.filter((f) => !f.archived && f.pushed_at > f.created_at));
+    if (lowOnBudget(res)) break forks;
+    if (list.length < 100) break;
+  }
+  forkLists++;
+
+  const out = [];
+  for (const f of touched) {
+    const old = known.get(f.full_name);
+    const rec = { slug: f.full_name, branch: f.default_branch, pushedAt: f.pushed_at, stars: f.stargazers_count, upstreamPushedAt: info.pushedAt };
+    if (old && old.pushedAt === f.pushed_at && old.upstreamPushedAt === info.pushedAt) {
+      out.push({ ...rec, ahead: old.ahead, behind: old.behind });
+      continue;
+    }
+    const base = encodeURIComponent(info.defaultBranch || 'HEAD');
+    const res = await gh(`/repos/${slug}/compare/${base}...${f.owner.login}:${f.name}:${encodeURIComponent(f.default_branch)}?per_page=1`);
+    compares++;
+    if (res.ok) {
+      const c = await res.json();
+      out.push({ ...rec, ahead: c.ahead_by, behind: c.behind_by });
+    } else if (old) out.push(old); // keep what we knew
+    if (lowOnBudget(res)) {
+      // save what this repo got so far; it's retried in full next run since fetchedAt isn't advanced
+      forksCache[slug] = { ...prev, forks: out.concat((prev?.forks || []).filter((p) => !out.some((o) => o.slug === p.slug))) };
+      break forks;
+    }
+  }
+  forksCache[slug] = { fetchedAt: now, total: info.forks, forks: out };
+}
+fs.writeFileSync(forksFile, JSON.stringify(forksCache, null, 2));
+console.log(`✓ forks: ${forkLists} fork lists, ${compares} compares (${Object.keys(forksCache).length} repos cached).`);
 
 // Likes: positive reactions on each script's giscus discussion. giscus (mapping "pathname") titles each
 // discussion with the page path without the leading slash, e.g. "scripts/NEVE/", which is also our record path.

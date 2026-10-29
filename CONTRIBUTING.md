@@ -2,7 +2,7 @@
 
 ## Add a script
 
-**The easy way:** fill in the [submission form](https://github.com/VoltageFoundryMod/splines/issues/new?template=submit.yml). No git needed. A bot turns it into a pull request and comments on your issue if anything needs fixing; editing the issue runs it again.
+**The easy way:** fill in the [submission form](https://github.com/carlosedp/splines/issues/new?template=submit.yml). No git needed. A bot turns it into a pull request and comments on your issue if anything needs fixing; editing the issue runs it again.
 
 **With a pull request:**
 
@@ -18,12 +18,12 @@ However a script was made, by hand or with AI, the person submitting it stands b
 
 ## AI disclosure is required
 
-| `ai:` | meaning |
-|---|---|
-| `none` | written without AI code generation (autocomplete-level help is fine) |
+| `ai:`      | meaning                                                                                          |
+| ---------- | ------------------------------------------------------------------------------------------------ |
+| `none`     | written without AI code generation (autocomplete-level help is fine)                             |
 | `assisted` | made with meaningful help from AI tools, up to mostly generated code, reviewed and tested by you |
 
-`unknown` is reserved for automatic imports. If your script was imported, claim it with the [claim form](https://github.com/VoltageFoundryMod/splines/issues/new?template=claim.yml) (or the "claim it" link on its page), or edit the entry: set `source: submitted` and fill in `ai`.
+`unknown` is reserved for automatic imports. If your script was imported, claim it with the [claim form](https://github.com/carlosedp/splines/issues/new?template=claim.yml) (or the "claim it" link on its page), or edit the entry: set `source: submitted` and fill in `ai`.
 
 ## Update or remove an entry
 
@@ -31,4 +31,4 @@ Edit or delete your `scripts/<name>/` folder in a PR. Authors can always ask for
 
 ## Working on the site itself
 
-No framework: `tools/build.mjs` renders plain HTML, `src/assets/app.js` filters the prerendered cards. `npm run dev` builds and serves locally.
+No framework: `tools/build.mjs` renders plain HTML, `src/assets/app.js` filters the prerendered cards. `npm run dev` builds, serves locally, and rebuilds and reloads the page when you edit an entry, `src/` or `tools/`.

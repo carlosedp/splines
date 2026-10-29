@@ -24,7 +24,7 @@ npm run enrich              # GitHub stars/last push/license/cover → .cache/gi
 npm run import -- --only community --limit 24   # seed/import entries; --dry-run to preview
 npm run build               # → dist/
 npm run serve               # → http://localhost:8080/<basePath>/
-npm run dev                 # build + serve
+npm run dev                 # build + serve --watch: rebuilds on changes (~1s) and live-reloads open pages
 npm run new -- <name> [--platform crow]   # scaffold an entry from templates/entry.md
 ```
 
@@ -40,7 +40,7 @@ src/about.md              about/submit/maiden page ({{title}}, {{catalog}}, {{re
 src/start.md              /start/ getting-started guide for newcomers (same placeholders, plus {{base}} for site links)
 tools/lib.mjs             config, PLATFORMS, entry loading, front matter, VALIDATION RULES (single source of truth)
 tools/validate.mjs        CLI validator (GitHub Actions annotations when GITHUB_ACTIONS is set)
-tools/enrich.mjs          GitHub API metadata + README cache (20h TTL); likes (👍❤️🎉🚀 reactions on giscus discussions, GraphQL) → .cache/discussions.json
+tools/enrich.mjs          GitHub API metadata + README cache (20h TTL); likes (👍❤️🎉🚀 reactions on giscus discussions, GraphQL) → .cache/discussions.json; forks pushed to after forking, with commits ahead/behind upstream (weekly) → .cache/forks.json
 tools/import.mjs          importers: maiden catalogs, awesome lists (incl. p3r7/awesome-monome-norns tables), GitHub topics + keyword search, lines (llllllll.co) threads per source with a `platform` (norns library, iii tag; rate-limited, recent only, `--days N` to backfill)
 tools/from-issue.mjs      [submit]/[claim] issue form → entry file + pr-body.md/comment.md (issue-entry.yml); field labels must match .github/ISSUE_TEMPLATE
 tools/health.mjs          follows moved repos (rewrites `repo`), sets/clears `status` for gone/archived → health.md (health.yml)
@@ -88,6 +88,8 @@ When adding a field: update `validateEntry` in `lib.mjs`, `templates/entry.md`, 
 - **`catalog.json` shape is a contract with maiden.** Keep `file_info`, `catalog_name`, `date`, `entries[]` with `project_name`, `project_url`, `author`, `description`, `discussion_url?`, `documentation_url?`, `tags`. Only `PLATFORMS[platform].maiden === true` entries (norns) go in it.
 - **Paths:** always build site URLs with `href()` (prefixes `basePath`). `basePath` is `""` now that the site is on its custom domain (`splines.cc`); a project Pages site would use `/<repo>`.
 - **Importer never overwrites** existing entries and dedupes by normalized repo URL. Imported entries are reviewed via the PR that `import.yml` opens. Repos in `site.config.json → import.ignore` are never imported: when you remove a dead entry or merge a duplicate, add the old URL there, or the next import brings it back.
+- **Active forks** (⑂ on cards, `/forks/`, script page aside): `enrich.mjs` stores every fork pushed to after it was created, with ahead/behind from the compare API; `build.mjs` decides what counts as active (`FORK_MIN_AHEAD` commits on its default branch, pushed within `FORK_ACTIVE_DAYS`). Tune the thresholds there; no refetch needed. Forks are not catalog entries and are not reviewed.
+- **The build updates `dist/` in place**: unchanged files aren't rewritten and files no build produced are pruned at the end. Always go through `write()` so a file isn't pruned.
 - **Likes, not star ratings.** The site is static, so "rating" = positive reactions on each script's giscus discussion (titled with the page path, e.g. `scripts/NEVE/`), counted by `enrich.mjs` and shown as ♥ on cards plus a "most liked" sort. ★ means GitHub stars; keep the two distinct.
 - **The build must work offline.** GitHub metadata and READMEs come only from `.cache/` (written by `enrich.mjs`). Missing cache just means fewer stats on cards and no README on script pages.
 - Styling: CSS custom properties on `:root`, with dark mode via `prefers-color-scheme` plus a `data-theme` override (toggle in header). Keep both themes working and the layout fine at 390px width.

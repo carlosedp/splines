@@ -11,7 +11,7 @@
     "import": "node tools/import.mjs",
     "build": "node tools/build.mjs",
     "serve": "node tools/serve.mjs",
-    "dev": "npm run build && npm run serve",
+    "dev": "node tools/build.mjs && node tools/serve.mjs --watch",
     "new": "node tools/new-entry.mjs"
   },
   "engines": {

@@ -98,6 +98,7 @@
     name: (a, b) => a.dataset.name.localeCompare(b.dataset.name),
     stars: (a, b) => b.dataset.stars - a.dataset.stars || sorters.name(a, b),
     likes: (a, b) => b.dataset.likes - a.dataset.likes || sorters.stars(a, b),
+    forks: (a, b) => b.dataset.forks - a.dataset.forks || sorters.stars(a, b),
     updated: (a, b) => (b.dataset.updated || '').localeCompare(a.dataset.updated || '') || sorters.name(a, b),
     added: (a, b) => (b.dataset.added || '').localeCompare(a.dataset.added || '') || sorters.name(a, b),
   };

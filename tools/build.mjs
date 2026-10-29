@@ -3,6 +3,7 @@
 //   scripts/<slug>/       one page per script
 //   about/                submission guide, AI disclosure levels, maiden setup
 //   start/                getting started: installing a first script, choosing well-known ones
+//   forks/                forks people keep working on (data from enrich.mjs)
 //   catalog.json          maiden-compatible catalog (norns scripts only)
 //   index.json            the whole catalog as plain JSON, for other tools
 import fs from "node:fs";
@@ -33,8 +34,13 @@ const submitUrl = `https://github.com/${cfg.repo}/issues/new?template=submit.yml
 const cache = readJSON(path.join(ROOT, ".cache", "github.json"), {});
 // likes = 👍/❤️/🎉/🚀 reactions on each script's giscus discussion, keyed by page path (written by enrich.mjs)
 const discussions = readJSON(path.join(ROOT, ".cache", "discussions.json"), {});
+// forks someone pushed to, with commits ahead/behind upstream (written by enrich.mjs)
+const forksCache = readJSON(path.join(ROOT, ".cache", "forks.json"), {});
 const buildDate = new Date().toISOString();
 const NEW_DAYS = 30; // cards get a "new" badge for this long after `added`
+// an active fork has its own work on its default branch and was pushed to recently
+const FORK_MIN_AHEAD = 2;
+const FORK_ACTIVE_DAYS = 365;
 
 const esc = (s) =>
   String(s ?? "").replace(
@@ -168,6 +174,27 @@ const AI_LABEL = {
   ],
 };
 
+/** Forks worth a look, most recently pushed first; `newer` = pushed after upstream's last push. */
+function activeForks(slug, info) {
+  return (forksCache[slug]?.forks || [])
+    .filter(
+      (f) =>
+        f.ahead >= FORK_MIN_AHEAD &&
+        Date.parse(buildDate) - Date.parse(f.pushedAt) <
+          FORK_ACTIVE_DAYS * 864e5,
+    )
+    .map((f) => ({
+      slug: f.slug,
+      branch: f.branch,
+      ahead: f.ahead,
+      behind: f.behind,
+      stars: f.stars,
+      pushed: f.pushedAt.slice(0, 10),
+      newer: !!info.pushedAt && f.pushedAt > info.pushedAt,
+    }))
+    .sort((a, b) => b.pushed.localeCompare(a.pushed));
+}
+
 // ---------- collect ----------
 const records = [];
 for (const e of loadEntries()) {
@@ -201,6 +228,8 @@ for (const e of loadEntries()) {
     license: d.license || gh.license || null,
     cover: d.cover || gh.cover || null,
     stars: gh.stars ?? null,
+    forks: gh.forks ?? null,
+    activeForks: activeForks(ghSlug, gh),
     likes: discussions[`${ENTRIES_DIR}/${e.slug}/`]?.likes ?? 0,
     updated: gh.pushedAt ? gh.pushedAt.slice(0, 10) : null,
     // set by the weekly health check; the enrich cache catches archives between two checks
@@ -263,6 +292,7 @@ ${
     <a href="${href("start/")}">start here</a>
     <a href="${href("new/")}">new</a>
     <a href="${href("updated/")}">updated</a>
+    <a href="${href("forks/")}">forks</a>
     <a href="${href("?kind=mod")}">mods</a>
     <a href="${href("about/")}">about</a>
     ${cfg.forum ? `<a href="${esc(cfg.forum)}">forum</a>` : ""}
@@ -299,11 +329,29 @@ const likesStat = (r) =>
     ? `<span class="stat likes" title="Likes on ${esc(cfg.title)}: reactions in the script's discussion">♥ ${r.likes}</span>`
     : "";
 
+const forksStat = (r) =>
+  r.activeForks.length
+    ? `<span class="stat forks" title="Active forks: ${FORK_MIN_AHEAD}+ commits of their own, pushed in the last year">⑂ ${r.activeForks.length}</span>`
+    : "";
+
+/** A fork list with ahead/behind counts and a link to its diff against upstream. */
+function forkList(r) {
+  const up = githubSlug(r.repo);
+  return `<ul class="fork-list">${r.activeForks
+    .map((f) => {
+      const [owner, name] = f.slug.split("/");
+      const diff = `https://github.com/${up}/compare/${encodeURIComponent(cache[up]?.defaultBranch || "HEAD")}...${owner}:${name}:${encodeURIComponent(f.branch)}`;
+      return `<li><a href="https://github.com/${esc(f.slug)}">${esc(f.slug)}</a>
+  <span class="fork-stats"><a href="${esc(diff)}" title="Commits ahead of / behind upstream: see the diff">+${f.ahead} −${f.behind}</a>${f.stars ? ` <span title="GitHub stars">★ ${f.stars}</span>` : ""} <time datetime="${esc(f.pushed)}" title="Last push">${esc(f.pushed)}</time>${f.newer ? ` <span class="badge new" title="Pushed more recently than upstream">newer</span>` : ""}</span></li>`;
+    })
+    .join("")}</ul>`;
+}
+
 function card(r) {
   const search = [r.name, r.author, r.description, ...r.tags, ...r.requires]
     .join(" ")
     .toLowerCase();
-  return `<li class="card" data-platform="${esc(r.platform)}" data-kind="${esc(r.kind)}" data-ai="${esc(r.ai)}" data-tags="${esc(r.tags.join(" "))}" data-requires="${esc(r.requires.join(" "))}" data-name="${esc(r.name)}" data-stars="${r.stars ?? 0}" data-likes="${r.likes}" data-updated="${esc(r.updated || "")}" data-added="${esc(r.added || "")}" data-search="${esc(search)}">
+  return `<li class="card" data-platform="${esc(r.platform)}" data-kind="${esc(r.kind)}" data-ai="${esc(r.ai)}" data-tags="${esc(r.tags.join(" "))}" data-requires="${esc(r.requires.join(" "))}" data-name="${esc(r.name)}" data-stars="${r.stars ?? 0}" data-likes="${r.likes}" data-forks="${r.activeForks.length}" data-updated="${esc(r.updated || "")}" data-added="${esc(r.added || "")}" data-search="${esc(search)}">
   <a class="card-link" href="${href(r.path)}">
     <span class="card-title">${esc(r.name)}${statusIcon(r)}${isNew(r) ? ` <span class="badge new" title="Added ${esc(r.added)}">new</span>` : ""}</span>
     <span class="card-author">by ${esc(r.author)}</span>
@@ -314,6 +362,7 @@ function card(r) {
     ${r.requires.map((q) => `<span class="badge req">${esc(q)}</span>`).join("")}
     ${likesStat(r)}
     ${r.stars != null ? `<span class="stat" title="GitHub stars">★ ${r.stars}</span>` : ""}
+    ${forksStat(r)}
     ${r.updated ? `<span class="stat" title="Last push">${esc(r.updated)}</span>` : ""}
   </div>
   <div class="card-tags">${r.tags
@@ -353,15 +402,33 @@ function chipGroup(name, label, counts, min = 1, text = (v) => v) {
 }
 
 // ---------- write ----------
-fs.rmSync(DIST, { recursive: true, force: true });
-fs.cpSync(path.join(ROOT, "src", "assets"), path.join(DIST, "assets"), {
-  recursive: true,
-});
+// dist/ is updated in place: files whose content didn't change aren't rewritten, and files this build no longer
+// produces are removed at the end. On Windows, rewriting ~600 directories (and having them scanned) is most of
+// the build time; rendering itself takes about a second.
+const written = new Set();
+const madeDirs = new Set();
 const write = (rel, content) => {
   const f = path.join(DIST, rel);
-  fs.mkdirSync(path.dirname(f), { recursive: true });
-  fs.writeFileSync(f, content);
+  written.add(f);
+  const buf = Buffer.isBuffer(content) ? content : Buffer.from(content);
+  try {
+    if (fs.readFileSync(f).equals(buf)) return;
+  } catch {
+    /* new file */
+  }
+  const dir = path.dirname(f);
+  if (!madeDirs.has(dir)) fs.mkdirSync(dir, { recursive: true });
+  madeDirs.add(dir);
+  fs.writeFileSync(f, buf);
 };
+const copyDir = (from, to) => {
+  for (const d of fs.readdirSync(from, { withFileTypes: true })) {
+    const rel = path.join(to, d.name);
+    if (d.isDirectory()) copyDir(path.join(from, d.name), rel);
+    else write(rel, fs.readFileSync(path.join(from, d.name)));
+  }
+};
+copyDir(path.join(ROOT, "src", "assets"), "assets");
 
 // index
 const aiCounts = new Map(
@@ -414,6 +481,7 @@ write(
       <option value="added">recently added</option>
       <option value="likes">most liked</option>
       <option value="stars">most GitHub stars</option>
+      <option value="forks">most active forks</option>
     </select>
   </div>
   <div class="filter-row">
@@ -487,6 +555,10 @@ for (const r of records) {
     ["repository", `<a href="${esc(r.repo)}">${esc(ghSlug || r.repo)}</a>`],
     r.license && ["license", esc(r.license)],
     r.stars != null && ["stars", `★ ${r.stars}`],
+    r.forks && [
+      "forks",
+      `<a href="https://github.com/${esc(ghSlug)}/forks?sort_by=last_updated">${r.forks}</a>${r.activeForks.length ? ` (<a href="${href(`forks/#${encodeURIComponent(r.slug)}`)}">${r.activeForks.length} active</a>)` : ""} · <a href="https://github.com/${esc(ghSlug)}/network">network</a>`,
+    ],
     r.updated && ["last push", esc(r.updated)],
     r.docs && ["docs", `<a href="${esc(r.docs)}">documentation</a>`],
     r.discussion && [
@@ -537,6 +609,7 @@ for (const r of records) {
     <aside class="entry-side">
       <dl>${meta.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>
       <div class="card-tags">${r.tags.map(tagLink).join("")}</div>
+      ${r.activeForks.length ? `<section class="forks"><h2>active forks</h2>${forkList(r)}</section>` : ""}
       ${r.source === "imported" ? `<p class="claim">Is this your script? <a href="${claimUrl}">Claim it</a> to disclose AI use and fix its details. It's a short form, no git needed.</p>` : ""}
       <p class="edit"><a href="${editUrl}">suggest an edit</a></p>
       ${badge}
@@ -549,7 +622,7 @@ for (const r of records) {
   // copy images that live next to the entry (screenshots referenced from the notes)
   for (const f of fs.readdirSync(r.dir)) {
     if (/\.(png|gif|jpe?g|webp)$/i.test(f))
-      fs.copyFileSync(path.join(r.dir, f), path.join(DIST, r.path, f));
+      write(path.join(r.path, f), fs.readFileSync(path.join(r.dir, f)));
   }
 }
 
@@ -624,6 +697,42 @@ ${entries.join("\n")}
 `,
   );
 }
+
+// active forks across the catalog
+const forked = records
+  .filter((r) => r.activeForks.length)
+  .sort(
+    (a, b) =>
+      b.activeForks[0].pushed.localeCompare(a.activeForks[0].pushed) ||
+      a.name.localeCompare(b.name),
+  );
+write(
+  "forks/index.html",
+  layout({
+    title: "active forks",
+    description: "Forks of catalog scripts that people keep working on.",
+    canonical: "forks/",
+    body: `
+<section class="hero">
+  <h1>active forks</h1>
+  <p>Forks of catalog scripts with work of their own: at least ${FORK_MIN_AHEAD} commits ahead of upstream on their main branch, pushed in the last year. <strong>newer</strong> marks forks pushed after the original. Forks aren't reviewed for the catalog; read the diff before installing one (<code>;install</code> works with a fork's URL too). Counts refresh weekly.</p>
+</section>
+${
+  forked.length
+    ? `<div class="fork-groups">${forked
+        .map(
+          (r) => `<section class="fork-group" id="${esc(r.slug)}">
+  <h2><a href="${href(r.path)}">${esc(r.name)}</a> <span class="fresh-by">by ${esc(r.author)}</span></h2>
+  <p class="hint">upstream last push ${esc(r.updated || "unknown")} · <a href="https://github.com/${esc(githubSlug(r.repo))}/network">network graph</a> · <a href="https://github.com/${esc(githubSlug(r.repo))}/forks?sort_by=last_updated">all ${r.forks} forks</a></p>
+  ${forkList(r)}
+</section>`,
+        )
+        .join("\n")}</div>`
+    : `<p class="empty">No fork data yet (it comes from GitHub during the deploy).</p>`
+}
+`,
+  }),
+);
 
 // about, getting started
 const pageMd = (file) =>
@@ -711,11 +820,23 @@ write(
 if (siteUrl) {
   write(
     "sitemap.xml",
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${["", "start/", "about/", "new/", "updated/", ...records.map((r) => r.path)].map((p) => `  <url><loc>${esc(`${siteUrl}/${p}`)}</loc></url>`).join("\n")}\n</urlset>\n`,
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${["", "start/", "about/", "new/", "updated/", "forks/", ...records.map((r) => r.path)].map((p) => `  <url><loc>${esc(`${siteUrl}/${p}`)}</loc></url>`).join("\n")}\n</urlset>\n`,
   );
 }
 write(".nojekyll", "");
 if (cfg.cname) write("CNAME", cfg.cname + "\n");
+
+// remove what this build didn't produce (deleted or renamed entries), then empty directories
+const prune = (dir) => {
+  for (const d of fs.readdirSync(dir, { withFileTypes: true })) {
+    const f = path.join(dir, d.name);
+    if (d.isDirectory()) {
+      prune(f);
+      if (!fs.readdirSync(f).length) fs.rmdirSync(f);
+    } else if (!written.has(f)) fs.rmSync(f);
+  }
+};
+prune(DIST);
 
 console.log(
   `✓ built ${records.length} entries into dist/ (${catalog.entries.length} in the maiden catalog)`,
