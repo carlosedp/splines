@@ -5,7 +5,7 @@
 //   node tools/enrich.mjs [--only name1,name2]
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT, loadConfig, loadEntries, githubSlug, gh, readJSON, readmeFile } from './lib.mjs';
+import { ROOT, ENTRIES_DIR, loadConfig, loadEntries, githubSlug, gh, readJSON, readmeFile } from './lib.mjs';
 
 const args = process.argv.slice(2);
 const only = args.includes('--only') ? new Set(args[args.indexOf('--only') + 1].split(',')) : null;
@@ -90,8 +90,8 @@ fs.writeFileSync(cacheFile, JSON.stringify(cache, null, 2));
 console.log(`✓ enriched ${fetched} repos, ${readmes} READMEs (${Object.keys(cache).length} cached).`);
 
 // Forks: for each repo with forks, the forks someone pushed to after forking, with how many commits they are
-// ahead of / behind upstream (compare API). Stored raw in .cache/forks.json; build.mjs decides which count as
-// active. Fork lists refresh weekly; a compare only reruns when the fork or upstream got new pushes.
+// ahead of / behind upstream (compare API). Stored raw in .cache/forks.json; tools/site/context.mjs sets what
+// counts as active. Fork lists refresh weekly; a compare only reruns when the fork or upstream got new pushes.
 // Stops while some API budget is left, so a big first run spreads over a few days instead of starving the rest.
 const forksFile = path.join(ROOT, '.cache', 'forks.json');
 const forksCache = readJSON(forksFile, {});
@@ -145,47 +145,64 @@ forks: for (const slug of seen) {
 fs.writeFileSync(forksFile, JSON.stringify(forksCache, null, 2));
 console.log(`✓ forks: ${forkLists} fork lists, ${compares} compares (${Object.keys(forksCache).length} repos cached).`);
 
-// Likes: positive reactions on each script's giscus discussion. giscus (mapping "pathname") titles each
-// discussion with the page path without the leading slash, e.g. "scripts/NEVE/", which is also our record path.
-// GraphQL needs a token; without one the previous cache is kept.
-const giscus = loadConfig().giscus || {};
-const LIKES = ['THUMBS_UP', 'HEART', 'HOORAY', 'ROCKET'];
-if (process.env.GITHUB_TOKEN && giscus.repo && giscus.categoryId) {
-  const [owner, name] = giscus.repo.split('/');
-  const likes = {};
-  let after = null;
-  let ok = true;
-  do {
-    const res = await fetch('https://api.github.com/graphql', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN}`, 'User-Agent': 'norns-catalog', 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: `query($owner: String!, $name: String!, $cat: ID!, $after: String) {
-          repository(owner: $owner, name: $name) {
-            discussions(first: 100, after: $after, categoryId: $cat) {
-              pageInfo { hasNextPage endCursor }
-              nodes { title comments { totalCount } reactionGroups { content reactors { totalCount } } }
-            }
-          }
-        }`,
-        variables: { owner, name, cat: giscus.categoryId, after },
-      }),
+// Likes and comments from each script page's thread on the Discourse forum (embedded comments). Discourse
+// creates a topic the first time a page's comments load, keyed by the page URL. embed/count (public, batched)
+// tells which pages have a topic; embed/info maps a page to its topic id once (needs DISCOURSE_API_KEY);
+// /t/<id>.json (public) has the likes. Without a key, pages already mapped keep updating; new ones wait.
+const discourse = loadConfig().discourse;
+const siteUrl = (loadConfig().siteUrl || '').replace(/\/+$/, '');
+if (discourse?.url && siteUrl) {
+  const forum = discourse.url.replace(/\/+$/, '');
+  const topicsFile = path.join(ROOT, '.cache', 'discourse-topics.json');
+  const topics = readJSON(topicsFile, {}); // page path -> topic id
+  const prevCounts = readJSON(path.join(ROOT, '.cache', 'discussions.json'), {});
+  // Discourse's TopicEmbed.normalize_url
+  const embedUrl = (p) => `${siteUrl}/${p}`.toLowerCase().replace(/\/$/, '').replace(/-+/, '-').trim();
+  const dc = (pathname, key) =>
+    fetch(`${forum}${pathname}`, {
+      headers: { Accept: 'application/json', 'User-Agent': 'splines-catalog', ...(key ? { 'Api-Key': key, 'Api-Username': process.env.DISCOURSE_API_USERNAME || 'system' } : {}) },
     });
-    const j = res.ok ? await res.json() : null;
-    const page = j?.data?.repository?.discussions;
-    if (!page) {
-      console.warn(`! could not read discussions (${res.status}${j?.errors ? `: ${j.errors[0].message}` : ''}); keeping cached likes.`);
+
+  const pages = loadEntries().map((e) => `${ENTRIES_DIR}/${e.slug}/`);
+  const withTopic = new Set();
+  let ok = true;
+  for (let i = 0; i < pages.length && ok; i += 40) {
+    const batch = pages.slice(i, i + 40);
+    const res = await dc(`/embed/count?${batch.map((p) => `embed_url[]=${encodeURIComponent(embedUrl(p))}`).join('&')}`);
+    if (!res.ok) {
+      console.warn(`! discourse embed/count: ${res.status}; keeping cached likes.`);
       ok = false;
       break;
     }
-    for (const d of page.nodes) {
-      const n = d.reactionGroups.filter((g) => LIKES.includes(g.content)).reduce((s, g) => s + g.reactors.totalCount, 0);
-      likes[d.title.replace(/^\/+/, '')] = { likes: n, comments: d.comments.totalCount };
+    const { counts } = await res.json();
+    const found = new Set(Object.keys(counts).map((u) => u.replace(/#discourse-comments$/, '')));
+    for (const p of batch) if (found.has(embedUrl(p))) withTopic.add(p);
+  }
+
+  const key = process.env.DISCOURSE_API_KEY;
+  if (ok && !key && [...withTopic].some((p) => !topics[p])) console.warn('! DISCOURSE_API_KEY not set: new forum topics are not mapped yet.');
+  const counts = {};
+  for (const p of ok ? withTopic : []) {
+    if (!topics[p] && key) {
+      const res = await dc(`/embed/info?embed_url=${encodeURIComponent(embedUrl(p))}`, key);
+      if (res.ok) topics[p] = (await res.json()).topic_id;
     }
-    after = page.pageInfo.hasNextPage ? page.pageInfo.endCursor : null;
-  } while (after);
+    if (!topics[p]) continue;
+    const res = await dc(`/t/${topics[p]}.json`);
+    if (res.status === 429) {
+      console.warn('! discourse rate limit; keeping cached counts for the rest.');
+      break;
+    }
+    if (!res.ok) continue;
+    const t = await res.json();
+    // likes on the topic's first post (the companion post for the page), like reacting to the script itself
+    const first = t.post_stream?.posts?.[0];
+    const likes = first?.like_count ?? first?.actions_summary?.find((a) => a.id === 2)?.count ?? 0;
+    counts[p] = { likes, comments: Math.max(0, (t.posts_count || 1) - 1), topic: `${forum}/t/${t.slug}/${t.id}` };
+  }
   if (ok) {
-    fs.writeFileSync(path.join(ROOT, '.cache', 'discussions.json'), JSON.stringify(likes, null, 2));
-    console.log(`✓ likes from ${Object.keys(likes).length} discussions.`);
+    fs.writeFileSync(topicsFile, JSON.stringify(topics, null, 2));
+    fs.writeFileSync(path.join(ROOT, '.cache', 'discussions.json'), JSON.stringify({ ...prevCounts, ...counts }, null, 2));
+    console.log(`✓ forum: ${withTopic.size} pages with a topic, ${Object.keys(counts).length} counted.`);
   }
 }

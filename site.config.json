@@ -9,11 +9,9 @@
   "branch": "main",
   "catalogName": "splines",
   "forum": "https://talk.splines.cc",
-  "giscus": {
-    "repo": "carlosedp/splines",
-    "repoId": "R_kgDOVSowcQ",
-    "category": "Scripts",
-    "categoryId": "DIC_kwDOVSowcc4DJR3U"
+  "discourse": {
+    "url": "https://talk.splines.cc",
+    "comments": true
   },
   "import": {
     "communityCatalogs": [

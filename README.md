@@ -8,7 +8,7 @@ A community catalog of scripts for monome norns, grid, iii, crow and teletype, p
 - **Maiden-compatible catalog**: `catalog.json` uses the same shape as monome's `community.json`.
 - **Importer**: proposes new scripts weekly from the official community catalog, awesome lists, GitHub topics and a GitHub keyword search (recent Lua repos mentioning norns).
 - **Health check**: weekly, opens a PR that follows moved repos and marks deleted or archived ones with a ⚠️ on the site.
-- **Optional discussions per script** with [giscus](https://giscus.app), backed by GitHub Discussions, so there's no database.
+- **Discussion per script** embedded from the [Discourse forum](https://talk.splines.cc); likes on a thread show as ♥ on the catalog.
 
 No framework: one Node build script and two dependencies (`yaml`, `marked`).
 
@@ -39,7 +39,7 @@ tools/
   health.mjs              follow moved repos, flag deleted/archived ones
   build.mjs               HTML pages, catalog.json, index.json, sitemap (pages in tools/site/)
   serve.mjs               local preview server
-site.config.json          title, URLs, giscus, import sources
+site.config.json          title, URLs, forum/discourse, import sources
 ```
 
 ## Entry format
@@ -73,13 +73,16 @@ Optional short "catalog notes", shown above the repo's README on the script page
 6. `claude.yml` (optional) lets maintainers write `@claude add https://github.com/owner/repo to the catalog` in an issue or comment; Claude Code follows `.claude/skills/add-script/SKILL.md` and opens a PR, and `@claude` comments on that PR revise it. Setup: install the [Claude GitHub app](https://github.com/apps/claude) on the repo, run `claude setup-token` and save the token as the `CLAUDE_CODE_OAUTH_TOKEN` secret. Only users with write access can trigger it. The same skill works in a local session or on claude.ai/code ("add <url> to the catalog").
 7. Allow Actions to create PRs: **Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests**.
 
-### Discussions (optional)
+### Discussions (Discourse)
 
-1. Enable Discussions on the repo and create a category, e.g. "Scripts" (Announcement type keeps new threads tidy).
-2. Install the [giscus app](https://github.com/apps/giscus) on the repo.
-3. Get `repoId` and `categoryId` from giscus.app and fill in `giscus` in `site.config.json`.
+Script pages embed their thread from the forum set in `site.config.json → discourse` (`comments: true` turns the embed on). On the Discourse side (Admin → Customize → Embedding):
 
-Threads are created on first comment and mapped to each page's path.
+1. Add an embeddable host `splines.cc` with the category the threads should go to.
+2. Set **Username for topic creation** (e.g. a `splines` bot user).
+3. Turn on **Embed unlisted** so topics stay out of the category until someone replies, and set **CSS selector for elements that are allowed in embeds** to `.entry-head` so a thread's first post is the script's name and description.
+4. For likes: create a read-only API key (single user, scope `embed`/global read) and add it as the `DISCOURSE_API_KEY` repo secret. `enrich` uses it once per topic to find which topic belongs to which page.
+
+A topic is created the first time someone scrolls to a page's comments, and later visits reuse it (matched by page URL). Likes on its first post count as ♥.
 
 ## TODO / to verify
 

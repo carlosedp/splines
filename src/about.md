@@ -82,6 +82,6 @@ Another weekly job checks that every listed repository still exists: moved repos
 
 ## discussions
 
-Script pages can have a discussion thread backed by GitHub Discussions, so no extra account or database is needed beyond GitHub.
+Each script page shows its thread from the [{{title}} forum]({{forum}}), created the first time someone opens the comments. Replying needs a forum account; liking the thread's first post gives the script a ♥ in the catalog.
 
 For everything else (questions about the catalog, script ideas, work in progress, feedback on the site), there's the [{{title}} forum]({{forum}}). Script-specific talk usually belongs in the script's own lines thread or repo; the forum is for the catalog and the people around it.

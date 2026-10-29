@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  discussions: read # likes come from reactions on giscus discussions
   pages: write
   id-token: write
 
@@ -36,6 +35,8 @@ jobs:
       - name: Enrich with GitHub metadata
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # read-only key for the forum: maps script pages to their topics (likes still update without it)
+          DISCOURSE_API_KEY: ${{ secrets.DISCOURSE_API_KEY }}
         run: npm run enrich
       - run: npm run validate
       - run: npm run build

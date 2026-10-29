@@ -17,7 +17,7 @@ export const newBadge = (r) => isNew(r) && html` <span class="badge new" title="
 
 export const likesStat = (r) =>
   r.likes > 0 &&
-  html`<span class="stat likes" title="Likes on ${cfg.title}: reactions in the script's discussion">♥ ${r.likes}</span>`;
+  html`<span class="stat likes" title="Likes on ${cfg.title}: likes on the script's forum thread">♥ ${r.likes}</span>`;
 
 const forksStat = (r) =>
   r.activeForks.length > 0 &&
