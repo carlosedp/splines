@@ -195,3 +195,9 @@ code, .cmd { font-family: var(--mono); font-size: .9em; }
 .fork-group h2 { font-size: 17px; margin: 0; display: flex; gap: 8px; align-items: baseline; }
 .fork-group .hint { margin: 2px 0 10px; font-size: 13px; }
 .fork-group:target { border-color: var(--accent); }
+.commit-list { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 4px; font-size: 14px; }
+.commit-list li { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
+.commit-list code { font-size: 12px; }
+.commit-msg { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.commit-list time { color: var(--muted); font: 12px var(--mono); white-space: nowrap; }
+.fork-page h1 { overflow-wrap: anywhere; }

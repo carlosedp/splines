@@ -3,6 +3,7 @@
 //   scripts/<slug>/       one page per script
 //   new/, updated/        latest additions and upstream pushes, plus Atom feeds
 //   forks/                forks people keep working on (data from enrich.mjs)
+//   scripts/<slug>/forks/<owner>/<repo>/  a page per active fork: what changed, install line, its README
 //   about/, start/        submission guide and getting started, from Markdown in src/
 //   admin/                every entry, published or not, for maintainers (data loaded from GitHub with their token)
 //   catalog.json          maiden-compatible catalog (norns scripts only)
@@ -19,6 +20,7 @@ import home from "./site/pages/home.mjs";
 import entries from "./site/pages/entry.mjs";
 import lists from "./site/pages/lists.mjs";
 import forks from "./site/pages/forks.mjs";
+import forkPages from "./site/pages/fork.mjs";
 import prose from "./site/pages/prose.mjs";
 import data from "./site/pages/data.mjs";
 import admin from "./site/pages/admin.mjs";
@@ -33,6 +35,7 @@ home(records, write);
 entries(records, write);
 lists(records, write);
 forks(records, write);
+forkPages(records, write);
 prose(records, write);
 admin(records, write);
 const inCatalog = data(records, write);

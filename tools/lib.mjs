@@ -54,6 +54,12 @@ export const KNOWN_REQUIRES = ['grid', 'arc', 'crow', 'midi', 'audio-in', 'keybo
 // Case is kept (the norns install folder is case-sensitive); uniqueness is checked ignoring case.
 // what the importer writes when a source has no description; the build shows the repo's description instead
 export const PLACEHOLDER_DESCRIPTION = 'no description yet';
+// An active fork has work of its own on its default branch and was pushed to recently. Active forks show on
+// cards, /forks/ and get their own page; enrich.mjs fetches their README and commits.
+export const FORK_MIN_AHEAD = 2;
+export const FORK_ACTIVE_DAYS = 365;
+export const isActiveFork = (f, now = Date.now()) =>
+  f.ahead >= FORK_MIN_AHEAD && now - Date.parse(f.pushedAt) < FORK_ACTIVE_DAYS * 864e5;
 export const SLUG_RE = /^[A-Za-z0-9_][A-Za-z0-9_.-]*$/;
 export const TAG_RE = /^[a-z0-9][a-z0-9-]*$/;
 
