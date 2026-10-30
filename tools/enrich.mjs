@@ -5,7 +5,7 @@
 //   node tools/enrich.mjs [--only name1,name2]
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT, ENTRIES_DIR, loadConfig, loadEntries, githubSlug, gh, readJSON, readmeFile } from './lib.mjs';
+import { ROOT, ENTRIES_DIR, loadConfig, loadEntries, githubSlug, gh, readJSON, readmeFile, isActiveFork } from './lib.mjs';
 
 const args = process.argv.slice(2);
 const only = args.includes('--only') ? new Set(args[args.indexOf('--only') + 1].split(',')) : null;
@@ -90,7 +90,7 @@ fs.writeFileSync(cacheFile, JSON.stringify(cache, null, 2));
 console.log(`✓ enriched ${fetched} repos, ${readmes} READMEs (${Object.keys(cache).length} cached).`);
 
 // Forks: for each repo with forks, the forks someone pushed to after forking, with how many commits they are
-// ahead of / behind upstream (compare API). Stored raw in .cache/forks.json; tools/site/context.mjs sets what
+// ahead of / behind upstream (compare API). Stored raw in .cache/forks.json; isActiveFork() in lib.mjs sets what
 // counts as active. Fork lists refresh weekly; a compare only reruns when the fork or upstream got new pushes.
 // Stops while some API budget is left, so a big first run spreads over a few days instead of starving the rest.
 const forksFile = path.join(ROOT, '.cache', 'forks.json');
@@ -125,7 +125,7 @@ forks: for (const slug of seen) {
     const old = known.get(f.full_name);
     const rec = { slug: f.full_name, branch: f.default_branch, pushedAt: f.pushed_at, stars: f.stargazers_count, upstreamPushedAt: info.pushedAt };
     if (old && old.pushedAt === f.pushed_at && old.upstreamPushedAt === info.pushedAt) {
-      out.push({ ...rec, ahead: old.ahead, behind: old.behind });
+      out.push({ ...rec, ahead: old.ahead, behind: old.behind, details: old.details });
       continue;
     }
     const base = encodeURIComponent(info.defaultBranch || 'HEAD');
@@ -133,7 +133,7 @@ forks: for (const slug of seen) {
     compares++;
     if (res.ok) {
       const c = await res.json();
-      out.push({ ...rec, ahead: c.ahead_by, behind: c.behind_by });
+      out.push({ ...rec, ahead: c.ahead_by, behind: c.behind_by, details: old?.details });
     } else if (old) out.push(old); // keep what we knew
     if (lowOnBudget(res)) {
       // save what this repo got so far; it's retried in full next run since fetchedAt isn't advanced
@@ -143,8 +143,51 @@ forks: for (const slug of seen) {
   }
   forksCache[slug] = { fetchedAt: now, total: info.forks, forks: out };
 }
+
+// Fork pages: for active forks only, the description, README and the fork's own latest commits. Refetched when
+// the fork or upstream gets new pushes (`details.for`).
+let forkDetails = 0;
+details: for (const [upstream, entry] of Object.entries(forksCache)) {
+  const info = cache[upstream];
+  if (!info) continue;
+  for (const f of entry.forks) {
+    const key = `${f.pushedAt} ${f.upstreamPushedAt}`;
+    if (!isActiveFork(f, now) || f.details?.for === key) continue;
+    const repo = await gh(`/repos/${f.slug}`);
+    if (lowOnBudget(repo)) break details;
+    if (!repo.ok) continue;
+    const r = await repo.json();
+    const d = {
+      for: key,
+      description: r.description || null,
+      license: r.license?.spdx_id && r.license.spdx_id !== 'NOASSERTION' ? r.license.spdx_id : null,
+    };
+    // the compare lists commits oldest first, 100 per page: the fork's latest ones are on the last page
+    const [owner, name] = f.slug.split('/');
+    const page = Math.max(1, Math.ceil(f.ahead / 100));
+    const base = encodeURIComponent(info.defaultBranch || 'HEAD');
+    const cmp = await gh(`/repos/${upstream}/compare/${base}...${owner}:${name}:${encodeURIComponent(f.branch)}?per_page=100&page=${page}`);
+    if (cmp.ok) {
+      d.commits = (await cmp.json()).commits
+        .slice(-10)
+        .reverse()
+        .map((c) => ({ sha: c.sha, message: c.commit.message.split('\n')[0].slice(0, 200), date: (c.commit.author?.date || '').slice(0, 10) }));
+    }
+    const readme = await gh(`/repos/${f.slug}/readme`);
+    const file = readmeFile(f.slug);
+    if (readme.ok) {
+      const j = await readme.json();
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, Buffer.from(j.content, 'base64').toString('utf8'));
+      d.readmePath = j.path;
+    }
+    f.details = d;
+    forkDetails++;
+    if (lowOnBudget(cmp) || lowOnBudget(readme)) break details;
+  }
+}
 fs.writeFileSync(forksFile, JSON.stringify(forksCache, null, 2));
-console.log(`✓ forks: ${forkLists} fork lists, ${compares} compares (${Object.keys(forksCache).length} repos cached).`);
+console.log(`✓ forks: ${forkLists} fork lists, ${compares} compares, ${forkDetails} fork pages refreshed (${Object.keys(forksCache).length} repos cached).`);
 
 // Likes and comments from each script page's thread on the Discourse forum (embedded comments). Discourse
 // creates a topic the first time a page's comments load, keyed by the page URL. embed/count (public, batched)

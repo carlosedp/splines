@@ -20,9 +20,7 @@ export const discussions = readJSON(path.join(ROOT, ".cache", "discussions.json"
 export const forksCache = readJSON(path.join(ROOT, ".cache", "forks.json"), {});
 
 export const NEW_DAYS = 30; // cards get a "new" badge for this long after `added`
-// an active fork has its own work on its default branch and was pushed to recently
-export const FORK_MIN_AHEAD = 2;
-export const FORK_ACTIVE_DAYS = 365;
+export { FORK_MIN_AHEAD, FORK_ACTIVE_DAYS } from "../lib.mjs";
 export const FEED_SIZE = 50;
 
 export const AI_LABEL = {
