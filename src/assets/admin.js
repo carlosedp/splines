@@ -28,13 +28,16 @@
     set: (m) => { try { sessionStorage.setItem(MEMO, JSON.stringify({ ...m, at: Date.now() })); } catch (e) { /* storage unavailable */ } },
   };
 
+  // the token can't be used for the admin view (any other error, like a network one, keeps it)
+  class AccessError extends Error {}
+
   async function graphql(token, query, variables, { partial = false } = {}) {
     const res = await fetch('https://api.github.com/graphql', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ query, variables }),
     });
-    if (res.status === 401) throw new Error('GitHub rejected the token');
+    if (res.status === 401) throw new AccessError('GitHub rejected the token (expired or revoked?)');
     const json = await res.json();
     // partial: a missing repo is an error for its alias only; keep the rest
     if (json.errors && !(partial && json.data)) throw new Error(json.errors[0].message);
@@ -45,7 +48,7 @@
   async function check(token, owner, name) {
     const who = await graphql(token, 'query($o:String!,$n:String!){viewer{login} repository(owner:$o,name:$n){viewerPermission}}', { o: owner, n: name });
     if (!['ADMIN', 'MAINTAIN', 'WRITE'].includes(who.repository?.viewerPermission)) {
-      throw new Error(`${who.viewer.login} doesn't have write access to ${owner}/${name}`);
+      throw new AccessError(`${who.viewer.login} doesn't have write access to ${owner}/${name}`);
     }
     return who.viewer.login;
   }
@@ -170,9 +173,23 @@
       chips.querySelectorAll('.chip').forEach((c) => {
         c.querySelector('.count').textContent = list.querySelectorAll(`.card[data-listing="${c.dataset.value}"]`).length;
       });
-      note.textContent = ` · admin (${login}): ${hidden.length} unpublished entries included`;
+      // "admin (login)" links to the sign-in page; "sign out" works right here
+      const who = el('a', null, login);
+      who.href = list.dataset.admin;
+      who.title = 'Admin sign-in page';
+      const out = el('button', 'link-button', 'sign out');
+      out.type = 'button';
+      out.addEventListener('click', () => {
+        store.set(null);
+        location.reload();
+      });
+      note.replaceChildren(' · admin (', who, `): ${hidden.length} unpublished entries included · `, out);
     } catch (err) {
-      note.textContent = ` · admin: ${err.message}`;
+      // an expired or revoked token, or lost write access: forget it, so the next page is the public view again
+      if (err instanceof AccessError) store.set(null);
+      const again = el('a', null, 'sign in again');
+      again.href = list.dataset.admin;
+      note.replaceChildren(` · admin: ${err.message}. `, ...(err instanceof AccessError ? [again] : []));
     }
   }
 

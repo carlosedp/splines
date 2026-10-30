@@ -81,7 +81,11 @@ Optional short "catalog notes", shown above the repo's README on the script page
 
 ### Admin view
 
-Sign in at `/admin/` with a GitHub token (a fine-grained token with public read access is enough). The page checks with GitHub that the user has write access to the repo. From then on, the catalog page in that browser also shows indexed and declined entries, with a dashed badge, their origin and invitation link, plus a **listing** filter (`?listing=indexed`). `admin.js` reads `scripts/*/index.md` from `main` through the GitHub API and builds those cards in the browser, so the deployed site itself never contains unpublished entries. Unpublished cards link to their repo, since they have no page. Admins are the repo's collaborators with write access; a repo secret can't work here, because a static page can't read secrets. The entry files are public in the repo anyway; the admin view only gathers them in one place.
+Sign in at `/admin/` with a GitHub token (a fine-grained token with public read access is enough). The page checks with GitHub that the user has write access to the repo. From then on, the catalog page in that browser also shows indexed and declined entries, with a dashed badge, their origin and invitation link, plus a **listing** filter (`?listing=indexed`). `admin.js` reads `scripts/*/index.md` from `main` through the GitHub API and builds those cards in the browser, so the deployed site itself never contains unpublished entries. Unpublished cards link to their repo, since they have no page.
+
+- **Signing out:** use the "sign out" button next to your login in the catalog's status line, or on `/admin/`.
+- **When the token expires or is revoked:** the next load gets a 401 from GitHub. The browser then forgets the token, the page shows "sign in again", and later pages are the public view. Results are cached for 10 minutes per tab, so an expired token can still show the cached view until then.
+- **Adding admins:** add them as collaborators with **Write** (or Maintain/Admin) access in Settings → Collaborators. Each admin signs in with their own token. Removing their access ends the admin view at their next load. Admins are the repo's collaborators with write access; a repo secret can't work here, because a static page can't read secrets. The entry files are public in the repo anyway; the admin view only gathers them in one place.
 
 ### Discussions (Discourse)
 

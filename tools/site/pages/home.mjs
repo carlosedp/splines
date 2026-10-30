@@ -73,7 +73,7 @@ export default function home(records, write) {
   </details>
   <p class="status"><span id="count">${records.length}</span> shown <button id="clear" type="button" class="link-button" hidden>clear filters</button></p>
 </section>
-<ul id="results" class="cards" data-repo="${cfg.repo}" data-branch="${cfg.branch}" data-ai-labels="${JSON.stringify(AI_LABEL)}">
+<ul id="results" class="cards" data-repo="${cfg.repo}" data-branch="${cfg.branch}" data-admin="${href("admin/")}" data-ai-labels="${JSON.stringify(AI_LABEL)}">
 ${join(records.map(card), "\n")}
 </ul>
 <p id="empty" class="empty" hidden>Nothing matches. Try fewer filters, or <a href="${submitUrl}">add the script you were looking for</a>.</p>
