@@ -11,5 +11,6 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/get-in-the-sea/45729
 ---

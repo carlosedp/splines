@@ -15,6 +15,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/thorns-a-fractal-sequencer/73644
 docs: https://github.com/mpelath/thorns/blob/main/README.md
 ---

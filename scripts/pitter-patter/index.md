@@ -16,6 +16,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/pitter-patter/68944
 docs: https://norns.community/pitter-patter
 ---

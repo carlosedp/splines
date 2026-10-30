@@ -1,0 +1,25 @@
+# Field labels are read by tools/from-issue.mjs: keep them in sync when renaming.
+# Invitations (tools/invite.mjs) link here with `script` filled in.
+name: Don't list my script
+description: Keep your script off splines, and stop us from asking again.
+title: "[optout] "
+labels: [optout]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        No problem. Your script won't be shown on splines (if it's there now, it comes off) and we won't ask you again.
+        We keep a one-line note that you said no, so our importer doesn't pick the repo up again. If you change your mind later, use the [claim form](https://github.com/carlosedp/splines/issues/new?template=claim.yml&title=%5Bclaim%5D%20).
+  - type: input
+    id: script
+    attributes:
+      label: Script
+      description: Its name in the catalog, or a link to its page.
+      placeholder: my-script
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything you'd like us to know
+      description: Optional, and only if you feel like it. For example "it's a test repo" or "not ready yet, ask me later".

@@ -12,6 +12,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/automs70/39686
 docs: https://norns.community/authors/pangrus/automs70
 ---

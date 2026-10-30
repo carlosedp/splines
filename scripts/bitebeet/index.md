@@ -12,6 +12,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/bitebeet/
 docs: https://norns.community/authors/midouest/bitebeet
 ---

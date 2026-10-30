@@ -3,10 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { ENTRIES_DIR, PLATFORMS, KINDS, STATUSES, githubSlug } from "../../lib.mjs";
 import { html, raw, join } from "../html.mjs";
-import { cfg, href, siteUrl, commentsReady, AI_LABEL } from "../context.mjs";
+import { cfg, href, siteUrl, cache, commentsReady, AI_LABEL } from "../context.mjs";
 import { markdown } from "../markdown.mjs";
 import { layout } from "../layout.mjs";
-import { aiBadge, statusIcon, newBadge, tagLink, reqBadge, likesStat, forkList } from "../components.mjs";
+import { aiBadge, statusIcon, newBadge, listingBadge, tagLink, reqBadge, likesStat, forkList } from "../components.mjs";
 
 function install(r) {
   if (r.kind === "library")
@@ -32,15 +32,24 @@ const discussion = (r) =>
 <div id="discourse-comments" data-forum="${cfg.discourse.url.replace(/\/*$/, "/")}" data-embed-url="${siteUrl}/${r.path}"></div>
 </section>`;
 
+// always shown: "no license" matters too (the author keeps all rights). "none found" only when GitHub was asked.
+function licenseText(r, ghSlug) {
+  if (r.license === "other") return html`<span title="The repository has a license file GitHub doesn't recognize: read it in the repo">other (see repo)</span>`;
+  if (r.license) return r.license;
+  if (ghSlug && cache[ghSlug]) return html`<span title="No license file in the repository: by default the author keeps all rights. Ask them before reusing the code.">none found</span>`;
+  return "unknown";
+}
+
 function sidebar(r, ghSlug) {
   const editUrl = `https://github.com/${cfg.repo}/edit/${cfg.branch}/${ENTRIES_DIR}/${r.slug}/index.md`;
   const claimUrl = `https://github.com/${cfg.repo}/issues/new?template=claim.yml&title=${encodeURIComponent(`[claim] ${r.slug}`)}&script=${encodeURIComponent(r.slug)}`;
+  const optoutUrl = `https://github.com/${cfg.repo}/issues/new?template=optout.yml&title=${encodeURIComponent(`[optout] ${r.slug}`)}&script=${encodeURIComponent(r.slug)}`;
   // a "listed on" badge for the script's README: links back here and tells readers where to find more
   const badgeMd = `[![listed on ${cfg.title}](${siteUrl}/assets/badge.svg)](${siteUrl}/${r.path})`;
   const meta = [
     ["author", r.author],
     ["repository", html`<a href="${r.repo}">${ghSlug || r.repo}</a>`],
-    r.license && ["license", r.license],
+    ["license", licenseText(r, ghSlug)],
     r.stars != null && ["stars", `★ ${r.stars}`],
     r.forks > 0 && [
       "forks",
@@ -57,7 +66,7 @@ function sidebar(r, ghSlug) {
       <dl>${meta.map(([k, v]) => html`<dt>${k}</dt><dd>${v}</dd>`)}</dl>
       <div class="card-tags">${r.tags.map(tagLink)}</div>
       ${r.activeForks.length > 0 && html`<section class="forks"><h2>active forks</h2>${forkList(r)}</section>`}
-      ${r.source === "imported" && html`<p class="claim">Is this your script? <a href="${claimUrl}">Claim it</a> to disclose AI use and fix its details. It's a short form, no git needed.</p>`}
+      ${r.source === "imported" && html`<p class="claim">Is this your script? <a href="${claimUrl}">Claim it</a> to disclose AI use and fix its details, or <a href="${optoutUrl}">take it off the site</a>. It's a short form, no git needed.</p>`}
       <p class="edit"><a href="${editUrl}">suggest an edit</a></p>
       ${siteUrl && html`<details class="badge-snippet"><summary>README badge</summary><p class="hint">Add this to your README:</p><div class="copy-row"><code class="cmd">${badgeMd}</code><button type="button" class="copy" data-copy="${badgeMd}">copy</button></div></details>`}
     </aside>`;
@@ -76,7 +85,7 @@ export default function entries(records, write) {
 <article class="entry">
   <p class="crumbs"><a class="back" href="${href("")}" data-back>← all scripts</a> <span class="crumb-sep">/</span> ${PLATFORMS[r.platform].label}${r.kind !== "script" && html` <span class="crumb-sep">/</span> <a href="${href(`?kind=${encodeURIComponent(r.kind)}`)}">${KINDS[r.kind].plural}</a>`}</p>
   <header class="entry-head">
-    <h1>${r.name}${statusIcon(r)}${newBadge(r)}</h1>
+    <h1>${r.name}${statusIcon(r)}${newBadge(r)}${listingBadge(r)}</h1>
     <p class="lede">${r.description}</p>
     <div class="card-meta">${aiBadge(r.ai)} <span class="ai-note">${AI_LABEL[r.ai][1]}</span>${commentsReady ? html` <a class="like-link" href="#discussion" title="Like it in its forum thread">♥ ${r.likes || ""} like</a>` : likesStat(r)}</div>
     ${r.status && html`<p class="warn">⚠️ ${STATUSES[r.status]}.</p>`}

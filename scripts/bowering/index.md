@@ -12,6 +12,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://github.com/whimsicalraps/bowering/issues
 docs: https://github.com/whimsicalraps/bowering
 ---

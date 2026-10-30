@@ -17,6 +17,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/endless-stairs/34799
 docs: https://norns.community/authors/midouest/endless-stairs
 ---

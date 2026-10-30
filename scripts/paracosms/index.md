@@ -18,6 +18,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/paracosms/57350
 docs: https://norns.community/authors/infinitedigits/paracosms
 ---

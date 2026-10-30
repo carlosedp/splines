@@ -32,6 +32,7 @@ jobs:
         run: |
           {
             echo 'Automated weekly import. Every new entry is marked `source: imported` and `ai: unknown`.'
+            echo 'Entries from the community catalog are `listing: published`; all others are `listing: indexed` and stay off the site until their author opts in. Merged indexed entries show up on the next `npm run invite` list.'
             echo 'Please skim for things that are not norns scripts (libraries, nb voices, forks, crow scripts) and delete those folders before merging.'
             echo
             echo '`origin: github-search` entries come from a keyword search and are the noisiest; `origin: lines` entries link their lines thread.'

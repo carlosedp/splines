@@ -16,6 +16,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/initenere/41193
 docs: https://norns.community/authors/vicimity/initenere
 ---

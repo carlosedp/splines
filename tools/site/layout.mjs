@@ -2,7 +2,7 @@
 import { html } from "./html.mjs";
 import { cfg, href, siteUrl, submitUrl } from "./context.mjs";
 
-export function layout({ title, description, body, canonical }) {
+export function layout({ title, description, body, canonical, noindex = false }) {
   const fullTitle = title ? `${title} · ${cfg.title}` : `${cfg.title} · ${cfg.tagline}`;
   return html`<!doctype html>
 <html lang="en">
@@ -20,6 +20,7 @@ export function layout({ title, description, body, canonical }) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${fullTitle}</title>
 <meta name="description" content="${description || cfg.description}">
+${noindex && html`<meta name="robots" content="noindex">`}
 ${canonical != null && siteUrl && html`<link rel="canonical" href="${siteUrl + "/" + canonical}">`}
 <meta property="og:title" content="${fullTitle}">
 <meta property="og:description" content="${description || cfg.description}">

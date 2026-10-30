@@ -13,6 +13,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/ygg-organismic-norns/74051
 docs: https://github.com/spgarbet/Ygg/blob/main/README.md
 ---

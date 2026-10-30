@@ -16,6 +16,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/37965
 docs: https://norns.community/authors/ngwese/tambla
 ---

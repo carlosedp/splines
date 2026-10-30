@@ -12,6 +12,7 @@ requires:
   - grid
 ai: assisted
 source: submitted
+listing: published
 added: 2026-10-21
 license: MIT
 discussion: https://llllllll.co/t/shoal-generative-melodies-for-norns/75630

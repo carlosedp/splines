@@ -11,6 +11,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/midiplayer/68868
 docs: https://github.com/sonocircuit/midiplayer
 ---

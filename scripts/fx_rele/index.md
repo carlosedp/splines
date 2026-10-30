@@ -10,6 +10,7 @@ tags:
   - audio-fx
   - delay
 ai: none
+listing: indexed
 added: 2026-10-21
 license: GPL-3.0
 ---

@@ -4,12 +4,13 @@ platform: norns
 kind: mod
 repo: https://github.com/sonocircuit/fx_pete
 author: sonoCircuit
-description: Multimode delay for the norns fx mod
+description: A super simple freeze-delay / beat-repeat effect for norns fx mod.
 tags:
   - fx
   - audio-fx
   - delay
 ai: none
+listing: indexed
 added: 2026-10-21
 license: GPL-3.0
 ---

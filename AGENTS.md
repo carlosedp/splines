@@ -14,6 +14,8 @@ Working name: **splines** (placeholder; see `site.config.json`). Unofficial and 
 
 AI-assisted scripts are welcome, but **AI disclosure is mandatory** (`ai:` field). That is a core product rule, not a detail.
 
+**Only with the author's OK** is the other one: the site shows `listing: published` entries only (submitted, claimed, or listed on norns.community by the author). Everything else the importer finds is `indexed`: kept and tracked, never rendered, and its author can be invited to opt in. Never publish an entry on someone else's behalf.
+
 ## Commands
 
 ```sh
@@ -25,6 +27,8 @@ npm run import -- --only community --limit 24   # seed/import entries; --dry-run
 npm run build               # → dist/
 npm run serve               # → http://localhost:8080/<basePath>/
 npm run dev                 # build + serve --watch: rebuilds on changes (~1s) and live-reloads open pages
+npm run dev:all             # same, with indexed/declined entries too (build --all; local preview only, never deploy)
+npm run invite              # invites.md: indexed entries whose authors could be invited (sends nothing; --send/--sync need a token)
 npm run new -- <name> [--platform crow]   # scaffold an entry from templates/entry.md
 ```
 
@@ -35,6 +39,7 @@ Node ≥ 20. There is no test suite yet. Verify changes by running `validate` an
 ```
 scripts/<name>/index.md   one entry per script, ANY platform (+ optional images next to it). This is catalog data, not code.
 templates/entry.md        entry template used by `npm run new`
+templates/invite.md       the opt-in invitation issue (title + body, {{placeholders}}) used by invite.mjs
 src/assets/               style.css, app.js (client filtering), favicon.svg
 src/about.md              about/submit/maiden page ({{title}}, {{catalog}}, {{repo}} placeholders)
 src/start.md              /start/ getting-started guide for newcomers (same placeholders, plus {{base}} for site links)
@@ -42,16 +47,20 @@ tools/lib.mjs             config, PLATFORMS, entry loading, front matter, VALIDA
 tools/validate.mjs        CLI validator (GitHub Actions annotations when GITHUB_ACTIONS is set)
 tools/enrich.mjs          GitHub API metadata + README cache (20h TTL); likes/comments of each page's forum thread (Discourse embed; DISCOURSE_API_KEY maps new topics) → .cache/discussions.json; forks pushed to after forking, with commits ahead/behind upstream (weekly) → .cache/forks.json
 tools/import.mjs          importers: maiden catalogs, awesome lists (incl. p3r7/awesome-monome-norns tables), GitHub topics + keyword search, lines (llllllll.co) threads per source with a `platform` (norns library, iii tag; rate-limited, recent only, `--days N` to backfill)
-tools/from-issue.mjs      [submit]/[claim] issue form → entry file + pr-body.md/comment.md (issue-entry.yml); field labels must match .github/ISSUE_TEMPLATE
+tools/from-issue.mjs      [submit]/[claim]/[optout] issue form → entry file + pr-body.md/comment.md (issue-entry.yml); field labels must match .github/ISSUE_TEMPLATE. A claim publishes (opt in), an optout sets `listing: declined`
+tools/invite.mjs          opt-in invitations for indexed entries: invites.md review list (default), --send opens issues and records `invited`, --sync marks closed invitations declined (invite.yml, gated)
 tools/health.mjs          follows moved repos (rewrites `repo`), sets/clears `status` for gone/archived → health.md (health.yml)
 tools/build.mjs           build entry point: collects records, runs each page module, prunes dist/
 tools/site/               html.mjs (`html` escaping tag, raw, join), context.mjs (config, caches, constants), records.mjs,
                           markdown.mjs (README/notes renderer), components.mjs (card, badges, fork list), layout.mjs,
-                          output.mjs (write-if-changed + prune), pages/*.mjs (one module per page or output group)
+                          output.mjs (write-if-changed + prune), pages/*.mjs (one module per page or output group;
+                          admin.mjs is only the sign-in: once a collaborator's token is stored, app.js loads src/assets/admin.js on the
+                          home page, which builds cards for unpublished entries from the GitHub API and shows the listing filter;
+                          keep its card() in step with card() in components.mjs)
 tools/serve.mjs           local static server honoring basePath
 tools/new-entry.mjs       scaffolder behind `npm run new`
 site.config.json          title, siteUrl, basePath, cname, repo, forum, discourse (embedded comments), import sources
-.github/workflows/        validate.yml (PRs), deploy.yml (push/daily → Pages), import.yml (weekly → PR), health.yml (weekly → PR), issue-entry.yml (issue forms → PR), claude.yml (`@claude` mentions by maintainers → Claude Code)
+.github/workflows/        validate.yml (PRs), deploy.yml (push/daily → Pages), import.yml (weekly → PR), health.yml (weekly → PR), issue-entry.yml (issue forms → PR), invite.yml (weekly, needs INVITES_ENABLED + approval in the `invites` environment → PR), claude.yml (`@claude` mentions by maintainers → Claude Code)
 .claude/skills/add-script/ procedure for "add <repo url> to the catalog" (used locally, on claude.ai/code and by claude.yml)
 ```
 
@@ -69,6 +78,8 @@ site.config.json          title, siteUrl, basePath, cname, repo, forum, discours
 | `requires` | | hardware from `KNOWN_REQUIRES` in `lib.mjs` (grid, arc, crow, midi, …) |
 | `ai` | ✓ | `none` \| `assisted`; `unknown` is allowed **only** with `source: imported` |
 | `source` | | `submitted` (default) \| `imported` |
+| `listing` | | `published` \| `indexed` (default) \| `declined` (`LISTINGS` in `lib.mjs`). Only `published` entries are built (`collectRecords()`); `build --all` previews the rest. The importer writes `published` for maiden community catalogs and `indexed` for every other source; claim/optout issues and the submit form set it |
+| `invited` | | https URL of the opt-in invitation issue on the script's repo, written by `invite.mjs --send`; one invitation per repo, ever |
 | `origin` | | where an import came from, e.g. `catalog:community`, `github-topic:norns`, `github-search`, `lines` |
 | `added` | ✓* | `YYYY-MM-DD`, drives `/new/` and its feed. Required unless `source: imported`; the initial seed import has none so it doesn't flood "new". `npm run new` fills it in |
 | `license`, `discussion`, `docs`, `cover` | | optional; URLs must be https |
@@ -86,10 +97,11 @@ When adding a field: update `validateEntry` in `lib.mjs`, `templates/entry.md`, 
 ## Conventions and constraints
 
 - **No framework, no client-side dependencies.** Plain Node ESM build, vanilla JS in the browser. Keep runtime deps minimal (currently `yaml`, `marked`). Discuss before adding any.
-- **Cards are prerendered.** `app.js` only filters and sorts existing DOM nodes using `data-*` attributes on each `.card`. If you add a filter, add the `data-*` attribute in `card()` in `tools/site/components.mjs` and the group in `app.js` (`PARAM` = URL param name, `MODE` = `any`/`all`). Filter state lives in the URL query (shareable links).
+- **Cards are prerendered.** `app.js` only filters and sorts existing DOM nodes using `data-*` attributes on each `.card` (the one exception: `admin.js` adds cards for unpublished entries, for signed-in admins only). If you add a filter, add the `data-*` attribute in `card()` in `tools/site/components.mjs` and the group in `app.js` (`PARAM` = URL param name, `MODE` = `any`/`all`). Filter state lives in the URL query (shareable links).
 - **Everything user-supplied is untrusted.** Write markup with the `html` tag (`tools/site/html.mjs`): it escapes every interpolated value, so only pass trusted HTML through `raw()` (sanitized markdown output). Use `cond && html`…`` for optional parts, but not with numbers (`0` renders as "0"; compare with `> 0`). Markdown goes through the custom `marked` renderer that escapes raw HTML and neutralizes non-http(s) links. Never use `innerHTML` with entry data in `app.js`.
 - **`catalog.json` shape is a contract with maiden.** Keep `file_info`, `catalog_name`, `date`, `entries[]` with `project_name`, `project_url`, `author`, `description`, `discussion_url?`, `documentation_url?`, `tags`. Only `PLATFORMS[platform].maiden === true` entries (norns) go in it.
 - **Paths:** always build site URLs with `href()` (prefixes `basePath`). `basePath` is `""` now that the site is on its custom domain (`splines.cc`); a project Pages site would use `/<repo>`.
+- **Declined entries stay.** An author's no is `listing: declined`, not a deletion, so the importer (which dedupes against existing entries) and `invite.mjs` leave the script alone.
 - **Importer never overwrites** existing entries and dedupes by normalized repo URL. Imported entries are reviewed via the PR that `import.yml` opens. Repos in `site.config.json → import.ignore` are never imported: when you remove a dead entry or merge a duplicate, add the old URL there, or the next import brings it back.
 - **Active forks** (⑂ on cards, `/forks/`, script page aside, and a page per fork at `scripts/<slug>/forks/<owner>/<repo>/`): `enrich.mjs` stores every fork pushed to after it was created, with ahead/behind from the compare API, and for active forks also their description, README and latest own commits (`details`, refetched when the fork or upstream gets pushes). `isActiveFork()` in `lib.mjs` decides what counts as active (`FORK_MIN_AHEAD` commits on its default branch, pushed within `FORK_ACTIVE_DAYS`); tune it there, no refetch needed. Forks are not catalog entries: no entry file, not reviewed, not in `catalog.json` or the sitemap, and their pages say so.
 - **The build updates `dist/` in place**: unchanged files aren't rewritten and files no build produced are pruned at the end. Always go through `write()` so a file isn't pruned.

@@ -9,6 +9,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/37947
 docs: https://norns.community/authors/eigen/p8
 ---

@@ -23,11 +23,15 @@ However a script was made, by hand or with AI, the person submitting it stands b
 | `none`     | written without AI code generation (autocomplete-level help is fine)                             |
 | `assisted` | made with meaningful help from AI tools, up to mostly generated code, reviewed and tested by you |
 
-`unknown` is reserved for automatic imports. If your script was imported, claim it with the [claim form](https://github.com/carlosedp/splines/issues/new?template=claim.yml) (or the "claim it" link on its page), or edit the entry: set `source: submitted` and fill in `ai`.
+`unknown` is reserved for automatic imports. If your script was imported, claim it with the [claim form](https://github.com/carlosedp/splines/issues/new?template=claim.yml) (or the "claim it" link on its page), or edit the entry: set `source: submitted`, `listing: published` and fill in `ai`.
+
+## Only with the author's OK
+
+Entries have a `listing`: `published` (on the site), `indexed` (found by the importer, kept in the repo but not shown until the author opts in) or `declined` (the author said no: never shown, never asked again). Only add `listing: published` for a script that isn't yours if its author agreed.
 
 ## Update or remove an entry
 
-Edit or delete your `scripts/<name>/` folder in a PR. Authors can always ask for their entry to be removed.
+Edit or delete your `scripts/<name>/` folder in a PR. Authors can always ask for their entry to be removed, or use the [opt-out form](https://github.com/carlosedp/splines/issues/new?template=optout.yml) to take it off the site.
 
 ## Working on the site itself
 

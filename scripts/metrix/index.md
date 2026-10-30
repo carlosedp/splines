@@ -16,4 +16,5 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 ---

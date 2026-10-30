@@ -10,6 +10,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/glitch-looper/54014
 docs: https://norns.community/authors/carltesta/glitchlooper
 ---

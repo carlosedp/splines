@@ -1,0 +1,83 @@
+name: invite authors
+
+# Asks the authors of indexed scripts whether they'd like them published, with an issue on their repo (tools/invite.mjs).
+# Two locks keep it from writing to anyone's repo by accident:
+#   1. it does nothing unless the repository variable INVITES_ENABLED is "true";
+#   2. the send job uses the `invites` environment: give it required reviewers (Settings → Environments), and every run
+#      waits for your approval after the list job has posted who would be invited to the run summary.
+# Opening issues on other people's repos needs a personal access token in the INVITE_TOKEN secret (GITHUB_TOKEN only
+# reaches this repo). The send job opens a pull request that records each issue as `invited:` in its entry.
+on:
+  schedule:
+    - cron: '23 6 * * 2' # weekly, Tuesday: the day after the import
+  workflow_dispatch:
+    inputs:
+      only:
+        description: 'Entries to invite, comma-separated (empty: the first `limit` ready ones)'
+        default: ''
+      limit:
+        description: 'How many to invite when `only` is empty'
+        default: '10'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  list:
+    if: vars.INVITES_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      names: ${{ steps.list.outputs.names }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # stars and last push sort the list and set stale repos apart; written by the deploy workflow's enrich step
+      - uses: actions/cache/restore@v4
+        with:
+          path: .cache
+          key: gh-meta-${{ github.run_id }}
+          restore-keys: gh-meta-
+      - name: List who would be invited
+        id: list
+        env:
+          ONLY: ${{ inputs.only }}
+          LIMIT: ${{ inputs.limit || '10' }}
+        run: |
+          node tools/invite.mjs --limit "$LIMIT"
+          if [ -n "$ONLY" ]; then echo "names=$ONLY" >> "$GITHUB_OUTPUT"; fi
+          cat invites.md >> "$GITHUB_STEP_SUMMARY"
+
+  send:
+    needs: list
+    if: needs.list.outputs.names != ''
+    runs-on: ubuntu-latest
+    environment: invites # required reviewers: the run waits here for approval
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Close declined invitations, then open new ones
+        env:
+          GITHUB_TOKEN: ${{ secrets.INVITE_TOKEN }}
+          NAMES: ${{ needs.list.outputs.names }}
+        run: |
+          node tools/invite.mjs --sync --send --only "$NAMES" 2>&1 | tee invite.log
+          { echo 'Records the invitation issues opened by the invite workflow (`invited:`), and marks invitations closed without an opt-in as `listing: declined`.'; echo; echo '```'; cat invite.log; echo '```'; } > pr-body.md
+      - name: Open pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: invite/automated
+          delete-branch: true
+          add-paths: scripts/**
+          commit-message: 'invites: record opened invitations'
+          title: 'invites: record opened invitations'
+          labels: invite
+          body-path: pr-body.md

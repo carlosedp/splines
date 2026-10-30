@@ -13,6 +13,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/vcr/63457
 docs: https://github.com/justmat/vcr
 ---

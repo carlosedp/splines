@@ -12,6 +12,8 @@
     "build": "node tools/build.mjs",
     "serve": "node tools/serve.mjs",
     "dev": "node tools/build.mjs && node tools/serve.mjs --watch",
+    "dev:all": "node tools/build.mjs --all && node tools/serve.mjs --watch --all",
+    "invite": "node tools/invite.mjs",
     "new": "node tools/new-entry.mjs"
   },
   "engines": {

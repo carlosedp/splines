@@ -14,6 +14,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/38559
 docs: https://norns.community/authors/quixotic7/gridstep
 ---

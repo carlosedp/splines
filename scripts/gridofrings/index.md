@@ -12,6 +12,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/gridofrings/65138
 docs: https://github.com/smonthms/gridofrings
 ---

@@ -12,5 +12,6 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/a-turntable-for-norns-v3-0-1-brings-supercollider-and-crow-to-the-party/67716
 ---

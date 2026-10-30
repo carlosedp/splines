@@ -12,6 +12,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/oilcan-percussion-co/60754
 docs: https://github.com/zjb-s/oilcan
 ---

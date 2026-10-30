@@ -22,6 +22,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://l.llllllll.co/arcologies
 docs: https://norns.community/arcologies
 ---

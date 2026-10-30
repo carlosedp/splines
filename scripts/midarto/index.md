@@ -15,6 +15,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/midarto/75532
 docs: https://github.com/mrglennjones/midarto/raw/main/docs/midarto-guide.pdf
 ---

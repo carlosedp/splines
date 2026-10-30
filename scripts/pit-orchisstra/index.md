@@ -17,6 +17,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/pit-orchisstra/66521
 docs: https://github.com/entzmingerc/pit-orchisstra
 ---

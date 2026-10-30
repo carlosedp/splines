@@ -9,6 +9,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/greyhole/27687
 docs: https://norns.community/authors/justmat/greyhole
 ---

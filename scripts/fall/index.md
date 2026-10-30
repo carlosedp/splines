@@ -16,6 +16,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/fall-generative-synth-sequencer/48991
 docs: https://llllllll.co/t/fall-generative-synth-sequencer/48991
 ---

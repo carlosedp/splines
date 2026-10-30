@@ -12,5 +12,6 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/delinquencer-a-sequencer-but-with-a-mind-of-its-own/
 ---

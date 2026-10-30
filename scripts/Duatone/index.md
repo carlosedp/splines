@@ -11,6 +11,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/duatone/74866
 docs: https://github.com/roiyaru-bokujin/Duatone/blob/main/README.md
 ---

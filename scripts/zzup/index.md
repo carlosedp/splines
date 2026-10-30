@@ -9,6 +9,7 @@ tags:
 ai: unknown
 source: imported
 origin: curated
+listing: indexed
 added: 2026-10-21
 license: GPL-3.0
 discussion: https://llllllll.co/t/zzup-see-what-s-new-and-updated-in-the-norns-catalog/75664

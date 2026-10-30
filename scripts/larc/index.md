@@ -13,6 +13,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/larc/39790
 docs: https://norns.community/authors/justmat/larc
 ---

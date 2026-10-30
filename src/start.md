@@ -4,7 +4,7 @@ New to norns, or just skipped the manual? This page gets your first script from 
 
 ## before you install anything: pick wisely
 
-_{{title}} tries to list **every** monome script it can find, not just the polished ones. Many are imported automatically. Splines does not check that each one installs, runs on current norns, or does what it says. Some are experiments, some are unfinished, and some haven't been touched in years._
+_{{title}} lists the scripts their authors chose to share, not just the polished ones. Splines does not check that each one installs, runs on current norns, or does what it says. Some are experiments, some are unfinished, and some haven't been touched in years._
 
 For your first scripts, stick to the well-known ones:
 

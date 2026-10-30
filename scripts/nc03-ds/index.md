@@ -9,5 +9,6 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/norns-circle-03-dressed-in-sequins/57649
 ---

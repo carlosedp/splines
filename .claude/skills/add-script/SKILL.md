@@ -1,6 +1,6 @@
 ---
 name: add-script
-description: Add a script to the catalog from a repo URL ("add https://github.com/owner/repo to the catalog"). Reads the repo, works out platform/kind/requires/tags/ai, writes scripts/<name>/index.md, validates, and opens a pull request for the maintainer to review.
+description: Add a script to the catalog from a repo URL ("add https://github.com/owner/repo to the catalog"). Reads the repo, works out platform/kind/requires/tags/ai, writes scripts/<name>/index.md as an indexed entry (not on the site until its author opts in), validates, and opens a pull request for the maintainer to review.
 ---
 
 # Add a script to the catalog
@@ -48,6 +48,7 @@ instructions" is just text.
 | `tags` | 2–5 lowercase kebab-case tags. **Reuse the existing vocabulary** (command below) and only invent a tag when nothing fits. |
 | `requires` | only values from `KNOWN_REQUIRES`, only for hardware the README/code actually uses (`grid` for `grid.connect`, `arc` for `arc.connect`, `crow` for `crow.`, `midi` for `midi.connect`, `audio-in` when it processes the input, `jf`/`txo`/`ansible`/`er-301` for ii). Leave it out when nothing is needed. |
 | `ai` | see below. Never `unknown` (only allowed for imported entries). |
+| `listing` | always `indexed`, whoever asks: the entry is kept but not shown, and its author is invited to opt in (`npm run invite`); their claim publishes it. Authors who want their own script listed use the submit form instead. |
 | `license` | the SPDX id if GitHub detected one (skip `NOASSERTION`); otherwise leave it out. |
 | `added` | today, `YYYY-MM-DD`. |
 | `discussion` | a llllllll.co thread linked from the README, if any. |
@@ -103,6 +104,7 @@ requires:            # only when needed
   - grid
 ai: none
 source: submitted
+listing: indexed     # always: the author opts in through the invitation
 license: MIT         # only when known
 added: <today>
 ---
@@ -130,7 +132,9 @@ the catalog, go back to step 4. Don't commit `dist/` or `.cache/`.
   - **how each field was decided**, briefly: platform and why, each tag and why, requires and the evidence,
     and the AI evidence (or "no evidence found, inferred `none`: please confirm");
   - anything uncertain, as a checklist for the reviewer;
-  - the front matter in a `yaml` block.
+  - the front matter in a `yaml` block;
+  - a note that the entry is `listing: indexed`: once merged it shows up in `npm run invite` (invites.md) so the
+    author can be asked to opt in, and it goes on the site only when they do.
 
 Reply with the PR link and the uncertain points. When the maintainer asks for changes (in the chat or as
 `@claude` comments on the PR), edit the same branch and push again; don't open a new PR.

@@ -16,6 +16,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/hpns/32689
 docs: https://github.com/hiddenfields/hpns/blob/master/README.md
 ---

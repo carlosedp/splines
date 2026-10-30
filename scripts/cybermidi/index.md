@@ -13,6 +13,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/65000
 docs: https://github.com/dstroud/cybermidi/blob/main/README.md
 ---

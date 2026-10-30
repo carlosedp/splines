@@ -17,6 +17,8 @@ tags: [sequencer]
 requires: [grid]
 # Required disclosure: none | assisted   (see the about page)
 ai: none
+# published puts it on the site. Only for your own script, or with its author's OK; otherwise use indexed.
+listing: published
 license: MIT
 # Today's date (YYYY-MM-DD); puts the script on the "new" page and feed. `npm run new` fills it in.
 added: 2026-01-01

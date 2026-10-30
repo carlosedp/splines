@@ -15,6 +15,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/mnmpatch/71750
 docs: https://github.com/hanjo-synth/Mnmpatch
 ---

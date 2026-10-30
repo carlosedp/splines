@@ -10,5 +10,6 @@ tags:
 ai: unknown
 source: imported
 origin: github-search
+listing: indexed
 added: 2026-10-25
 ---

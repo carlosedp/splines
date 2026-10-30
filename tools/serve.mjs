@@ -1,5 +1,6 @@
 // Tiny static server for previewing dist/ locally, honoring basePath from site.config.json.
 // With --watch (npm run dev): rebuilds when entries, src/, tools/, the config or .cache/ change, and reloads open pages.
+// --all is passed on to the build (npm run dev:all): indexed and declined entries too.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -56,7 +57,7 @@ if (watch) {
     if (building) return void (again = true);
     building = true;
     const t = Date.now();
-    spawn(process.execPath, [path.join(ROOT, 'tools', 'build.mjs')], { cwd: ROOT, stdio: 'inherit' }).on('exit', (code) => {
+    spawn(process.execPath, [path.join(ROOT, 'tools', 'build.mjs'), ...process.argv.filter((a) => a === '--all')], { cwd: ROOT, stdio: 'inherit' }).on('exit', (code) => {
       building = false;
       if (code === 0) {
         console.log(`  rebuilt in ${Date.now() - t}ms, reloading ${clients.size} page(s)`);

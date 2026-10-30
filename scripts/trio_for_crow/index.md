@@ -11,4 +11,5 @@ requires:
 ai: unknown
 source: imported
 origin: github-topic:norns
+listing: indexed
 ---

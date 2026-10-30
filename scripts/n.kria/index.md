@@ -15,6 +15,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/n-kria-0-13-native-norns-kria/60403
 docs: https://llllllll.co/t/n-kria-0-13-native-norns-kria/60403
 ---

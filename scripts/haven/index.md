@@ -14,6 +14,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/haven/21285
 docs: https://norns.community/authors/lfsaw/haven
 ---

@@ -14,6 +14,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/machine-drum-randomizer-for-monome-norns/71998
 docs: https://github.com/hanjo-synth/MDPatch
 ---

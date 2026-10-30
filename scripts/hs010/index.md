@@ -13,6 +13,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/hs010-happy-synthesis-010
 docs: https://github.com/Karolis-Lasys/hs010/blob/main/README.md
 ---

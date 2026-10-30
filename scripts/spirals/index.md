@@ -15,6 +15,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/spirals/40678
 docs: https://norns.community/authors/tomw/spirals
 ---

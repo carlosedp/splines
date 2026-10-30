@@ -18,6 +18,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/loud-numbers-data-sonification-with-norns/51353
 docs: https://github.com/loudnumbers/loudnumbers_norns
 ---

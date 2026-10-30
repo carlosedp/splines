@@ -1,4 +1,6 @@
-// Turn a "[submit]" or "[claim]" issue (from the forms in .github/ISSUE_TEMPLATE) into an entry change.
+// Turn a "[submit]", "[claim]" or "[optout]" issue (from the forms in .github/ISSUE_TEMPLATE) into an entry change.
+// A claim is how an author opts in: it publishes the entry (`listing: published`) and discloses AI use. An opt-out
+// sets `listing: declined`: the entry stays in the repo, so the importer and invite.mjs leave the script alone.
 // Run by .github/workflows/issue-entry.yml; the workflow validates the result and opens the pull request.
 //
 //   ISSUE_TITLE=… ISSUE_BODY=… ISSUE_NUMBER=… ISSUE_AUTHOR=… node tools/from-issue.mjs
@@ -10,11 +12,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   ROOT, ENTRIES_DIR, PLATFORMS, DEFAULT_PLATFORM, KNOWN_REQUIRES, SLUG_RE, TAG_RE,
-  loadEntries, normalizeRepo, githubSlug, gh, isModOnly, stringifyFrontMatter, updateFrontMatter,
+  loadEntries, listingOf, normalizeRepo, githubSlug, gh, isModOnly, stringifyFrontMatter, updateFrontMatter,
 } from './lib.mjs';
 
 const { ISSUE_TITLE = '', ISSUE_BODY = '', ISSUE_NUMBER = '0', ISSUE_AUTHOR = '' } = process.env;
-const kind = ISSUE_TITLE.match(/^\[(submit|claim)\]/i)?.[1].toLowerCase();
+const kind = ISSUE_TITLE.match(/^\[(submit|claim|optout)\]/i)?.[1].toLowerCase();
 const today = new Date().toISOString().slice(0, 10);
 
 function output(key, value) {
@@ -61,17 +63,24 @@ const ai = (label) => {
 const ownsRepo = (repo) => githubSlug(repo)?.split('/')[0] === ISSUE_AUTHOR.toLowerCase();
 
 const entries = loadEntries();
+// the claim and opt-out forms' "Script" field: a name, or a link to the script page
+function scriptField() {
+  const wanted = field('script').replace(/^.*\/scripts\/|\/.*$/g, '');
+  const entry = entries.find((e) => e.slug.toLowerCase() === wanted.toLowerCase());
+  if (!entry) fail(`there's no script named "${wanted}" in the catalog`);
+  return entry;
+}
 let name, data, file, summary;
 
 try {
-  if (!kind) fail('the issue title must start with [submit] or [claim]');
+  if (!kind) fail('the issue title must start with [submit], [claim] or [optout]');
   if (kind === 'submit') {
     const repo = field('repository').replace(/\.git$/, '').replace(/\/+$/, '');
     if (!https(repo)) fail('the repository must be an https URL, like https://github.com/you/my-script');
     const platform = choice('platform') || DEFAULT_PLATFORM;
     if (!PLATFORMS[platform]) fail(`platform must be one of: ${Object.keys(PLATFORMS).join(', ')}`);
     const listed = entries.find((e) => e.platform === platform && normalizeRepo(e.data?.repo) === normalizeRepo(repo));
-    if (listed) fail(`this repo is already listed as \`${listed.slug}\`. If it's yours and was imported, use the claim form instead.`);
+    if (listed) fail(`this repo is already listed as \`${listed.slug}\`. If it's yours, use the claim form to publish it instead.`);
 
     // license and author default to what GitHub knows
     const slug = githubSlug(repo);
@@ -99,6 +108,8 @@ try {
     };
     if (requires.length) data.requires = requires;
     data.ai = ai('ai disclosure');
+    // the form asks submitters to confirm they're the author or have the author's OK
+    data.listing = 'published';
     const license = field('license') || (info.license?.spdx_id !== 'NOASSERTION' && info.license?.spdx_id);
     if (license) data.license = license;
     data.added = today;
@@ -108,13 +119,12 @@ try {
     fs.mkdirSync(path.join(ROOT, ENTRIES_DIR, name), { recursive: true });
     fs.writeFileSync(path.join(ROOT, file), stringifyFrontMatter(data));
     summary = `Adds **${name}** (${platform}${data.kind ? ` ${data.kind}` : ''}) from ${data.repo}.`;
-  } else {
-    const wanted = field('script').replace(/^.*\/scripts\/|\/.*$/g, ''); // a name, or a link to the script page
-    const entry = entries.find((e) => e.slug.toLowerCase() === wanted.toLowerCase());
-    if (!entry) fail(`there's no script named "${wanted}" in the catalog`);
-    if (entry.data?.source !== 'imported') fail(`\`${entry.slug}\` is already claimed; use "suggest an edit" on its page for changes`);
+  } else if (kind === 'claim') {
+    const entry = scriptField();
+    // indexed or declined entries can always be claimed: that's the author opting in (or changing their mind)
+    if (entry.data?.source !== 'imported' && listingOf(entry.data) === 'published') fail(`\`${entry.slug}\` is already claimed; use "suggest an edit" on its page for changes`);
     name = entry.slug;
-    const changes = { ai: ai('ai disclosure'), source: 'submitted', origin: undefined };
+    const changes = { ai: ai('ai disclosure'), source: 'submitted', origin: undefined, listing: 'published' };
     // claimed entries need a date; an imported one may have none
     if (!entry.data.added) changes.added = today;
     if (field('description')) changes.description = field('description').replace(/\s+/g, ' ');
@@ -127,7 +137,16 @@ try {
     file = entry.file;
     const abs = path.join(ROOT, file);
     fs.writeFileSync(abs, updateFrontMatter(fs.readFileSync(abs, 'utf8'), changes));
-    summary = `Claims **${name}** for its author: \`source: submitted\`, \`ai: ${changes.ai}\`${['description', 'tags', 'requires', 'author'].some((k) => k in changes) ? ', plus updated details' : ''}.`;
+    summary = `Claims **${name}** for its author and publishes it: \`listing: published\`, \`source: submitted\`, \`ai: ${changes.ai}\`${['description', 'tags', 'requires', 'author'].some((k) => k in changes) ? ', plus updated details' : ''}.`;
+  } else {
+    const entry = scriptField();
+    if (listingOf(entry.data) === 'declined') fail(`\`${entry.slug}\` is already marked as not to be listed`);
+    name = entry.slug;
+    data = { ...entry.data, listing: 'declined' };
+    file = entry.file;
+    const abs = path.join(ROOT, file);
+    fs.writeFileSync(abs, updateFrontMatter(fs.readFileSync(abs, 'utf8'), { listing: 'declined' }));
+    summary = `Opts **${name}** out: \`listing: declined\`. It comes off the site if it was on it, and its author won't be asked again.`;
   }
 
   const owner = ownsRepo(data.repo)

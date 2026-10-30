@@ -12,6 +12,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/fixed-filter-banking-crisis/71735
 docs: https://github.com/xmacex/fixed-filter-banking-crisis
 ---

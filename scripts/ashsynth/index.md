@@ -15,5 +15,6 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 docs: https://github.com/nunosmash/ashsynth/blob/main/README.md
 ---

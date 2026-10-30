@@ -12,6 +12,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/beacon/
 docs: https://norns.community/authors/tomw/beacon
 ---
