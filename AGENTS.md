@@ -44,7 +44,10 @@ tools/enrich.mjs          GitHub API metadata + README cache (20h TTL); likes (�
 tools/import.mjs          importers: maiden catalogs, awesome lists (incl. p3r7/awesome-monome-norns tables), GitHub topics + keyword search, lines (llllllll.co) threads per source with a `platform` (norns library, iii tag; rate-limited, recent only, `--days N` to backfill)
 tools/from-issue.mjs      [submit]/[claim] issue form → entry file + pr-body.md/comment.md (issue-entry.yml); field labels must match .github/ISSUE_TEMPLATE
 tools/health.mjs          follows moved repos (rewrites `repo`), sets/clears `status` for gone/archived → health.md (health.yml)
-tools/build.mjs           renders everything into dist/
+tools/build.mjs           build entry point: collects records, runs each page module, prunes dist/
+tools/site/               html.mjs (`html` escaping tag, raw, join), context.mjs (config, caches, constants), records.mjs,
+                          markdown.mjs (README/notes renderer), components.mjs (card, badges, fork list), layout.mjs,
+                          output.mjs (write-if-changed + prune), pages/*.mjs (one module per page or output group)
 tools/serve.mjs           local static server honoring basePath
 tools/new-entry.mjs       scaffolder behind `npm run new`
 site.config.json          title, siteUrl, basePath, cname, repo, giscus, import sources
@@ -74,21 +77,21 @@ site.config.json          title, siteUrl, basePath, cname, repo, giscus, import 
 
 The entry body is optional **catalog notes**, rendered above the upstream README on the script page. PRs only need front matter; the README is the documentation. HTML comments in the body are not published (the template hint is one).
 
-READMEs are rendered by `renderReadme()` in `build.mjs`: raw HTML is never passed through (only `<img>` is rebuilt from src/alt/width), relative links/images are rewritten to the repo's blob/raw URLs (`fromRepo()`), and headings shift down one level.
+READMEs are rendered by `renderReadme()` in `tools/site/markdown.mjs`: raw HTML is never passed through (only `<img>` is rebuilt from src/alt/width), relative links/images are rewritten to the repo's blob/raw URLs (`fromRepo()`), and headings shift down one level.
 
 The URL slug is the folder name: `/scripts/<name>/`, stable even if the platform changes. Duplicate names and duplicate repos (per platform) are rejected by `validate.mjs`. Adding a platform is one line in `PLATFORMS`.
 
-When adding a field: update `validateEntry` in `lib.mjs`, `templates/entry.md`, the issue forms (`.github/ISSUE_TEMPLATE/*.yml` + `from-issue.mjs`), the table in `README.md`/`src/about.md`, the record built in `build.mjs`, and, if relevant, `index.json`/`catalog.json`.
+When adding a field: update `validateEntry` in `lib.mjs`, `templates/entry.md`, the issue forms (`.github/ISSUE_TEMPLATE/*.yml` + `from-issue.mjs`), the table in `README.md`/`src/about.md`, the record built in `tools/site/records.mjs`, and, if relevant, `index.json`/`catalog.json`.
 
 ## Conventions and constraints
 
 - **No framework, no client-side dependencies.** Plain Node ESM build, vanilla JS in the browser. Keep runtime deps minimal (currently `yaml`, `marked`). Discuss before adding any.
-- **Cards are prerendered.** `app.js` only filters and sorts existing DOM nodes using `data-*` attributes on each `.card`. If you add a filter, add the `data-*` attribute in `card()` in `build.mjs` and the group in `app.js` (`PARAM` = URL param name, `MODE` = `any`/`all`). Filter state lives in the URL query (shareable links).
-- **Everything user-supplied is untrusted.** Escape with `esc()` in templates. Markdown goes through the custom `marked` renderer that escapes raw HTML and neutralizes non-http(s) links. Never use `innerHTML` with entry data in `app.js`.
+- **Cards are prerendered.** `app.js` only filters and sorts existing DOM nodes using `data-*` attributes on each `.card`. If you add a filter, add the `data-*` attribute in `card()` in `tools/site/components.mjs` and the group in `app.js` (`PARAM` = URL param name, `MODE` = `any`/`all`). Filter state lives in the URL query (shareable links).
+- **Everything user-supplied is untrusted.** Write markup with the `html` tag (`tools/site/html.mjs`): it escapes every interpolated value, so only pass trusted HTML through `raw()` (sanitized markdown output). Use `cond && html`…`` for optional parts, but not with numbers (`0` renders as "0"; compare with `> 0`). Markdown goes through the custom `marked` renderer that escapes raw HTML and neutralizes non-http(s) links. Never use `innerHTML` with entry data in `app.js`.
 - **`catalog.json` shape is a contract with maiden.** Keep `file_info`, `catalog_name`, `date`, `entries[]` with `project_name`, `project_url`, `author`, `description`, `discussion_url?`, `documentation_url?`, `tags`. Only `PLATFORMS[platform].maiden === true` entries (norns) go in it.
 - **Paths:** always build site URLs with `href()` (prefixes `basePath`). `basePath` is `""` now that the site is on its custom domain (`splines.cc`); a project Pages site would use `/<repo>`.
 - **Importer never overwrites** existing entries and dedupes by normalized repo URL. Imported entries are reviewed via the PR that `import.yml` opens. Repos in `site.config.json → import.ignore` are never imported: when you remove a dead entry or merge a duplicate, add the old URL there, or the next import brings it back.
-- **Active forks** (⑂ on cards, `/forks/`, script page aside): `enrich.mjs` stores every fork pushed to after it was created, with ahead/behind from the compare API; `build.mjs` decides what counts as active (`FORK_MIN_AHEAD` commits on its default branch, pushed within `FORK_ACTIVE_DAYS`). Tune the thresholds there; no refetch needed. Forks are not catalog entries and are not reviewed.
+- **Active forks** (⑂ on cards, `/forks/`, script page aside): `enrich.mjs` stores every fork pushed to after it was created, with ahead/behind from the compare API; `tools/site/context.mjs` decides what counts as active (`FORK_MIN_AHEAD` commits on its default branch, pushed within `FORK_ACTIVE_DAYS`). Tune the thresholds there; no refetch needed. Forks are not catalog entries and are not reviewed.
 - **The build updates `dist/` in place**: unchanged files aren't rewritten and files no build produced are pruned at the end. Always go through `write()` so a file isn't pruned.
 - **Likes, not star ratings.** The site is static, so "rating" = positive reactions on each script's giscus discussion (titled with the page path, e.g. `scripts/NEVE/`), counted by `enrich.mjs` and shown as ♥ on cards plus a "most liked" sort. ★ means GitHub stars; keep the two distinct.
 - **The build must work offline.** GitHub metadata and READMEs come only from `.cache/` (written by `enrich.mjs`). Missing cache just means fewer stats on cards and no README on script pages.

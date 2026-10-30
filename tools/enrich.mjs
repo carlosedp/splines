@@ -102,7 +102,8 @@ let forkLists = 0;
 let compares = 0;
 forks: for (const slug of seen) {
   const info = cache[slug];
-  if (!info?.forks || info.missing) continue;
+  // forks undefined = cached before fork counts were recorded: look anyway (the list call answers it)
+  if (!info || info.missing || info.forks === 0) continue;
   const prev = forksCache[slug];
   if (prev && now - prev.fetchedAt < forksMaxAgeMs && prev.total === info.forks) continue;
 

@@ -37,7 +37,7 @@ tools/
   import.mjs              pull new entries from external sources
   from-issue.mjs          submit/claim issue form → entry (used by issue-entry.yml)
   health.mjs              follow moved repos, flag deleted/archived ones
-  build.mjs               HTML pages, catalog.json, index.json, sitemap
+  build.mjs               HTML pages, catalog.json, index.json, sitemap (pages in tools/site/)
   serve.mjs               local preview server
 site.config.json          title, URLs, giscus, import sources
 ```
