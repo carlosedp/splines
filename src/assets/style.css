@@ -128,6 +128,13 @@ code, .cmd { font-family: var(--mono); font-size: .9em; }
 .badge.ai-assisted { color: var(--warn); border-color: currentColor; }
 .badge.ai-unknown { border-style: dashed; }
 .badge.new { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; vertical-align: middle; }
+.badge.listing { color: var(--warn); border-color: currentColor; border-style: dashed; vertical-align: middle; }
+
+/* admin/ */
+.admin-signin { max-width: 520px; }
+.admin-signin label { display: block; font: 13px var(--mono); color: var(--muted); margin-bottom: 4px; }
+.admin-signin input { flex: 1; min-width: 0; font: 14px var(--sans); padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.admin-note { color: var(--warn); }
 .stat.likes { color: var(--accent); }
 .like-link { font: 13px var(--mono); text-decoration: none; border: 1px solid var(--accent); border-radius: 999px; padding: 1px 10px; }
 .like-link:hover { background: var(--accent); color: var(--accent-ink); }

@@ -4,7 +4,9 @@
 //
 // Sources are configured in site.config.json -> import. Imported entries get
 // `source: imported` and `ai: unknown`, and are proposed through a pull request
-// by the weekly workflow so a human reviews them before they go live.
+// by the weekly workflow. Only entries from maiden community catalogs are `listing: published` (their
+// authors listed them there); the rest are `listing: indexed`: kept and tracked, but not on the site until
+// their author opts in (tools/invite.mjs drafts the invitations).
 import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT, ENTRIES_DIR, loadConfig, loadEntries, normalizeRepo, stringifyFrontMatter, gh, githubSlug, hasNornsLayout, isModOnly, TAG_RE, PLACEHOLDER_DESCRIPTION, KNOWN_REQUIRES } from './lib.mjs';
@@ -69,7 +71,8 @@ function add({ name, repo, author, description, tags, requires, discussion, docs
   // hardware tags (grid, arc, crow, midi...) double as the `requires` filter
   const req = requires ?? data.tags.filter((t) => KNOWN_REQUIRES.includes(t));
   if (req.length) data.requires = req;
-  Object.assign(data, { ai: 'unknown', source: 'imported', origin, added: today });
+  const listing = origin.startsWith('catalog:') ? 'published' : 'indexed';
+  Object.assign(data, { ai: 'unknown', source: 'imported', origin, listing, added: today });
   if (discussion?.startsWith('https://')) data.discussion = discussion;
   if (docs?.startsWith('https://')) data.docs = docs;
 

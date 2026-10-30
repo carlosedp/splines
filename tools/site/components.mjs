@@ -1,5 +1,5 @@
 // Pieces several pages share: cards, badges, fork lists, the "what's new" panels, filter chips.
-import { githubSlug, PLATFORMS, KINDS, STATUSES } from "../lib.mjs";
+import { githubSlug, PLATFORMS, KINDS, STATUSES, LISTINGS } from "../lib.mjs";
 import { html } from "./html.mjs";
 import { cfg, href, siteUrl, cache, buildDate, NEW_DAYS, FORK_MIN_AHEAD, AI_LABEL } from "./context.mjs";
 
@@ -8,7 +8,11 @@ export const aiBadge = (ai) => html`<span class="badge ai ai-${ai}" title="${AI_
 export const statusIcon = (r) =>
   r.status && html` <span class="status-warn" title="${STATUSES[r.status]}" aria-label="${STATUSES[r.status]}" role="img">⚠️</span>`;
 
-export const tagLink = (t) => html`<a class="tag" href="${href(`?tag=${encodeURIComponent(t)}`)}">${t}</a>`;
+// only seen in a `build --all` preview: the deployed site has published entries only
+export const listingBadge = (r) =>
+  r.listing !== "published" && html` <span class="badge listing" title="${LISTINGS[r.listing]}">${r.listing}</span>`;
+
+export const tagLink =(t) => html`<a class="tag" href="${href(`?tag=${encodeURIComponent(t)}`)}">${t}</a>`;
 
 export const reqBadge = (q) => html`<span class="badge req">${q}</span>`;
 
@@ -37,9 +41,10 @@ export function forkList(r) {
 
 export function card(r) {
   const search = [r.name, r.author, r.description, ...r.tags, ...r.requires].join(" ").toLowerCase();
-  return html`<li class="card" data-platform="${r.platform}" data-kind="${r.kind}" data-ai="${r.ai}" data-tags="${r.tags.join(" ")}" data-requires="${r.requires.join(" ")}" data-name="${r.name}" data-stars="${r.stars ?? 0}" data-likes="${r.likes}" data-forks="${r.activeForks.length}" data-updated="${r.updated}" data-added="${r.added}" data-search="${search}">
+  // src/assets/admin.js builds the same markup for unpublished entries: keep the two in step
+  return html`<li class="card" data-listing="${r.listing}" data-platform="${r.platform}" data-kind="${r.kind}" data-ai="${r.ai}" data-tags="${r.tags.join(" ")}" data-requires="${r.requires.join(" ")}" data-name="${r.name}" data-stars="${r.stars ?? 0}" data-likes="${r.likes}" data-forks="${r.activeForks.length}" data-updated="${r.updated}" data-added="${r.added}" data-search="${search}">
   <a class="card-link" href="${href(r.path)}">
-    <span class="card-title">${r.name}${statusIcon(r)}${newBadge(r)}</span>
+    <span class="card-title">${r.name}${statusIcon(r)}${newBadge(r)}${listingBadge(r)}</span>
     <span class="card-author">by ${r.author}</span>
   </a>
   <p class="card-desc">${r.description}</p>

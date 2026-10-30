@@ -4,6 +4,7 @@
 //   new/, updated/        latest additions and upstream pushes, plus Atom feeds
 //   forks/                forks people keep working on (data from enrich.mjs)
 //   about/, start/        submission guide and getting started, from Markdown in src/
+//   admin/                every entry, published or not, for maintainers (data loaded from GitHub with their token)
 //   catalog.json          maiden-compatible catalog (norns scripts only)
 //   index.json            the whole catalog as plain JSON, for other tools
 //
@@ -20,8 +21,11 @@ import lists from "./site/pages/lists.mjs";
 import forks from "./site/pages/forks.mjs";
 import prose from "./site/pages/prose.mjs";
 import data from "./site/pages/data.mjs";
+import admin from "./site/pages/admin.mjs";
 
-const records = collectRecords();
+// --all: a local preview with every entry, not just published ones (cards show the listing). Never deploy it.
+const all = process.argv.includes("--all");
+const records = collectRecords({ all });
 const { write, copyDir, prune } = createOutput(DIST);
 
 copyDir(path.join(ROOT, "src", "assets"), "assets");
@@ -30,8 +34,9 @@ entries(records, write);
 lists(records, write);
 forks(records, write);
 prose(records, write);
+admin(records, write);
 const inCatalog = data(records, write);
 // remove what this build didn't write (deleted or renamed entries); always go through write()
 prune();
 
-console.log(`✓ built ${records.length} entries into dist/ (${inCatalog} in the maiden catalog)`);
+console.log(`✓ built ${records.length} entries into dist/ (${inCatalog} in the maiden catalog)${all ? ", including unpublished ones: preview only" : ""}`);

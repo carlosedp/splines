@@ -1,5 +1,6 @@
 // index.html: the searchable, filterable list. Cards are prerendered; app.js only filters and sorts them.
-import { PLATFORMS, KINDS } from "../../lib.mjs";
+// Signed-in admins (see admin.mjs) also get cards for unpublished entries, built by admin.js, and the listing filter.
+import { PLATFORMS, KINDS, LISTINGS } from "../../lib.mjs";
 import { html, join } from "../html.mjs";
 import { cfg, href, submitUrl, AI_LABEL } from "../context.mjs";
 import { latest } from "../records.mjs";
@@ -61,6 +62,10 @@ export default function home(records, write) {
       ${[...aiCounts].map(([k, n]) => html`<button type="button" class="chip" data-value="${k}" aria-pressed="false" title="${AI_LABEL[k][1]}">${AI_LABEL[k][0]} <span class="count">${n}</span></button>`)}
     </fieldset>
     ${chipGroup("requires", "hardware", reqCounts)}
+    <fieldset class="chips admin-only" data-group="listing" hidden>
+      <legend>listing (admin)</legend>
+      ${Object.entries(LISTINGS).map(([k, title]) => html`<button type="button" class="chip" data-value="${k}" aria-pressed="false" title="${title}">${k} <span class="count"></span></button>`)}
+    </fieldset>
   </div>
   <details class="tag-panel">
     <summary>tags <span class="count">${tagCounts.size}</span></summary>
@@ -68,7 +73,7 @@ export default function home(records, write) {
   </details>
   <p class="status"><span id="count">${records.length}</span> shown <button id="clear" type="button" class="link-button" hidden>clear filters</button></p>
 </section>
-<ul id="results" class="cards">
+<ul id="results" class="cards" data-repo="${cfg.repo}" data-branch="${cfg.branch}" data-ai-labels="${JSON.stringify(AI_LABEL)}">
 ${join(records.map(card), "\n")}
 </ul>
 <p id="empty" class="empty" hidden>Nothing matches. Try fewer filters, or <a href="${submitUrl}">add the script you were looking for</a>.</p>

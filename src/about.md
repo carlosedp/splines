@@ -4,6 +4,10 @@
 
 It's unofficial and community-run, and has no affiliation with monome. Scripts live in their authors' repositories and keep their own licenses; {{title}} only links to them.
 
+## only with the author's OK
+
+A script appears here only if its author wants it here: they submitted it, claimed it, or listed it in monome's [norns.community](https://norns.community) catalog themselves. {{title}} also looks for scripts on its own (see [where the scripts come from](#where-the-scripts-come-from)), but what it finds is not shown. Instead, the author gets a one-time invitation on their repository and can say yes, no, or nothing at all.
+
 ## the one rule: you own what you post
 
 However a script was made, the person who submits it stands behind it:
@@ -20,7 +24,7 @@ Every entry carries one of these labels, and the list can be filtered by them, s
 | -------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | **handmade** (`ai: none`)        | written without AI code generation (autocomplete-level help is fine)                                    |
 | **ai-assisted** (`ai: assisted`) | made with meaningful help from AI tools, up to mostly generated code, reviewed and tested by the author |
-| **undisclosed** (`ai: unknown`)  | imported automatically; the author hasn't said yet                                                      |
+| **undisclosed** (`ai: unknown`)  | listed from the community catalog; the author hasn't said yet                                           |
 
 ## submitting a script
 
@@ -54,7 +58,7 @@ The script page shows your repository's README, so there's no need to copy your 
 
 4. Open a pull request. A check validates the entry and confirms the repo exists (for norns, that it has a `.lua` script at its root). Once merged, the site rebuilds in a minute or two.
 
-Already listed through an import? Use the "claim it" link on the script's page (or the [claim form](https://github.com/{{repo}}/issues/new?template=claim.yml)) to disclose AI use and fix its details.
+Already listed through an import, or invited to opt in? Use the "claim it" link on the script's page (or the [claim form](https://github.com/{{repo}}/issues/new?template=claim.yml)) to publish it, disclose AI use and fix its details. Rather not be listed? The [opt-out form](https://github.com/{{repo}}/issues/new?template=optout.yml) takes it off the site and stops any further invitations.
 
 Once it's listed, the script page has a README badge you can copy, linking readers back to the catalog.
 
@@ -76,7 +80,10 @@ maiden's project manager reads its catalogs from its configuration on the device
 
 ## where the scripts come from
 
-Besides direct submissions, a weekly job looks for scripts in the official community catalog, curated lists and public GitHub repositories. New finds are proposed as a pull request and reviewed before they appear here. They're marked **undisclosed** until their authors claim them.
+Besides direct submissions, a weekly job looks for scripts in the official community catalog, curated lists, lines threads and public GitHub repositories.
+
+- Scripts from the **community catalog** appear here, because their authors chose to publish them there. They're marked **undisclosed** until their authors claim them.
+- **Everything else** is only indexed: kept in the catalog's repository and checked for moves and deletions, but **not shown on the site**. Its author may get a single issue on their repo asking whether they'd like it listed. Answering yes publishes it. Answering no, or closing the issue, keeps it off the site, and they won't be asked again.
 
 Another weekly job checks that every listed repository still exists: moved repos are followed automatically, and deleted ones are flagged for removal.
 

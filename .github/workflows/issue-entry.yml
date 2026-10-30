@@ -1,6 +1,6 @@
 name: entry from issue
 
-# "[submit]" and "[claim]" issues (forms in .github/ISSUE_TEMPLATE) become pull requests.
+# "[submit]", "[claim]" (opt in) and "[optout]" issues (forms in .github/ISSUE_TEMPLATE) become pull requests.
 # Editing the issue runs it again and updates the same pull request.
 on:
   issues:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   entry:
-    if: startsWith(github.event.issue.title, '[submit]') || startsWith(github.event.issue.title, '[claim]')
+    if: startsWith(github.event.issue.title, '[submit]') || startsWith(github.event.issue.title, '[claim]') || startsWith(github.event.issue.title, '[optout]')
     runs-on: ubuntu-latest
     concurrency: issue-${{ github.event.issue.number }}
     steps:
@@ -56,7 +56,7 @@ jobs:
           commit-message: 'scripts: ${{ steps.entry.outputs.name }} (#${{ github.event.issue.number }})'
           title: 'scripts: ${{ github.event.issue.title }}'
           body-path: pr-body.md
-          labels: ${{ startsWith(github.event.issue.title, '[claim]') && 'claim' || 'submission' }}
+          labels: ${{ startsWith(github.event.issue.title, '[claim]') && 'claim' || startsWith(github.event.issue.title, '[optout]') && 'optout' || 'submission' }}
       - name: Comment on the issue
         if: always() && steps.entry.conclusion == 'success'
         env:

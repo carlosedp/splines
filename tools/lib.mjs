@@ -37,6 +37,17 @@ export const STATUSES = {
   archived: 'The repository is archived: it may no longer be maintained, or a newer script may have replaced it',
   gone: 'The repository could not be found: it may have been deleted, made private or moved',
 };
+// Whether an entry is on the site (front matter `listing`). Scripts are only published with their author's OK: they
+// submitted or opted in, or listed the script in a maiden community catalog themselves. Everything else found by the
+// importer stays indexed: kept here, tracked by enrich and health, shown only to admins, and its author can be invited
+// to opt in (tools/invite.mjs). An author who says no gets `declined`: never shown, never asked again.
+export const LISTINGS = {
+  published: 'On the site and in catalog.json: the author submitted it, opted in, or listed it in a community catalog',
+  indexed: 'Found by the importer; not on the site until its author opts in',
+  declined: 'The author asked not to be listed; not on the site, and never invited again',
+};
+export const DEFAULT_LISTING = 'indexed';
+export const listingOf = (data) => data?.listing ?? DEFAULT_LISTING;
 export const AI_VALUES = ['none', 'assisted', 'unknown'];
 export const SOURCE_VALUES = ['submitted', 'imported'];
 export const KNOWN_REQUIRES = ['grid', 'arc', 'crow', 'midi', 'audio-in', 'keyboard', 'jf', 'ansible', 'teletype', 'hid', 'osc', 'txo', 'er-301'];
@@ -143,11 +154,12 @@ export function validateEntry(entry) {
   if (!AI_VALUES.includes(d.ai)) errs.push(`"ai" must be one of: ${AI_VALUES.join(', ')}`);
   if (d.source !== undefined && !SOURCE_VALUES.includes(d.source)) errs.push(`"source" must be one of: ${SOURCE_VALUES.join(', ')}`);
   if (d.status !== undefined && !STATUSES[d.status]) errs.push(`"status" must be one of: ${Object.keys(STATUSES).join(', ')}`);
+  if (d.listing !== undefined && !LISTINGS[d.listing]) errs.push(`"listing" must be one of: ${Object.keys(LISTINGS).join(', ')}`);
   if (d.source !== 'imported' && d.ai === 'unknown') errs.push('"ai: unknown" is only allowed for imported entries; submitters must disclose');
   // drives the /new/ page and feed; the initial import has no date, so it doesn't flood them
   if (d.added !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(String(d.added))) errs.push('"added" must be a date like 2026-10-21');
   if (d.added === undefined && d.source !== 'imported') errs.push('"added" is required: the date the entry is submitted, like 2026-10-21');
-  for (const k of ['discussion', 'docs', 'cover', 'install']) {
+  for (const k of ['discussion', 'docs', 'cover', 'install', 'invited']) {
     if (d[k] !== undefined && !/^https:\/\/[^\s]+$/.test(String(d[k]))) errs.push(`"${k}" must be an https URL`);
   }
   return errs;

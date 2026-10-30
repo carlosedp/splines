@@ -1,6 +1,6 @@
 // Entries plus cached GitHub data, as the records every page renders from (sorted by name).
 import path from "node:path";
-import { ROOT, ENTRIES_DIR, loadEntries, validateEntry, githubSlug, PLACEHOLDER_DESCRIPTION } from "../lib.mjs";
+import { ROOT, ENTRIES_DIR, loadEntries, validateEntry, githubSlug, listingOf, PLACEHOLDER_DESCRIPTION } from "../lib.mjs";
 import { cache, discussions, forksCache, buildDate, FORK_MIN_AHEAD, FORK_ACTIVE_DAYS } from "./context.mjs";
 import { renderReadme } from "./markdown.mjs";
 
@@ -20,7 +20,8 @@ function activeForks(slug, info) {
     .sort((a, b) => b.pushed.localeCompare(a.pushed));
 }
 
-export function collectRecords() {
+/** Published entries only, unless `all` (a local preview with indexed and declined ones, see build.mjs --all). */
+export function collectRecords({ all = false } = {}) {
   const records = [];
   for (const e of loadEntries()) {
     const errs = validateEntry(e);
@@ -29,6 +30,8 @@ export function collectRecords() {
       continue;
     }
     const d = e.data;
+    const listing = listingOf(d);
+    if (listing !== "published" && !all) continue;
     const ghSlug = githubSlug(d.repo);
     const gh = cache[ghSlug] || {};
     records.push({
@@ -44,6 +47,7 @@ export function collectRecords() {
       ai: d.ai,
       source: d.source || "submitted",
       origin: d.origin || null,
+      listing,
       repo: d.repo,
       discussion: d.discussion || null,
       docs: d.docs || null,

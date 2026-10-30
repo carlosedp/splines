@@ -1,13 +1,15 @@
 # Field labels are read by tools/from-issue.mjs: keep them in sync when renaming.
-name: Claim an imported script
-description: Your script was imported automatically? Claim it, disclose AI use and fix its details.
+# Invitations (tools/invite.mjs) link here with `script` filled in.
+name: Claim and publish your script
+description: Your script is in the catalog but not on the site yet, or was imported automatically? Opt in, disclose AI use and fix its details.
 title: "[claim] "
 labels: [claim]
 body:
   - type: markdown
     attributes:
       value: |
-        Imported scripts show as **undisclosed** until their author claims them. A bot turns this form into a pull request; leave a field empty to keep what's there.
+        Scripts only go on splines with their author's OK. Send this form to publish yours (or, if it's already listed, to claim it). A bot turns it into a pull request; leave a field empty to keep what's there.
+        Changed your mind, or don't want it listed? Use the [opt-out form](https://github.com/carlosedp/splines/issues/new?template=optout.yml&title=%5Boptout%5D%20) instead.
   - type: input
     id: script
     attributes:
@@ -51,7 +53,7 @@ body:
     attributes:
       label: The one rule
       options:
-        - label: I'm the author of this script
+        - label: I'm the author of this script, and I'd like it listed on splines
           required: true
         - label: I understand the code well enough to answer questions and fix bugs
           required: true
