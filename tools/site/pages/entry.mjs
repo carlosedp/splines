@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { ENTRIES_DIR, PLATFORMS, KINDS, STATUSES, githubSlug } from "../../lib.mjs";
 import { html, raw, join } from "../html.mjs";
-import { cfg, href, siteUrl, commentsReady, AI_LABEL } from "../context.mjs";
+import { cfg, href, siteUrl, cache, commentsReady, AI_LABEL } from "../context.mjs";
 import { markdown } from "../markdown.mjs";
 import { layout } from "../layout.mjs";
 import { aiBadge, statusIcon, newBadge, listingBadge, tagLink, reqBadge, likesStat, forkList } from "../components.mjs";
@@ -32,6 +32,14 @@ const discussion = (r) =>
 <div id="discourse-comments" data-forum="${cfg.discourse.url.replace(/\/*$/, "/")}" data-embed-url="${siteUrl}/${r.path}"></div>
 </section>`;
 
+// always shown: "no license" matters too (the author keeps all rights). "none found" only when GitHub was asked.
+function licenseText(r, ghSlug) {
+  if (r.license === "other") return html`<span title="The repository has a license file GitHub doesn't recognize: read it in the repo">other (see repo)</span>`;
+  if (r.license) return r.license;
+  if (ghSlug && cache[ghSlug]) return html`<span title="No license file in the repository: by default the author keeps all rights. Ask them before reusing the code.">none found</span>`;
+  return "unknown";
+}
+
 function sidebar(r, ghSlug) {
   const editUrl = `https://github.com/${cfg.repo}/edit/${cfg.branch}/${ENTRIES_DIR}/${r.slug}/index.md`;
   const claimUrl = `https://github.com/${cfg.repo}/issues/new?template=claim.yml&title=${encodeURIComponent(`[claim] ${r.slug}`)}&script=${encodeURIComponent(r.slug)}`;
@@ -41,7 +49,7 @@ function sidebar(r, ghSlug) {
   const meta = [
     ["author", r.author],
     ["repository", html`<a href="${r.repo}">${ghSlug || r.repo}</a>`],
-    r.license && ["license", r.license],
+    ["license", licenseText(r, ghSlug)],
     r.stars != null && ["stars", `★ ${r.stars}`],
     r.forks > 0 && [
       "forks",

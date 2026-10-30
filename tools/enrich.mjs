@@ -47,7 +47,8 @@ for (const e of loadEntries()) {
       stars: r.stargazers_count,
       forks: r.forks_count,
       pushedAt: r.pushed_at,
-      license: r.license?.spdx_id && r.license.spdx_id !== 'NOASSERTION' ? r.license.spdx_id : null,
+      // NOASSERTION: there is a license file, but GitHub can't tell which license it is
+      license: r.license?.spdx_id ? (r.license.spdx_id === 'NOASSERTION' ? 'other' : r.license.spdx_id) : null,
       archived: r.archived,
       defaultBranch: r.default_branch,
       topics: r.topics || [],
