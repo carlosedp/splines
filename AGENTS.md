@@ -40,7 +40,7 @@ src/about.md              about/submit/maiden page ({{title}}, {{catalog}}, {{re
 src/start.md              /start/ getting-started guide for newcomers (same placeholders, plus {{base}} for site links)
 tools/lib.mjs             config, PLATFORMS, entry loading, front matter, VALIDATION RULES (single source of truth)
 tools/validate.mjs        CLI validator (GitHub Actions annotations when GITHUB_ACTIONS is set)
-tools/enrich.mjs          GitHub API metadata + README cache (20h TTL); likes (👍❤️🎉🚀 reactions on giscus discussions, GraphQL) → .cache/discussions.json; forks pushed to after forking, with commits ahead/behind upstream (weekly) → .cache/forks.json
+tools/enrich.mjs          GitHub API metadata + README cache (20h TTL); likes/comments of each page's forum thread (Discourse embed; DISCOURSE_API_KEY maps new topics) → .cache/discussions.json; forks pushed to after forking, with commits ahead/behind upstream (weekly) → .cache/forks.json
 tools/import.mjs          importers: maiden catalogs, awesome lists (incl. p3r7/awesome-monome-norns tables), GitHub topics + keyword search, lines (llllllll.co) threads per source with a `platform` (norns library, iii tag; rate-limited, recent only, `--days N` to backfill)
 tools/from-issue.mjs      [submit]/[claim] issue form → entry file + pr-body.md/comment.md (issue-entry.yml); field labels must match .github/ISSUE_TEMPLATE
 tools/health.mjs          follows moved repos (rewrites `repo`), sets/clears `status` for gone/archived → health.md (health.yml)
@@ -50,7 +50,7 @@ tools/site/               html.mjs (`html` escaping tag, raw, join), context.mjs
                           output.mjs (write-if-changed + prune), pages/*.mjs (one module per page or output group)
 tools/serve.mjs           local static server honoring basePath
 tools/new-entry.mjs       scaffolder behind `npm run new`
-site.config.json          title, siteUrl, basePath, cname, repo, giscus, import sources
+site.config.json          title, siteUrl, basePath, cname, repo, forum, discourse (embedded comments), import sources
 .github/workflows/        validate.yml (PRs), deploy.yml (push/daily → Pages), import.yml (weekly → PR), health.yml (weekly → PR), issue-entry.yml (issue forms → PR), claude.yml (`@claude` mentions by maintainers → Claude Code)
 .claude/skills/add-script/ procedure for "add <repo url> to the catalog" (used locally, on claude.ai/code and by claude.yml)
 ```
@@ -93,7 +93,7 @@ When adding a field: update `validateEntry` in `lib.mjs`, `templates/entry.md`, 
 - **Importer never overwrites** existing entries and dedupes by normalized repo URL. Imported entries are reviewed via the PR that `import.yml` opens. Repos in `site.config.json → import.ignore` are never imported: when you remove a dead entry or merge a duplicate, add the old URL there, or the next import brings it back.
 - **Active forks** (⑂ on cards, `/forks/`, script page aside): `enrich.mjs` stores every fork pushed to after it was created, with ahead/behind from the compare API; `tools/site/context.mjs` decides what counts as active (`FORK_MIN_AHEAD` commits on its default branch, pushed within `FORK_ACTIVE_DAYS`). Tune the thresholds there; no refetch needed. Forks are not catalog entries and are not reviewed.
 - **The build updates `dist/` in place**: unchanged files aren't rewritten and files no build produced are pruned at the end. Always go through `write()` so a file isn't pruned.
-- **Likes, not star ratings.** The site is static, so "rating" = positive reactions on each script's giscus discussion (titled with the page path, e.g. `scripts/NEVE/`), counted by `enrich.mjs` and shown as ♥ on cards plus a "most liked" sort. ★ means GitHub stars; keep the two distinct.
+- **Likes, not star ratings.** The site is static, so "rating" = likes on the first post of each script's thread on the Discourse forum (talk.splines.cc), counted by `enrich.mjs`. Script pages embed the thread; Discourse creates the topic the first time someone scrolls to the comments (`app.js` loads the embed lazily), keyed by the page URL and shown as ♥ on cards plus a "most liked" sort. ★ means GitHub stars; keep the two distinct.
 - **The build must work offline.** GitHub metadata and READMEs come only from `.cache/` (written by `enrich.mjs`). Missing cache just means fewer stats on cards and no README on script pages.
 - Styling: CSS custom properties on `:root`, with dark mode via `prefers-color-scheme` plus a `data-theme` override (toggle in header). Keep both themes working and the layout fine at 390px width.
 - The author develops on **Windows**; keep scripts cross-platform (use `path`, normalize `\` to `/` for display paths, no shell-specific npm scripts).
@@ -103,7 +103,6 @@ When adding a field: update `validateEntry` in `lib.mjs`, `templates/entry.md`, 
 
 - Confirm how maiden is configured with an extra catalog URL on the device, then document the exact steps in `src/about.md` (the `## installing with maiden` section).
 - Some imported "norns" entries are really crow scripts, Max patches, editor plugins or libraries (e.g. `crow-scripts`, `trio_for_crow`, `m4l-monome-norns`, `norns.el`). Re-platform or remove them during curation.
-- giscus is wired but inactive until `site.config.json → giscus` is filled in.
 
 ## Roadmap (under discussion, not decided)
 

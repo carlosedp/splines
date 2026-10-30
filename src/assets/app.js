@@ -42,6 +42,27 @@
     });
   }
 
+  // ---- forum comments: load Discourse's embed when the section comes near, so its topic is created only then ----
+  const comments = document.getElementById('discourse-comments');
+  if (comments) {
+    const load = () => {
+      window.DiscourseEmbed = { discourseUrl: comments.dataset.forum, discourseEmbedUrl: comments.dataset.embedUrl };
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = comments.dataset.forum + 'javascripts/embed.js';
+      document.head.appendChild(s);
+    };
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((seen) => {
+        if (seen.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          load();
+        }
+      }, { rootMargin: '400px' });
+      io.observe(comments);
+    } else load();
+  }
+
   // ---- catalog list ----
   const list = document.getElementById('results');
   if (!list) return;

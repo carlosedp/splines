@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { ENTRIES_DIR, PLATFORMS, KINDS, STATUSES, githubSlug } from "../../lib.mjs";
 import { html, raw, join } from "../html.mjs";
-import { cfg, href, siteUrl, giscusReady, AI_LABEL } from "../context.mjs";
+import { cfg, href, siteUrl, commentsReady, AI_LABEL } from "../context.mjs";
 import { markdown } from "../markdown.mjs";
 import { layout } from "../layout.mjs";
 import { aiBadge, statusIcon, newBadge, tagLink, reqBadge, likesStat, forkList } from "../components.mjs";
@@ -23,11 +23,13 @@ function install(r) {
 </section>`;
 }
 
-const discussion = () =>
-  giscusReady &&
+// app.js loads Discourse's embed.js when this scrolls near the viewport, so the forum topic is only created
+// when someone actually reaches the comments.
+const discussion = (r) =>
+  commentsReady &&
   html`<section class="discussion" id="discussion"><h2>discussion</h2>
-<p class="hint">Like this script? React with 👍 or ❤️ below (needs a GitHub account). Reactions count as likes (♥) on ${cfg.title}, updated daily.</p>
-<script src="https://giscus.app/client.js" data-repo="${cfg.giscus.repo}" data-repo-id="${cfg.giscus.repoId}" data-category="${cfg.giscus.category}" data-category-id="${cfg.giscus.categoryId}" data-mapping="pathname" data-strict="1" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="preferred_color_scheme" data-lang="en" data-loading="lazy" crossorigin="anonymous" async></script>
+<p class="hint">Talk about this script on the <a href="${cfg.discourse.url}">${cfg.title} forum</a>. Like the thread's first post to give it a ♥ here (counts update daily).</p>
+<div id="discourse-comments" data-forum="${cfg.discourse.url.replace(/\/*$/, "/")}" data-embed-url="${siteUrl}/${r.path}"></div>
 </section>`;
 
 function sidebar(r, ghSlug) {
@@ -76,7 +78,7 @@ export default function entries(records, write) {
   <header class="entry-head">
     <h1>${r.name}${statusIcon(r)}${newBadge(r)}</h1>
     <p class="lede">${r.description}</p>
-    <div class="card-meta">${aiBadge(r.ai)} <span class="ai-note">${AI_LABEL[r.ai][1]}</span>${giscusReady ? html` <a class="like-link" href="#discussion" title="React in the discussion to like it">♥ ${r.likes || ""} like</a>` : likesStat(r)}</div>
+    <div class="card-meta">${aiBadge(r.ai)} <span class="ai-note">${AI_LABEL[r.ai][1]}</span>${commentsReady ? html` <a class="like-link" href="#discussion" title="Like it in its forum thread">♥ ${r.likes || ""} like</a>` : likesStat(r)}</div>
     ${r.status && html`<p class="warn">⚠️ ${STATUSES[r.status]}.</p>`}
   </header>
   ${r.cover && html`<img class="cover" src="${r.cover}" alt="${r.name} screenshot" loading="lazy">`}
@@ -89,7 +91,7 @@ export default function entries(records, write) {
           ? html`<section class="readme"><h2>readme <span class="readme-src">from <a href="${r.repo}">${ghSlug || r.repo}</a></span></h2><div class="prose">${raw(r.readme)}</div></section>`
           : html`<section class="readme"><h2>readme</h2><p class="hint">Documentation lives in <a href="${r.repo}">the repository</a>.</p></section>`
       }
-      ${discussion()}
+      ${discussion(r)}
     </div>
     ${sidebar(r, ghSlug)}
   </div>
