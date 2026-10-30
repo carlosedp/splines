@@ -27,7 +27,7 @@ export default function forks(records, write) {
       body: html`
 <section class="hero">
   <h1>active forks</h1>
-  <p>Forks of catalog scripts with work of their own: at least ${FORK_MIN_AHEAD} commits ahead of upstream on their main branch, pushed in the last year. <strong>newer</strong> marks forks pushed after the original. Forks aren't reviewed for the catalog; read the diff before installing one (<code>;install</code> works with a fork's URL too). Counts refresh weekly.</p>
+  <p>Forks of catalog scripts with work of their own: at least ${FORK_MIN_AHEAD} commits ahead of upstream on their main branch, pushed in the last year. <strong>newer</strong> marks forks pushed after the original. Each fork has a page with its install line, its latest commits and its README. Forks aren't reviewed for the catalog; look at what changed before installing one. Counts refresh weekly.</p>
 </section>
 ${
   forked.length

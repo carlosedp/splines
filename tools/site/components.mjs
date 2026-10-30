@@ -23,15 +23,18 @@ const forksStat = (r) =>
   r.activeForks.length > 0 &&
   html`<span class="stat forks" title="Active forks: ${FORK_MIN_AHEAD}+ commits of their own, pushed in the last year">⑂ ${r.activeForks.length}</span>`;
 
-/** A fork list with ahead/behind counts and a link to its diff against upstream. */
-export function forkList(r) {
+/** GitHub's diff between the script's repo and one of its forks. */
+export function forkDiffUrl(r, f) {
   const up = githubSlug(r.repo);
-  const upBranch = encodeURIComponent(cache[up]?.defaultBranch || "HEAD");
-  return html`<ul class="fork-list">${r.activeForks.map((f) => {
-    const [owner, name] = f.slug.split("/");
-    const diff = `https://github.com/${up}/compare/${upBranch}...${owner}:${name}:${encodeURIComponent(f.branch)}`;
-    return html`<li><a href="https://github.com/${f.slug}">${f.slug}</a>
-  <span class="fork-stats"><a href="${diff}" title="Commits ahead of / behind upstream: see the diff">+${f.ahead} −${f.behind}</a>${f.stars > 0 && html` <span title="GitHub stars">★ ${f.stars}</span>`} <time datetime="${f.pushed}" title="Last push">${f.pushed}</time>${f.newer && html` <span class="badge new" title="Pushed more recently than upstream">newer</span>`}</span></li>`;
+  const [owner, name] = f.slug.split("/");
+  return `https://github.com/${up}/compare/${encodeURIComponent(cache[up]?.defaultBranch || "HEAD")}...${owner}:${name}:${encodeURIComponent(f.branch)}`;
+}
+
+/** A fork list (each fork links to its page) with ahead/behind counts linking to the diff. `except` = a fork slug to leave out. */
+export function forkList(r, except) {
+  return html`<ul class="fork-list">${r.activeForks.filter((f) => f.slug !== except).map((f) => {
+    return html`<li><a href="${href(f.path)}" title="About this fork">${f.slug}</a>
+  <span class="fork-stats"><a href="${forkDiffUrl(r, f)}" title="Commits ahead of / behind upstream: see the diff">+${f.ahead} −${f.behind}</a>${f.stars > 0 && html` <span title="GitHub stars">★ ${f.stars}</span>`} <time datetime="${f.pushed}" title="Last push">${f.pushed}</time>${f.newer && html` <span class="badge new" title="Pushed more recently than upstream">newer</span>`}</span></li>`;
   })}</ul>`;
 }
 
