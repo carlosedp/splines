@@ -18,6 +18,11 @@ export default function home(records, write) {
     for (const q of r.requires) reqCounts.set(q, (reqCounts.get(q) || 0) + 1);
   }
   const aiCounts = countBy(records, Object.keys(AI_LABEL), "ai");
+  // chip text for values admin.js adds when unpublished entries bring new ones (see chipGroup's `text` below)
+  const chipLabels = {
+    platform: Object.fromEntries(Object.entries(PLATFORMS).map(([k, p]) => [k, p.label])),
+    kind: Object.fromEntries(Object.entries(KINDS).map(([k, p]) => [k, p.plural])),
+  };
 
   write(
     "index.html",
@@ -73,7 +78,7 @@ export default function home(records, write) {
   </details>
   <p class="status"><span id="count">${records.length}</span> shown <button id="clear" type="button" class="link-button" hidden>clear filters</button></p>
 </section>
-<ul id="results" class="cards" data-repo="${cfg.repo}" data-branch="${cfg.branch}" data-admin="${href("admin/")}" data-ai-labels="${JSON.stringify(AI_LABEL)}">
+<ul id="results" class="cards" data-repo="${cfg.repo}" data-branch="${cfg.branch}" data-admin="${href("admin/")}" data-ai-labels="${JSON.stringify(AI_LABEL)}" data-chip-labels="${JSON.stringify(chipLabels)}">
 ${join(records.map(card), "\n")}
 </ul>
 <p id="empty" class="empty" hidden>Nothing matches. Try fewer filters, or <a href="${submitUrl}">add the script you were looking for</a>.</p>

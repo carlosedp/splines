@@ -145,6 +145,38 @@
     return li;
   }
 
+  /**
+   * The build counted the chips over published entries only. Recount every group over all the cards, so the counts
+   * match what the filter shows, and add chips for values only unpublished entries have (a tag, platform or kind).
+   * app.js handles clicks on the fieldset, so new chips work as they are.
+   */
+  function recountChips(list) {
+    const labels = JSON.parse(list.dataset.chipLabels || '{}');
+    const cards = Array.from(list.querySelectorAll('.card'));
+    document.querySelectorAll('fieldset.chips[data-group]').forEach((fs) => {
+      const g = fs.dataset.group;
+      const counts = new Map();
+      for (const c of cards) for (const v of (c.dataset[g] || '').split(' ').filter(Boolean)) counts.set(v, (counts.get(v) || 0) + 1);
+      const chips = new Map(Array.from(fs.querySelectorAll('.chip'), (c) => [c.dataset.value, c]));
+      for (const [v, n] of counts) {
+        if (chips.has(v)) continue;
+        const chip = el('button', 'chip', `${labels[g]?.[v] ?? v} `);
+        chip.type = 'button';
+        chip.dataset.value = v;
+        chip.setAttribute('aria-pressed', 'false');
+        chip.append(el('span', 'count'));
+        chips.set(v, chip);
+      }
+      for (const [v, chip] of chips) chip.querySelector('.count').textContent = counts.get(v) || 0;
+      // most used first, like chipGroup() in the build; the AI and listing groups keep their fixed order
+      if (g !== 'ai' && g !== 'listing') {
+        fs.append(...[...chips].sort(([a], [b]) => (counts.get(b) || 0) - (counts.get(a) || 0) || a.localeCompare(b)).map(([, c]) => c));
+      }
+    });
+    const tagTotal = document.querySelector('.tag-panel summary .count');
+    if (tagTotal) tagTotal.textContent = document.querySelectorAll('fieldset[data-group="tags"] .chip').length;
+  }
+
   async function showAll(list) {
     const token = store.get();
     const [owner, name] = list.dataset.repo.split('/');
@@ -167,12 +199,8 @@
       const aiLabels = JSON.parse(list.dataset.aiLabels || '{}');
       window.splinesAddCards(hidden.map((e) => card(e, aiLabels)));
 
-      const chips = document.querySelector('fieldset[data-group="listing"]');
-      chips.hidden = false;
-      // counted from the cards, so they match what the filter shows
-      chips.querySelectorAll('.chip').forEach((c) => {
-        c.querySelector('.count').textContent = list.querySelectorAll(`.card[data-listing="${c.dataset.value}"]`).length;
-      });
+      document.querySelector('fieldset[data-group="listing"]').hidden = false;
+      recountChips(list);
       // "admin (login)" links to the sign-in page; "sign out" works right here
       const who = el('a', null, login);
       who.href = list.dataset.admin;
