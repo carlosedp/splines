@@ -13,6 +13,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/hiswing-script/71720
 docs: https://github.com/hanjo-synth/Hiswing
 ---

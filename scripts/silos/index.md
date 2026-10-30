@@ -17,6 +17,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/43804
 docs: https://norns.community/authors/justmat/silos
 ---

@@ -13,5 +13,6 @@ requires:
 ai: unknown
 source: imported
 origin: awesome:p3r7/awesome-monome-norns
+listing: indexed
 discussion: https://llllllll.co/t/langl/26931
 ---

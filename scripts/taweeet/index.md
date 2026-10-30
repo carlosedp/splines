@@ -10,6 +10,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/69028
 docs: https://github.com/skibu/taweeet/blob/main/README.md
 ---

@@ -11,6 +11,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/samthree-three-voice-pitched-looper/60482
 docs: https://llllllll.co/t/samthree-three-voice-pitched-looper/60482
 ---

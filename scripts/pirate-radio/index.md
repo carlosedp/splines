@@ -11,6 +11,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/pirate-radio/49013
 docs: https://norns.community/authors/study-group/pirate-radio
 ---

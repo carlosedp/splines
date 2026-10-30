@@ -14,6 +14,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/mdscaler/73236
 docs: https://github.com/hanjo-synth/MDScaler
 ---

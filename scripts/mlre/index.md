@@ -19,6 +19,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/mlre/57371
 docs: https://github.com/sonocircuit/mlre
 ---

@@ -9,5 +9,6 @@ tags:
 ai: unknown
 source: imported
 origin: awesome:p3r7/awesome-monome-norns
+listing: indexed
 docs: https://github.com/nattog/vials/blob/main/README.md
 ---

@@ -15,6 +15,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://l.llllllll.co/yggdrasil
 docs: https://norns.community/yggdrasil
 ---

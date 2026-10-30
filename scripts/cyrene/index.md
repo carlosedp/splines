@@ -19,6 +19,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/31648
 docs: https://norns.community/authors/21echoes/cyrene
 ---

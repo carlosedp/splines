@@ -11,6 +11,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/warmreload/63623
 docs: https://github.com/schollz/warmreload
 ---

@@ -10,5 +10,6 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/demon-core-a-very-simple-noise-module-for-norns-but-with-a-mind-of-its-own/
 ---

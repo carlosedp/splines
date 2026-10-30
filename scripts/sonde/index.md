@@ -14,5 +14,6 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 docs: https://github.com/simonsunyiming/sonde/blob/main/README.md
 ---

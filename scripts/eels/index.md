@@ -15,6 +15,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/eels/
 docs: https://github.com/andr-ew/eels
 ---

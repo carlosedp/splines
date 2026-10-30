@@ -10,6 +10,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/eterna/73584/
 docs: https://github.com/etsuko-fm/eterna
 ---

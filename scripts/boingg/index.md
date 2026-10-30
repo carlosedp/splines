@@ -16,6 +16,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/boingg/26536
 docs: https://norns.community/authors/justmat/boingg
 ---

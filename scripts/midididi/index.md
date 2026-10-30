@@ -13,5 +13,6 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/midididi-midi-cc-looper-mod/67129
 ---

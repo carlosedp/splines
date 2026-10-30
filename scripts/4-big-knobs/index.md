@@ -16,6 +16,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/42190
 docs: https://norns.community/authors/21echoes/4-big-knobs
 ---

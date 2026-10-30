@@ -12,6 +12,7 @@ requires:
 ai: unknown
 source: imported
 origin: awesome:p3r7/awesome-monome-norns
+listing: indexed
 discussion: https://llllllll.co/t/fourtunes-a-4-track-polyphonic-step-sequencer/37854
 docs: https://github.com/silent5/Fourtunes/blob/main/Fourtunes%20Manual.pdf
 ---

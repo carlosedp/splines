@@ -20,6 +20,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://l.llllllll.co/less-concepts-norns
 docs: https://llllllll.co/t/less-concepts/54178#documentation-5
 ---

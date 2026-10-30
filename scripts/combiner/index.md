@@ -13,6 +13,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/65187
 docs: https://github.com/dstroud/combiner/blob/main/README.md
 ---

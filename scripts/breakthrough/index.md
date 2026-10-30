@@ -13,6 +13,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/breakthrough/39196
 docs: https://norns.community/authors/tomw/breakthrough
 ---

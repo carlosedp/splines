@@ -14,6 +14,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/41560
 docs: https://norns.community/authors/justmat/crow_talk
 ---

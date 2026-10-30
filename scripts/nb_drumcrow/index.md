@@ -15,5 +15,6 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/nb-drumcrow-norns-mod-that-turns-crow-into-a-4-voice-synth/69066
 ---

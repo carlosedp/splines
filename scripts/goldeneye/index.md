@@ -11,6 +11,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://l.llllllll.co/goldeneye
 docs: https://norns.community/goldeneye
 ---

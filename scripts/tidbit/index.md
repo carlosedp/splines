@@ -18,6 +18,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/tidbit/52104
 docs: https://llllllll.co/t/tidbit/52104
 ---

@@ -16,6 +16,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/streams/61436
 docs: https://github.com/sonocircuit/streams/docs
 ---

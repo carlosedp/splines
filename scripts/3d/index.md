@@ -9,6 +9,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/39622
 docs: https://norns.community/authors/eigen/3d
 ---

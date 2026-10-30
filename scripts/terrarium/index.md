@@ -10,5 +10,6 @@ tags:
 ai: assisted
 source: submitted
 origin: github-topic:monome-norns
+listing: published
 added: 2026-10-21
 ---

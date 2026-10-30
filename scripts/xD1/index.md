@@ -12,6 +12,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/xd1-is-an-fm-synth/59150
 docs: https://norns.community/authors/alanza/xd1
 ---

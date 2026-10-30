@@ -11,6 +11,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/scryingstone-norns/70778
 docs: https://www.youtube.com/watch?v=vvl44pg3hMM
 ---

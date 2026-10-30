@@ -14,6 +14,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/awed/72603
 docs: https://github.com/melocoi/_awed/blob/main/README.md
 ---

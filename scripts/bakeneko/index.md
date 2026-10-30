@@ -11,6 +11,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://l.llllllll.co/bakeneko
 docs: https://norns.community/bakeneko
 ---

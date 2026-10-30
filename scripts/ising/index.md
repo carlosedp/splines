@@ -9,5 +9,6 @@ tags:
 ai: unknown
 source: imported
 origin: awesome:p3r7/awesome-monome-norns
+listing: indexed
 discussion: https://llllllll.co/t/ising/30789
 ---

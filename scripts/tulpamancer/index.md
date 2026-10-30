@@ -13,6 +13,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://l.llllllll.co/tulpamancer
 docs: https://norns.community/tulpamancer
 ---

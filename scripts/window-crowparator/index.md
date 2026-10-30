@@ -11,6 +11,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/window-crowparator/71520
 docs: https://github.com/xmacex/window-crowparator
 ---

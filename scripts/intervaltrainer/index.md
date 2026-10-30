@@ -12,6 +12,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/interval-trainer/61087
 docs: https://llllllll.co/t/interval-trainer/61087
 ---

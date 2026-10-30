@@ -9,6 +9,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/ingenue-a-modern-responsive-web-interface-for-norns/74794
 docs: https://github.com/seajaysec/ingenue/blob/main/README.md
 ---

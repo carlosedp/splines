@@ -12,6 +12,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/noize/61967
 docs: https://github.com/deeg-deeg-deeg/noize
 ---

@@ -10,6 +10,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/foot-foot/73334
 docs: https://github.com/melocoi/footfoot/blob/main/README.md
 ---

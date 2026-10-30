@@ -13,6 +13,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/koiboi2/73410
 docs: https://github.com/Dillbo/KoiBoi2/blob/main/README.md
 ---

@@ -21,6 +21,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://l.llllllll.co/cheat-codes-2
 docs: https://github.com/dndrks/cheat_codes_2
 ---

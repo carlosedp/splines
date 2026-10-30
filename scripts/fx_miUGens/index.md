@@ -10,6 +10,7 @@ tags:
   - audio-fx
 ai: assisted
 source: submitted
+listing: published
 added: 2026-10-21
 license: GPL-3.0
 ---

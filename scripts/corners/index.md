@@ -15,6 +15,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/46227
 docs: https://norns.community/authors/quixotic7/corners
 ---

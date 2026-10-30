@@ -12,6 +12,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/eastwind/64578
 docs: https://www.youtube.com/watch?v=6yVP39R6n48
 ---

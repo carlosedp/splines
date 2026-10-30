@@ -14,6 +14,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/acid-test/52201
 docs: https://norns.community/authors/infinitedigits/acid-test
 ---

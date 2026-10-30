@@ -12,6 +12,7 @@ tags:
 ai: unknown
 source: imported
 origin: github-topic:norns
+listing: indexed
 ---
 
 An effect for the [fx](../fx/) mod framework. Install and enable **fx** first, then this mod (SYSTEM > MODS), and restart norns.

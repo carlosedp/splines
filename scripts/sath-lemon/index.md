@@ -14,6 +14,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/4-voice-live-looper-with-grid-visualization/74233
 docs: https://github.com/DesioArt/sath-lemon
 ---

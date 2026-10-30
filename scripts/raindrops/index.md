@@ -14,6 +14,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/raindrops-simple-generative-synth-sequencer/47633
 docs: https://llllllll.co/t/raindrops-simple-generative-synth-sequencer/47633
 ---

@@ -10,6 +10,7 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/34095
 docs: https://norns.community/authors/21echoes/samsara
 ---

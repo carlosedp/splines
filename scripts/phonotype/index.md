@@ -14,6 +14,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/49564
 docs: https://norns.community/authors/sixolet/phonotype
 ---

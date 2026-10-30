@@ -13,6 +13,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/21207
 docs: https://norns.community/authors/dani_derks/cranes
 ---

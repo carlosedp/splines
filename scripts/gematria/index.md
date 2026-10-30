@@ -12,6 +12,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://l.llllllll.co/gematria
 docs: https://norns.community/gematria
 ---

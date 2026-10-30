@@ -14,6 +14,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/4ccfader/71810
 docs: https://github.com/hanjo-synth/4CCFader
 ---

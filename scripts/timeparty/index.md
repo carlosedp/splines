@@ -15,6 +15,7 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/timeparty/22837
 docs: https://norns.community/authors/crim/timeparty
 ---

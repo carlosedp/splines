@@ -18,5 +18,6 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/m18s-now-for-norns/32068
 ---

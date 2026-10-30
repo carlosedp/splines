@@ -12,5 +12,6 @@ requires:
 ai: unknown
 source: imported
 origin: catalog:community
+listing: published
 discussion: https://llllllll.co/t/path-trace-movement-recorder-for-norns-and-crow/66276
 ---
