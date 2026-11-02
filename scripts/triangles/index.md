@@ -9,6 +9,6 @@ tags:
 ai: unknown
 source: imported
 origin: catalog:community
-listing: published
+listing: declined
 discussion: https://llllllll.co/t/triangles/52662
 ---
