@@ -31,7 +31,7 @@ Entries have a `listing`: `published` (on the site), `indexed` (found by the imp
 
 ## Update or remove an entry
 
-Edit or delete your `scripts/<name>/` folder in a PR. Authors can always ask for their entry to be removed, or use the [opt-out form](https://github.com/carlosedp/splines/issues/new?template=optout.yml) to take it off the site.
+To change the description, tags, hardware, AI disclosure or links, use the "edit its details" link on the script's page (or the [edit form](https://github.com/carlosedp/splines/issues/new?template=edit.yml)): it opens with the current values filled in, and a bot turns it into a pull request. For anything else, edit or delete your `scripts/<name>/` folder in a PR. Authors can always ask for their entry to be removed, or use the [opt-out form](https://github.com/carlosedp/splines/issues/new?template=optout.yml) to take it off the site.
 
 ## Working on the site itself
 

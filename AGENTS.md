@@ -47,7 +47,7 @@ tools/lib.mjs             config, PLATFORMS, entry loading, front matter, VALIDA
 tools/validate.mjs        CLI validator (GitHub Actions annotations when GITHUB_ACTIONS is set)
 tools/enrich.mjs          GitHub API metadata + README cache (20h TTL); likes/comments of each page's forum thread (Discourse embed; DISCOURSE_API_KEY maps new topics) → .cache/discussions.json; forks pushed to after forking, with commits ahead/behind upstream (weekly) → .cache/forks.json
 tools/import.mjs          importers: maiden catalogs, awesome lists (incl. p3r7/awesome-monome-norns tables), GitHub topics + keyword search, lines (llllllll.co) threads per source with a `platform` (norns library, iii tag; rate-limited, recent only, `--days N` to backfill)
-tools/from-issue.mjs      [submit]/[claim]/[optout] issue form → entry file + pr-body.md/comment.md (issue-entry.yml); field labels must match .github/ISSUE_TEMPLATE. A claim publishes (opt in), an optout sets `listing: declined`
+tools/from-issue.mjs      [submit]/[claim]/[edit]/[optout] issue form → entry file + pr-body.md/comment.md (issue-entry.yml); field labels must match .github/ISSUE_TEMPLATE. A claim publishes (opt in), an edit changes a published entry's details (script pages link to it prefilled), an optout sets `listing: declined`
 tools/invite.mjs          opt-in invitations for indexed entries: invites.md review list (default), --send opens issues and records `invited`, --sync marks closed invitations declined (invite.yml, gated)
 tools/health.mjs          follows moved repos (rewrites `repo`), sets/clears `status` for gone/archived → health.md (health.yml)
 tools/build.mjs           build entry point: collects records, runs each page module, prunes dist/

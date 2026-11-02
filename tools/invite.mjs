@@ -10,7 +10,7 @@
 // --send and --sync need a token that can open issues on other people's repos (GITHUB_TOKEN; in Actions, a PAT).
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT, loadConfig, loadEntries, listingOf, githubSlug, readJSON, parseFrontMatter, updateFrontMatter } from './lib.mjs';
+import { ROOT, loadConfig, loadEntries, listingOf, githubSlug, issueFormUrl, readJSON, parseFrontMatter, updateFrontMatter } from './lib.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k) => (args.includes(k) ? args[args.indexOf(k) + 1] : null);
@@ -27,8 +27,6 @@ const cfg = loadConfig();
 const siteUrl = (cfg.siteUrl || '').replace(/\/+$/, '');
 const cache = readJSON(path.join(ROOT, '.cache', 'github.json'), {});
 const now = Date.now();
-const issueForm = (template, kind, name) =>
-  `https://github.com/${cfg.repo}/issues/new?template=${template}&title=${encodeURIComponent(`[${kind}] ${name}`)}&script=${encodeURIComponent(name)}`;
 
 const template = parseFrontMatter(fs.readFileSync(path.join(ROOT, 'templates', 'invite.md'), 'utf8'));
 /** The invitation for one entry: { title, body }. */
@@ -40,8 +38,8 @@ function invitation(e) {
       .replaceAll('{{repo}}', e.data.repo)
       .replaceAll('{{site}}', siteUrl)
       .replaceAll('{{about}}', `${siteUrl}/about/`)
-      .replaceAll('{{optin}}', issueForm('claim.yml', 'claim', e.slug))
-      .replaceAll('{{optout}}', issueForm('optout.yml', 'optout', e.slug));
+      .replaceAll('{{optin}}', issueFormUrl(cfg.repo, 'claim.yml', e.slug, e.data))
+      .replaceAll('{{optout}}', issueFormUrl(cfg.repo, 'optout.yml', e.slug));
   return { title: fill(template.data.title), body: fill(template.body.trim()) + '\n' };
 }
 

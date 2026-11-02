@@ -58,7 +58,7 @@ The script page shows your repository's README, so there's no need to copy your 
 
 4. Open a pull request. A check validates the entry and confirms the repo exists (for norns, that it has a `.lua` script at its root). Once merged, the site rebuilds in a minute or two.
 
-Already listed through an import, or invited to opt in? Use the "claim it" link on the script's page (or the [claim form](https://github.com/{{repo}}/issues/new?template=claim.yml)) to publish it, disclose AI use and fix its details. Rather not be listed? The [opt-out form](https://github.com/{{repo}}/issues/new?template=optout.yml) takes it off the site and stops any further invitations.
+Already listed through an import, or invited to opt in? Use the "claim it" link on the script's page (or the [claim form](https://github.com/{{repo}}/issues/new?template=claim.yml)) to publish it, disclose AI use and fix its details. Rather not be listed? The [opt-out form](https://github.com/{{repo}}/issues/new?template=optout.yml) takes it off the site and stops any further invitations. Once it's published, "edit its details" on its page changes the description, tags, hardware or links the same way.
 
 Once it's listed, the script page has a README badge you can copy, linking readers back to the catalog.
 

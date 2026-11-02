@@ -1,0 +1,67 @@
+# Field labels are read by tools/from-issue.mjs: keep them in sync when renaming.
+# Script pages link here with every field filled in from the entry (the query params match the field ids).
+name: Edit your script's details
+description: Change the description, tags, hardware or links of a script that's on splines. No git needed.
+title: "[edit] "
+labels: [edit]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Change what you like and submit; a bot turns it into a pull request. Fields come filled in with what's listed now (when you open this from the script's page). A field left empty keeps its current value; write `none` to clear hardware or a link.
+        Not on the site yet? Use the [claim form](https://github.com/carlosedp/splines/issues/new?template=claim.yml&title=%5Bclaim%5D%20) instead.
+  - type: input
+    id: script
+    attributes:
+      label: Script
+      description: Its name in the catalog, or a link to its page.
+      placeholder: https://splines.cc/scripts/my-script/
+    validations:
+      required: true
+  - type: input
+    id: description
+    attributes:
+      label: Description
+      description: One line, 160 characters max.
+  - type: input
+    id: tags
+    attributes:
+      label: Tags
+      description: Separated by commas. Replaces the current tags.
+  - type: input
+    id: requires
+    attributes:
+      label: Hardware it needs
+      description: Separated by commas (grid, arc, crow, midi, audio-in, keyboard, jf, ansible, teletype, hid, osc, txo, er-301), or none.
+  - type: dropdown
+    id: ai
+    attributes:
+      label: AI disclosure
+      description: See https://splines.cc/about/#ai-disclosure
+      options:
+        - "keep: no change"
+        - "none: written without AI code generation (autocomplete-level help is fine)"
+        - "assisted: made with meaningful help from AI tools, reviewed and tested by me"
+      default: 0
+  - type: input
+    id: author
+    attributes:
+      label: Author
+      description: How you'd like to be credited.
+  - type: input
+    id: docs
+    attributes:
+      label: Documentation
+      description: An https link to docs beyond the README, or none.
+  - type: input
+    id: discussion
+    attributes:
+      label: Discussion
+      description: An https link to a thread about the script (e.g. on lines), or none.
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: The one rule
+      options:
+        - label: I'm the author of this script, or I have the author's OK to change its entry
+          required: true

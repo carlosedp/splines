@@ -100,6 +100,17 @@ export function normalizeRepo(url) {
     .toLowerCase();
 }
 
+// A link to one of the issue forms (.github/ISSUE_TEMPLATE/<template>) for an entry. GitHub prefills a form field
+// from the query param named after its id; empty values are left out, lists become "a, b".
+export function issueFormUrl(repo, template, slug, fields = {}) {
+  const params = new URLSearchParams({ template, title: `[${template.replace(/\.yml$/, '')}] ${slug}`, script: slug });
+  for (const [k, v] of Object.entries(fields)) {
+    const value = Array.isArray(v) ? v.join(', ') : v;
+    if (value && value !== PLACEHOLDER_DESCRIPTION) params.set(k, value);
+  }
+  return `https://github.com/${repo}/issues/new?${params.toString().replace(/\+/g, '%20')}`;
+}
+
 export function githubSlug(url) {
   const m = normalizeRepo(url).match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)/);
   return m ? `${m[1]}/${m[2]}` : null;

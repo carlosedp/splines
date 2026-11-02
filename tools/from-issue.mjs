@@ -1,6 +1,7 @@
-// Turn a "[submit]", "[claim]" or "[optout]" issue (from the forms in .github/ISSUE_TEMPLATE) into an entry change.
-// A claim is how an author opts in: it publishes the entry (`listing: published`) and discloses AI use. An opt-out
-// sets `listing: declined`: the entry stays in the repo, so the importer and invite.mjs leave the script alone.
+// Turn a "[submit]", "[claim]", "[edit]" or "[optout]" issue (from the forms in .github/ISSUE_TEMPLATE) into an entry change.
+// A claim is how an author opts in: it publishes the entry (`listing: published`) and discloses AI use. An edit
+// changes the details of a published entry. An opt-out sets `listing: declined`: the entry stays in the repo, so
+// the importer and invite.mjs leave the script alone.
 // Run by .github/workflows/issue-entry.yml; the workflow validates the result and opens the pull request.
 //
 //   ISSUE_TITLE=… ISSUE_BODY=… ISSUE_NUMBER=… ISSUE_AUTHOR=… node tools/from-issue.mjs
@@ -16,7 +17,7 @@ import {
 } from './lib.mjs';
 
 const { ISSUE_TITLE = '', ISSUE_BODY = '', ISSUE_NUMBER = '0', ISSUE_AUTHOR = '' } = process.env;
-const kind = ISSUE_TITLE.match(/^\[(submit|claim|optout)\]/i)?.[1].toLowerCase();
+const kind = ISSUE_TITLE.match(/^\[(submit|claim|edit|optout)\]/i)?.[1].toLowerCase();
 const today = new Date().toISOString().slice(0, 10);
 
 function output(key, value) {
@@ -63,7 +64,7 @@ const ai = (label) => {
 const ownsRepo = (repo) => githubSlug(repo)?.split('/')[0] === ISSUE_AUTHOR.toLowerCase();
 
 const entries = loadEntries();
-// the claim and opt-out forms' "Script" field: a name, or a link to the script page
+// the claim, edit and opt-out forms' "Script" field: a name, or a link to the script page
 function scriptField() {
   const wanted = field('script').replace(/^.*\/scripts\/|\/.*$/g, '');
   const entry = entries.find((e) => e.slug.toLowerCase() === wanted.toLowerCase());
@@ -73,7 +74,7 @@ function scriptField() {
 let name, data, file, summary;
 
 try {
-  if (!kind) fail('the issue title must start with [submit], [claim] or [optout]');
+  if (!kind) fail('the issue title must start with [submit], [claim], [edit] or [optout]');
   if (kind === 'submit') {
     const repo = field('repository').replace(/\.git$/, '').replace(/\/+$/, '');
     if (!https(repo)) fail('the repository must be an https URL, like https://github.com/you/my-script');
@@ -122,7 +123,7 @@ try {
   } else if (kind === 'claim') {
     const entry = scriptField();
     // indexed or declined entries can always be claimed: that's the author opting in (or changing their mind)
-    if (entry.data?.source !== 'imported' && listingOf(entry.data) === 'published') fail(`\`${entry.slug}\` is already claimed; use "suggest an edit" on its page for changes`);
+    if (entry.data?.source !== 'imported' && listingOf(entry.data) === 'published') fail(`\`${entry.slug}\` is already claimed; use the "edit details" link on its page for changes`);
     name = entry.slug;
     const changes = { ai: ai('ai disclosure'), source: 'submitted', origin: undefined, listing: 'published' };
     // claimed entries need a date; an imported one may have none
@@ -138,6 +139,36 @@ try {
     const abs = path.join(ROOT, file);
     fs.writeFileSync(abs, updateFrontMatter(fs.readFileSync(abs, 'utf8'), changes));
     summary = `Claims **${name}** for its author and publishes it: \`listing: published\`, \`source: submitted\`, \`ai: ${changes.ai}\`${['description', 'tags', 'requires', 'author'].some((k) => k in changes) ? ', plus updated details' : ''}.`;
+  } else if (kind === 'edit') {
+    const entry = scriptField();
+    if (listingOf(entry.data) !== 'published') fail(`\`${entry.slug}\` isn't on the site yet; use the claim form to publish it`);
+    name = entry.slug;
+    // the form comes prefilled from the entry: an empty field keeps the value, "none" clears an optional one
+    const none = (label) => field(label).toLowerCase() === 'none';
+    const link = (label, key) => {
+      if (!field(label)) return entry.data[key];
+      if (none(label)) return undefined;
+      if (!https(field(label))) fail(`${label} must be an https link, or none`);
+      return field(label);
+    };
+    const changes = {};
+    if (field('description')) changes.description = field('description').replace(/\s+/g, ' ');
+    if (field('tags')) changes.tags = tags('tags');
+    if (none('hardware it needs')) changes.requires = undefined;
+    else if (field('hardware it needs')) changes.requires = hardware(list('hardware it needs'));
+    if (choice('ai disclosure') && choice('ai disclosure') !== 'keep') changes.ai = ai('ai disclosure');
+    if (field('author')) changes.author = field('author');
+    changes.docs = link('documentation', 'docs');
+    changes.discussion = link('discussion', 'discussion');
+    // only what actually differs, so the pull request (and its summary) shows the real change
+    for (const k of Object.keys(changes)) if (JSON.stringify(changes[k]) === JSON.stringify(entry.data[k])) delete changes[k];
+    if (!Object.keys(changes).length) fail('nothing to change: every field matches what the entry has now');
+    data = { ...entry.data, ...changes };
+
+    file = entry.file;
+    const abs = path.join(ROOT, file);
+    fs.writeFileSync(abs, updateFrontMatter(fs.readFileSync(abs, 'utf8'), changes));
+    summary = `Edits **${name}**: ${Object.keys(changes).map((k) => `\`${k}\``).join(', ')}.`;
   } else {
     const entry = scriptField();
     if (listingOf(entry.data) === 'declined') fail(`\`${entry.slug}\` is already marked as not to be listed`);

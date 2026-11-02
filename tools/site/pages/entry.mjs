@@ -1,7 +1,7 @@
 // scripts/<slug>/: one page per script, with install instructions, catalog notes and the upstream README.
 import fs from "node:fs";
 import path from "node:path";
-import { ENTRIES_DIR, PLATFORMS, KINDS, STATUSES, githubSlug } from "../../lib.mjs";
+import { ENTRIES_DIR, PLATFORMS, KINDS, STATUSES, githubSlug, issueFormUrl } from "../../lib.mjs";
 import { html, raw, join } from "../html.mjs";
 import { cfg, href, siteUrl, cache, commentsReady, AI_LABEL } from "../context.mjs";
 import { markdown } from "../markdown.mjs";
@@ -42,8 +42,11 @@ function licenseText(r, ghSlug) {
 
 function sidebar(r, ghSlug) {
   const editUrl = `https://github.com/${cfg.repo}/edit/${cfg.branch}/${ENTRIES_DIR}/${r.slug}/index.md`;
-  const claimUrl = `https://github.com/${cfg.repo}/issues/new?template=claim.yml&title=${encodeURIComponent(`[claim] ${r.slug}`)}&script=${encodeURIComponent(r.slug)}`;
-  const optoutUrl = `https://github.com/${cfg.repo}/issues/new?template=optout.yml&title=${encodeURIComponent(`[optout] ${r.slug}`)}&script=${encodeURIComponent(r.slug)}`;
+  // the claim and edit forms open with the entry's current values, so authors only touch what changes
+  const current = { description: r.description, tags: r.tags, requires: r.requires, author: r.author };
+  const claimUrl = issueFormUrl(cfg.repo, "claim.yml", r.slug, current);
+  const optoutUrl = issueFormUrl(cfg.repo, "optout.yml", r.slug);
+  const detailsUrl = issueFormUrl(cfg.repo, "edit.yml", r.slug, { ...current, docs: r.docs, discussion: r.discussion });
   // a "listed on" badge for the script's README: links back here and tells readers where to find more
   const badgeMd = `[![listed on ${cfg.title}](${siteUrl}/assets/badge.svg)](${siteUrl}/${r.path})`;
   const meta = [
@@ -67,6 +70,7 @@ function sidebar(r, ghSlug) {
       <div class="card-tags">${r.tags.map(tagLink)}</div>
       ${r.activeForks.length > 0 && html`<section class="forks"><h2>active forks</h2>${forkList(r)}</section>`}
       ${r.source === "imported" && html`<p class="claim">Is this your script? <a href="${claimUrl}">Claim it</a> to disclose AI use and fix its details, or <a href="${optoutUrl}">take it off the site</a>. It's a short form, no git needed.</p>`}
+      ${r.source !== "imported" && html`<p class="edit">Your script? <a href="${detailsUrl}">Edit its details</a> with a short form, no git needed.</p>`}
       <p class="edit"><a href="${editUrl}">suggest an edit</a></p>
       ${siteUrl && html`<details class="badge-snippet"><summary>README badge</summary><p class="hint">Add this to your README:</p><div class="copy-row"><code class="cmd">${badgeMd}</code><button type="button" class="copy" data-copy="${badgeMd}">copy</button></div></details>`}
     </aside>`;
