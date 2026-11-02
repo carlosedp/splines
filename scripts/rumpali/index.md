@@ -5,10 +5,13 @@ repo: https://github.com/vehka/rumpali
 author: vehka
 description: Drum practice script for norns
 tags:
-  - ai-assisted
-ai: unknown
-source: imported
-origin: github-topic:norns
-listing: indexed
-added: 2026-11-02
+  - midi
+  - drums
+  - practice
+requires:
+  - midi
+ai: assisted
+listing: published
+license: MIT
+added: 2026-11-01
 ---
