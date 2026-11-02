@@ -8,7 +8,7 @@ description: library that checks a script's dependencies (packages, pipx tools, 
 tags:
   - library
   - utility
-ai: none
+ai: assisted
 source: submitted
 listing: published
 added: 2026-10-29
