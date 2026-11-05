@@ -19,6 +19,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # the admin-data branch below
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -40,6 +42,21 @@ jobs:
         run: npm run enrich
       - run: npm run validate
       - run: npm run build
+      # The admin view's index of unpublished entries (tools/admin-index.mjs). It goes to its own branch, one commit,
+      # force-pushed, so it stays off the site: splines.cc only ever serves published entries.
+      - name: Publish the admin index to the admin-data branch
+        if: github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm run admin-index
+          cd admin-data
+          git init -q -b admin-data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add unpublished.json
+          git commit -q -m "admin index for ${GITHUB_SHA::7}"
+          git push -q --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:admin-data
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

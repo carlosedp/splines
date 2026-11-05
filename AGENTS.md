@@ -28,6 +28,7 @@ npm run build               # → dist/
 npm run serve               # → http://localhost:8080/<basePath>/
 npm run dev                 # build + serve --watch: rebuilds on changes (~1s) and live-reloads open pages
 npm run dev:all             # same, with indexed/declined entries too (build --all; local preview only, never deploy)
+npm run admin-index         # admin-data/unpublished.json: the admin view's index of unpublished entries (offline)
 npm run invite              # invites.md: indexed entries whose authors could be invited (sends nothing; --send/--sync need a token)
 npm run new -- <name> [--platform crow]   # scaffold an entry from templates/entry.md
 ```
@@ -59,6 +60,8 @@ tools/site/               html.mjs (`html` escaping tag, raw, join), context.mjs
                           keep its card() in step with card() in components.mjs)
 tools/serve.mjs           local static server honoring basePath
 tools/new-entry.mjs       scaffolder behind `npm run new`
+tools/admin-index.mjs     unpublished entries (+ stars/last push from the cache) → admin-data/unpublished.json; deploy.yml force-pushes it to the
+                          `admin-data` branch (never the site), and admin.js reads it with the admin's token in one request
 site.config.json          title, siteUrl, basePath, cname, repo, forum, discourse (embedded comments), import sources
 .github/workflows/        validate.yml (PRs), deploy.yml (push/daily → Pages), import.yml (weekly → PR), health.yml (weekly → PR), issue-entry.yml (issue forms → PR), invite.yml (weekly, needs INVITES_ENABLED + approval in the `invites` environment → PR), claude.yml (`@claude` mentions by maintainers → Claude Code)
 .claude/skills/add-script/ procedure for "add <repo url> to the catalog" (used locally, on claude.ai/code and by claude.yml)

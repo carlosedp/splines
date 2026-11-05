@@ -10,6 +10,7 @@
     "enrich": "node tools/enrich.mjs",
     "import": "node tools/import.mjs",
     "build": "node tools/build.mjs",
+    "admin-index": "node tools/admin-index.mjs",
     "serve": "node tools/serve.mjs",
     "dev": "node tools/build.mjs && node tools/serve.mjs --watch",
     "dev:all": "node tools/build.mjs --all && node tools/serve.mjs --watch --all",

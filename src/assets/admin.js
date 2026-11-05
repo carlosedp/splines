@@ -1,6 +1,7 @@
 // Admin view. On /admin/: sign in with a GitHub token (kept in localStorage) and check the user can write to the
-// catalog repo. On the catalog page (app.js loads this file only when a token is stored): read every
-// scripts/*/index.md through the GitHub API, build cards for the entries that aren't published, hand them to app.js,
+// catalog repo. On the catalog page (app.js loads this file only when a token is stored): read the unpublished
+// entries from the index the deploy workflow keeps on the `admin-data` branch (tools/admin-index.mjs), or from every
+// scripts/*/index.md through the GitHub API before that branch exists, build cards for them, hand them to app.js,
 // and show the listing filter. Entry data is untrusted: it only reaches the page through textContent, attributes
 // and https-checked links.
 (function () {
@@ -8,24 +9,21 @@
 
   const KEY = 'splines-admin-token';
   const MEMO = 'splines-admin-entries';
+  const INDEX = { branch: 'admin-data', file: 'unpublished.json' }; // written by deploy.yml
   const store = {
     get: () => { try { return localStorage.getItem(KEY); } catch (e) { return null; } },
     set: (v) => {
       try {
         v ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY);
-        sessionStorage.removeItem(MEMO);
+        localStorage.removeItem(MEMO);
       } catch (e) { /* storage unavailable */ }
     },
   };
-  // the unpublished entries last fetched in this tab, reused for 10 minutes
+  // the unpublished entries last fetched, shared by every tab: the index copy is revalidated on each page with its
+  // ETag (a 304 is quick and free), the slow fallback copy is reused for 10 minutes
   const memo = {
-    get: () => {
-      try {
-        const m = JSON.parse(sessionStorage.getItem(MEMO));
-        return m && Date.now() - m.at < 10 * 60e3 ? m : null;
-      } catch (e) { return null; }
-    },
-    set: (m) => { try { sessionStorage.setItem(MEMO, JSON.stringify({ ...m, at: Date.now() })); } catch (e) { /* storage unavailable */ } },
+    get: () => { try { return JSON.parse(localStorage.getItem(MEMO)); } catch (e) { return null; } },
+    set: (m) => { try { localStorage.setItem(MEMO, JSON.stringify(m)); } catch (e) { /* storage unavailable */ } },
   };
 
   // the token can't be used for the admin view (any other error, like a network one, keeps it)
@@ -212,14 +210,8 @@
       // published entries are already on the page. Skip them by name too, not only by listing: GitHub's copy can be
       // behind this build (a listing changed but not yet on the branch), and a script must never show twice.
       const shown = new Set(Array.from(list.children, (c) => c.dataset.name.toLowerCase()));
-      // GitHub's copy is fetched once per tab every 10 minutes (about nine queries); later pages use the cached one
-      let { login, hidden } = memo.get() || {};
-      if (!hidden) {
-        login = await check(token, owner, name);
-        hidden = await unpublished(token, owner, name, branch, shown);
-        memo.set({ login, hidden });
-      }
-      hidden = hidden.filter((e) => !shown.has(e.slug.toLowerCase()));
+      const [login, got] = await Promise.all([check(token, owner, name), load(token, owner, name, branch, shown)]);
+      const hidden = got.hidden.filter((e) => !shown.has(e.slug.toLowerCase()));
       const aiLabels = JSON.parse(list.dataset.aiLabels || '{}');
       const ctx = { repo: list.dataset.repo, branch: list.dataset.branch };
       window.splinesAddCards(hidden.map((e) => card(e, aiLabels, ctx)));
@@ -236,7 +228,8 @@
         store.set(null);
         location.reload();
       });
-      note.replaceChildren(' · admin (', who, `): ${hidden.length} unpublished entries included · `, out);
+      const asOf = got.built ? ` (as of the ${got.built.slice(0, 16).replace('T', ' ')} UTC deploy)` : '';
+      note.replaceChildren(' · admin (', who, `): ${hidden.length} unpublished entries included${asOf} · `, out);
     } catch (err) {
       // an expired or revoked token, or lost write access: forget it, so the next page is the public view again
       if (err instanceof AccessError) store.set(null);
@@ -244,6 +237,30 @@
       again.href = list.dataset.admin;
       note.replaceChildren(` · admin: ${err.message}. `, ...(err instanceof AccessError ? [again] : []));
     }
+  }
+
+  /**
+   * The unpublished entries: the index on the admin-data branch (one request, a 304 when unchanged), or, before the
+   * first deploy has written it, every entry read through GraphQL (about nine queries).
+   */
+  async function load(token, owner, name, branch, shown) {
+    const cached = memo.get();
+    if (cached && !cached.etag && Date.now() - cached.at < 10 * 60e3) return cached;
+    const headers = { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.raw+json' };
+    if (cached?.etag) headers['If-None-Match'] = cached.etag;
+    const res = await fetch(`https://api.github.com/repos/${owner}/${name}/contents/${INDEX.file}?ref=${INDEX.branch}`, { headers, cache: 'no-store' });
+    if (res.status === 401) throw new AccessError('GitHub rejected the token (expired or revoked?)');
+    if (res.status === 304 && cached) return cached;
+    let got;
+    if (res.ok) {
+      const index = await res.json();
+      got = { hidden: Array.isArray(index.entries) ? index.entries : [], built: index.built || null, etag: res.headers.get('ETag'), at: Date.now() };
+    } else {
+      // 404: no index yet; anything else (rate limit, outage): the slow path still works
+      got = { hidden: await unpublished(token, owner, name, branch, shown), built: null, etag: null, at: Date.now() };
+    }
+    memo.set(got);
+    return got;
   }
 
   /** Every entry on the branch that isn't published, with stars and last push for sorting. */
