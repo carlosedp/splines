@@ -88,7 +88,7 @@ export default function entries(records, write) {
         body: html`
 <article class="entry">
   <p class="crumbs"><a class="back" href="${href("")}" data-back>← all scripts</a> <span class="crumb-sep">/</span> ${PLATFORMS[r.platform].label}${r.kind !== "script" && html` <span class="crumb-sep">/</span> <a href="${href(`?kind=${encodeURIComponent(r.kind)}`)}">${KINDS[r.kind].plural}</a>`}</p>
-  <header class="entry-head">
+  <header class="entry-head" data-name="${r.name}">
     <h1>${r.name}${statusIcon(r)}${newBadge(r)}${listingBadge(r)}</h1>
     <p class="lede">${r.description}</p>
     <div class="card-meta">${aiBadge(r.ai)} <span class="ai-note">${AI_LABEL[r.ai][1]}</span>${commentsReady ? html` <a class="like-link" href="#discussion" title="Like it in its forum thread">♥ ${r.likes || ""} like</a>` : likesStat(r)}</div>

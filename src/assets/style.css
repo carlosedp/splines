@@ -225,6 +225,8 @@ code, .cmd { font-family: var(--mono); font-size: .9em; }
 .fork-group h2 { font-size: 17px; margin: 0; display: flex; gap: 8px; align-items: baseline; }
 .fork-group .hint { margin: 2px 0 10px; font-size: 13px; }
 .fork-group:target { border-color: var(--accent); }
+.entry-head h1 .fav-toggle { position: static; display: inline-grid; vertical-align: middle; width: 40px; height: 40px; font-size: 28px; margin-left: 4px; }
+.fork-group[data-name] { position: relative; padding-right: 44px; } /* room for the star and quick view (app.js) */
 .commit-list { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 4px; font-size: 14px; }
 .commit-list li { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
 .commit-list code { font-size: 12px; }

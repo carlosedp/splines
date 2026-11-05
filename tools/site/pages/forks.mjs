@@ -1,13 +1,14 @@
 // forks/: forks people keep working on, grouped by script, most recently pushed first (data from enrich.mjs).
 import { githubSlug } from "../../lib.mjs";
 import { html, join } from "../html.mjs";
-import { href, FORK_MIN_AHEAD } from "../context.mjs";
+import { href, FORK_MIN_AHEAD, AI_LABEL } from "../context.mjs";
 import { layout } from "../layout.mjs";
-import { forkList } from "../components.mjs";
+import { forkList, itemData } from "../components.mjs";
 
 const group = (r) => {
   const gh = `https://github.com/${githubSlug(r.repo)}`;
-  return html`<section class="fork-group" id="${r.slug}">
+  // itemData and the rest: app.js adds the favorite star and quick view for the upstream script
+  return html`<section class="fork-group" id="${r.slug}" ${itemData(r)} data-author="${r.author}" data-description="${r.description}" data-ai-label="${AI_LABEL[r.ai][0]}">
   <h2><a href="${href(r.path)}">${r.name}</a> <span class="fresh-by">by ${r.author}</span></h2>
   <p class="hint">upstream last push ${r.updated || "unknown"} · <a href="${gh}/network">network graph</a> · <a href="${gh}/forks?sort_by=last_updated">all ${r.forks} forks</a></p>
   ${forkList(r)}

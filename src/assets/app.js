@@ -82,41 +82,10 @@
     } else load();
   }
 
-  // ---- catalog list ----
-  const list = document.getElementById("results");
-  if (!list) return;
-
-  const cards = Array.from(list.children);
-  const q = document.getElementById("q");
-  const sort = document.getElementById("sort");
-  const countEl = document.getElementById("count");
-  const emptyEl = document.getElementById("empty");
-  const clearBtn = document.getElementById("clear");
-  const qClear = document.getElementById("q-clear");
-  const groups = {}; // group name -> Set of selected values
-  const PARAM = {
-    fav: "fav",
-    platform: "platform",
-    kind: "kind",
-    ai: "ai",
-    requires: "req",
-    tags: "tag",
-    listing: "listing",
-  };
-  // how values inside one group combine: "any" = OR, "all" = AND
-  const MODE = {
-    fav: "any",
-    platform: "any",
-    kind: "any",
-    ai: "any",
-    requires: "all",
-    tags: "all",
-    listing: "any",
-  };
-
-  // ---- favorites: a star on each card, kept in this browser only (localStorage, keyed by entry name) ----
-  // The button is added here, not prerendered, so it never shows without the script that makes it work. The cards
-  // admin.js builds for unpublished entries get one too (splinesAddCards below), so admins can star indexed entries.
+  // ---- favorites and quick view, on every card (home, new/, updated/) and fork group (forks/) ----
+  // Favorites are kept in this browser only (localStorage, keyed by entry name). Both buttons are added here, not
+  // prerendered, so they never show without the script that makes them work. The cards admin.js builds for
+  // unpublished entries get them too (splinesAddCards below), so admins can star indexed entries.
   const FAV_KEY = "splines-favorites";
   const loadFavs = () => {
     try {
@@ -134,7 +103,6 @@
       /* storage unavailable */
     }
   };
-  const favBox = document.querySelector('fieldset.chips[data-group="fav"]');
   function markFav(card) {
     const on = favs.has(card.dataset.name);
     card.dataset.fav = on ? "1" : "";
@@ -150,14 +118,14 @@
     b.type = "button";
     b.className = "fav-toggle";
     b.setAttribute("aria-label", `favorite ${card.dataset.name}`);
-    card.prepend(b);
+    const h1 = card.querySelector("h1"); // the script page: next to its name rather than in a corner
+    h1 ? h1.append(b) : card.prepend(b);
     markFav(card);
   }
 
-  // ---- quick view: a handle at the bottom right of every card opens a dialog with its details and maiden install line ----
-  // Built from the card's data-* attributes and text, through textContent only (admin.js cards carry the same
-  // attributes, plus admin-only rows in `card.splinesInfo`).
-  const aiLabels = JSON.parse(list.dataset.aiLabels || "{}");
+  // Quick view: a handle at the bottom right opens a dialog with the script's details and maiden install line, built
+  // from the item's data-* attributes (itemData() in tools/site/components.mjs) and text, through textContent only.
+  // admin.js cards carry the same attributes, plus admin-only rows in `card.splinesInfo`.
   const https = (u) =>
     typeof u === "string" && /^https:\/\/[^\s]+$/.test(u) ? u : null;
   const el = (tag, cls, text) => {
@@ -189,10 +157,11 @@
     close.addEventListener("click", () => dialog.close());
     head.append(el("h2", null, d.name), close);
     const text = (sel) => card.querySelector(sel)?.textContent.trim() || "";
+    const author = text(".card-author") || (d.author ? `by ${d.author}` : "");
     const body = [
       head,
-      el("p", "card-author", text(".card-author")),
-      el("p", "quick-info-desc", text(".card-desc")),
+      el("p", "card-author", author),
+      el("p", "quick-info-desc", text(".card-desc") || d.description || ""),
     ];
 
     const dl = el("dl");
@@ -201,7 +170,7 @@
       ...(extra.rows || []),
       ["platform", d.platform],
       ["type", d.kind],
-      ["AI", (aiLabels[d.ai] || [d.ai])[0]],
+      ["AI", d.aiLabel || text(".badge.ai") || d.ai],
       ["requires", d.requires],
       ["tags", d.tags],
       ["added", d.added],
@@ -247,7 +216,7 @@
       row.append(code, copy);
       body.push(el("h3", null, "install from maiden"), row);
     }
-    const page = card.querySelector("a.card-link[href]");
+    const page = card.querySelector("a.card-link[href], h2 > a[href]");
     if (page) {
       const more = el("a", "quick-info-page", "script page →");
       more.href = page.href;
@@ -282,11 +251,85 @@
     b.setAttribute("aria-haspopup", "dialog");
     card.append(b);
   }
-  const decorate = (card) => {
-    addFavButton(card);
-    addQuickButton(card);
+  const decorate = (item) => {
+    addFavButton(item);
+    if (!item.matches(".entry-head")) addQuickButton(item); // the script page already shows all of it
   };
-  cards.forEach(decorate);
+  const items = Array.from(document.querySelectorAll(".cards > .card, .fork-group[data-name], .entry-head[data-name]"));
+  items.forEach(decorate);
+  let onFavChange = () => {}; // the catalog list re-filters (the favorites pill)
+
+  document.addEventListener("click", (ev) => {
+    const quick = ev.target.closest(".card-quick");
+    if (quick) return showInfo(quick.closest("[data-name]"));
+    const star = ev.target.closest(".fav-toggle");
+    if (!star) return;
+    const item = star.closest("[data-name]");
+    const name = item.dataset.name;
+    favs.has(name) ? favs.delete(name) : favs.add(name);
+    saveFavs();
+    markFav(item);
+    onFavChange();
+  });
+  // starred in another tab
+  addEventListener("storage", (ev) => {
+    if (ev.key !== FAV_KEY) return;
+    favs = loadFavs();
+    items.forEach(markFav);
+    onFavChange();
+  });
+
+  // the whole card opens the script page (its title stays the real link, for keyboard and screen readers);
+  // ctrl/cmd/shift-click and middle-click open a new tab like a link would. admin.js cards open their own dialog.
+  function openCard(ev) {
+    if (
+      ev.defaultPrevented ||
+      ev.target.closest("a, button") ||
+      getSelection().toString()
+    )
+      return;
+    const link = ev.target.closest(".cards > .card")?.querySelector("a.card-link[href]");
+    if (!link) return;
+    if (ev.button === 1 || ev.ctrlKey || ev.metaKey || ev.shiftKey)
+      window.open(link.href, "_blank", "noopener");
+    else if (ev.button === 0) location.href = link.href;
+  }
+  document.addEventListener("click", openCard);
+  document.addEventListener("auxclick", openCard);
+
+
+  // ---- catalog list ----
+  const list = document.getElementById("results");
+  if (!list) return;
+
+  const cards = Array.from(list.children);
+  const q = document.getElementById("q");
+  const sort = document.getElementById("sort");
+  const countEl = document.getElementById("count");
+  const emptyEl = document.getElementById("empty");
+  const clearBtn = document.getElementById("clear");
+  const qClear = document.getElementById("q-clear");
+  const favBox = document.querySelector('fieldset.chips[data-group="fav"]');
+  const groups = {}; // group name -> Set of selected values
+  const PARAM = {
+    fav: "fav",
+    platform: "platform",
+    kind: "kind",
+    ai: "ai",
+    requires: "req",
+    tags: "tag",
+    listing: "listing",
+  };
+  // how values inside one group combine: "any" = OR, "all" = AND
+  const MODE = {
+    fav: "any",
+    platform: "any",
+    kind: "any",
+    ai: "any",
+    requires: "all",
+    tags: "all",
+    listing: "any",
+  };
 
   document.querySelectorAll("fieldset.chips[data-group]").forEach((fs) => {
     const g = fs.dataset.group;
@@ -393,45 +436,7 @@
     history.replaceState(null, "", qs ? `?${qs}` : location.pathname);
   }
 
-  list.addEventListener("click", (ev) => {
-    const b = ev.target.closest(".card-quick");
-    if (b) showInfo(b.closest(".card"));
-  });
-  list.addEventListener("click", (ev) => {
-    const b = ev.target.closest(".fav-toggle");
-    if (!b) return;
-    const card = b.closest(".card");
-    const name = card.dataset.name;
-    favs.has(name) ? favs.delete(name) : favs.add(name);
-    saveFavs();
-    markFav(card);
-    apply();
-  });
-  // the whole card opens the script page (its title stays the real link, for keyboard and screen readers);
-  // ctrl/cmd/shift-click and middle-click open a new tab like a link would. admin.js cards open their own dialog.
-  function openCard(ev) {
-    if (
-      ev.defaultPrevented ||
-      ev.target.closest("a, button") ||
-      getSelection().toString()
-    )
-      return;
-    const link = ev.target.closest(".card")?.querySelector("a.card-link[href]");
-    if (!link) return;
-    if (ev.button === 1 || ev.ctrlKey || ev.metaKey || ev.shiftKey)
-      window.open(link.href, "_blank", "noopener");
-    else if (ev.button === 0) location.href = link.href;
-  }
-  list.addEventListener("click", openCard);
-  list.addEventListener("auxclick", openCard);
-
-  // starred in another tab
-  addEventListener("storage", (ev) => {
-    if (ev.key !== FAV_KEY) return;
-    favs = loadFavs();
-    cards.forEach(markFav);
-    apply();
-  });
+  onFavChange = apply;
 
   // in-page tag links filter instead of navigating
   list.addEventListener("click", (ev) => {
@@ -489,6 +494,7 @@
   window.splinesAddCards = (nodes) => {
     nodes.forEach((n) => {
       decorate(n);
+      items.push(n);
       list.appendChild(n);
     });
     cards.push(...nodes);
