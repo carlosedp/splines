@@ -114,6 +114,13 @@ code, .cmd { font-family: var(--mono); font-size: .9em; }
 .cards { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
 .card:hover { border-color: var(--muted); }
+.card { position: relative; }
+.card:has(.fav-toggle) .card-link { padding-right: 26px; }
+/* favorite toggle, added by app.js; ★ in the meta row stays GitHub stars */
+.fav-toggle { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--muted); font: 20px/1 var(--sans); cursor: pointer; display: grid; place-items: center; }
+.fav-toggle:hover { color: var(--accent); background: var(--chip); }
+.fav-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fav-toggle[aria-pressed="true"] { color: var(--accent); }
 .card-link { text-decoration: none; color: var(--ink); display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .card-title { font: 600 17px/1.2 var(--mono); }
 .card-author { color: var(--muted); font-size: 13px; }

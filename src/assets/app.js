@@ -76,9 +76,44 @@
   const clearBtn = document.getElementById('clear');
   const qClear = document.getElementById('q-clear');
   const groups = {}; // group name -> Set of selected values
-  const PARAM = { platform: 'platform', kind: 'kind', ai: 'ai', requires: 'req', tags: 'tag', listing: 'listing' };
+  const PARAM = { fav: 'fav', platform: 'platform', kind: 'kind', ai: 'ai', requires: 'req', tags: 'tag', listing: 'listing' };
   // how values inside one group combine: "any" = OR, "all" = AND
-  const MODE = { platform: 'any', kind: 'any', ai: 'any', requires: 'all', tags: 'all', listing: 'any' };
+  const MODE = { fav: 'any', platform: 'any', kind: 'any', ai: 'any', requires: 'all', tags: 'all', listing: 'any' };
+
+  // ---- favorites: a star on each card, kept in this browser only (localStorage, keyed by entry name) ----
+  // The button is added here, not prerendered, so it never shows without the script that makes it work. The cards
+  // admin.js builds for unpublished entries get one too (splinesAddCards below), so admins can star indexed entries.
+  const FAV_KEY = 'splines-favorites';
+  const loadFavs = () => {
+    try {
+      const v = JSON.parse(localStorage.getItem(FAV_KEY));
+      return new Set(Array.isArray(v) ? v.map(String) : []);
+    } catch (e) { return new Set(); }
+  };
+  let favs = loadFavs();
+  const saveFavs = () => {
+    try { localStorage.setItem(FAV_KEY, JSON.stringify([...favs].sort())); } catch (e) { /* storage unavailable */ }
+  };
+  const favBox = document.querySelector('fieldset.chips[data-group="fav"]');
+  function markFav(card) {
+    const on = favs.has(card.dataset.name);
+    card.dataset.fav = on ? '1' : '';
+    const b = card.querySelector('.fav-toggle');
+    b.textContent = on ? '★' : '☆';
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.title = on
+      ? 'Local favorite: saved only in this browser. Click to remove'
+      : 'Add as a local favorite: saved only in this browser, not shared or synced';
+  }
+  function addFavButton(card) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'fav-toggle';
+    b.setAttribute('aria-label', `favorite ${card.dataset.name}`);
+    card.prepend(b);
+    markFav(card);
+  }
+  cards.forEach(addFavButton);
 
   document.querySelectorAll('fieldset.chips[data-group]').forEach((fs) => {
     const g = fs.dataset.group;
@@ -103,7 +138,7 @@
   if (groups.tags && groups.tags.size) document.querySelector('.tag-panel')?.setAttribute('open', '');
 
   const dataSet = (card, key) => (card.dataset[key] ? card.dataset[key].split(' ') : []);
-  const field = { platform: 'platform', kind: 'kind', ai: 'ai', requires: 'requires', tags: 'tags', listing: 'listing' };
+  const field = { fav: 'fav', platform: 'platform', kind: 'kind', ai: 'ai', requires: 'requires', tags: 'tags', listing: 'listing' };
 
   function matches(card, terms) {
     for (const [g, sel] of Object.entries(groups)) {
@@ -139,6 +174,11 @@
     list.appendChild(frag);
 
     countEl.textContent = shown;
+    if (favBox) {
+      const n = cards.filter((c) => c.dataset.fav).length;
+      favBox.querySelector('.count').textContent = n;
+      favBox.hidden = n === 0 && !groups.fav.size; // nothing to show until something is starred
+    }
     emptyEl.hidden = shown > 0;
 
     document.querySelectorAll('fieldset.chips[data-group]').forEach((fs) => {
@@ -156,6 +196,24 @@
     const qs = p.toString();
     history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
   }
+
+  list.addEventListener('click', (ev) => {
+    const b = ev.target.closest('.fav-toggle');
+    if (!b) return;
+    const card = b.closest('.card');
+    const name = card.dataset.name;
+    favs.has(name) ? favs.delete(name) : favs.add(name);
+    saveFavs();
+    markFav(card);
+    apply();
+  });
+  // starred in another tab
+  addEventListener('storage', (ev) => {
+    if (ev.key !== FAV_KEY) return;
+    favs = loadFavs();
+    cards.forEach(markFav);
+    apply();
+  });
 
   // in-page tag links filter instead of navigating
   list.addEventListener('click', (ev) => {
@@ -204,7 +262,10 @@
 
   // ---- admin view: admin.js adds cards for unpublished entries (only loaded once someone signed in on /admin/) ----
   window.splinesAddCards = (nodes) => {
-    nodes.forEach((n) => list.appendChild(n));
+    nodes.forEach((n) => {
+      addFavButton(n);
+      list.appendChild(n);
+    });
     cards.push(...nodes);
     apply();
   };

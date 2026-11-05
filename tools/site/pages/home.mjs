@@ -60,6 +60,10 @@ export default function home(records, write) {
     </select>
   </div>
   <div class="filter-row">
+    <fieldset class="chips" data-group="fav" hidden>
+      <legend>yours</legend>
+      <button type="button" class="chip" data-value="1" aria-pressed="false" title="Scripts you starred, saved in this browser only">★ favorites <span class="count"></span></button>
+    </fieldset>
     ${chipGroup("platform", "platform", countBy(records, Object.keys(PLATFORMS), "platform"))}
     ${chipGroup("kind", "type", countBy(records, Object.keys(KINDS), "kind"), { text: (k) => KINDS[k].plural })}
     <fieldset class="chips" data-group="ai">
