@@ -85,6 +85,7 @@ export default function entries(records, write) {
         title: r.name,
         description: r.description,
         canonical: r.path,
+        section: r.kind === "mod" ? "mods" : "scripts",
         body: html`
 <article class="entry">
   <p class="crumbs"><a class="back" href="${href("")}" data-back>← all scripts</a> <span class="crumb-sep">/</span> ${PLATFORMS[r.platform].label}${r.kind !== "script" && html` <span class="crumb-sep">/</span> <a href="${href(`?kind=${encodeURIComponent(r.kind)}`)}">${KINDS[r.kind].plural}</a>`}</p>

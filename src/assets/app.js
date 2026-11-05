@@ -434,6 +434,14 @@
     qClear.hidden = !q.value;
     const qs = p.toString();
     history.replaceState(null, "", qs ? `?${qs}` : location.pathname);
+
+    // header: "mods" is current while the type filter is mods only, "scripts" otherwise
+    const mods = groups.kind?.size === 1 && groups.kind.has("mod");
+    for (const [key, on] of [["scripts", !mods], ["mods", mods]]) {
+      const a = document.querySelector(`.site-header [data-nav="${key}"]`);
+      if (on) a?.setAttribute("aria-current", "page");
+      else a?.removeAttribute("aria-current");
+    }
   }
 
   onFavChange = apply;

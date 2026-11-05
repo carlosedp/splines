@@ -2,13 +2,38 @@
 import { html } from "./html.mjs";
 import { cfg, href, siteUrl, submitUrl } from "./context.mjs";
 
+// header sections: the catalog views side by side, then the guides. [key, path, label]
+const nav = [
+  ["start", "start/", "getting started"],
+  ["scripts", "", "scripts"],
+  ["new", "new/", "new"],
+  ["updated", "updated/", "updated"],
+  ["forks", "forks/", "forks"],
+  ["mods", "?kind=mod", "mods"],
+  ["about", "about/", "about"],
+];
+
+/** The header section a page belongs to, from its canonical path (`section` overrides it, e.g. a mod's page). */
+function sectionOf(canonical) {
+  if (canonical == null) return null;
+  if (/(^|\/)forks\//.test(canonical)) return "forks"; // forks/ and each fork's page
+  if (canonical === "" || canonical.startsWith("scripts/")) return "scripts";
+  return nav.find(([, p]) => p && p === canonical)?.[0] ?? null;
+}
+
+/**
+ * `section`: which header link is marked current (defaults to the one matching `canonical`). On the home page
+ * app.js moves the mark between "scripts" and "mods" as the type filter changes.
+ */
 export function layout({
   title,
   description,
   body,
   canonical,
+  section,
   noindex = false,
 }) {
+  const current = section ?? sectionOf(canonical);
   const fullTitle = title
     ? `${title} · ${cfg.title}`
     : `${cfg.title} · ${cfg.tagline}`;
@@ -80,13 +105,15 @@ export function layout({
             />${cfg.title}</a
           >
           <nav>
-            <a href="${href("")}">scripts</a>
-            <a href="${href("start/")}">start here</a>
-            <a href="${href("new/")}">new</a>
-            <a href="${href("updated/")}">updated</a>
-            <a href="${href("forks/")}">forks</a>
-            <a href="${href("?kind=mod")}">mods</a>
-            <a href="${href("about/")}">about</a>
+            ${nav.map(
+              ([key, path, label]) =>
+                html`<a
+                  href="${href(path)}"
+                  data-nav="${key}"
+                  ${current === key ? html` aria-current="page"` : ""}
+                  >${label}</a
+                >`,
+            )}
             ${cfg.forum && html`<a href="${cfg.forum}">talk</a>`}
             <a class="nav-submit" href="${submitUrl}">+ submit</a>
             <a href="https://github.com/${cfg.repo}">github</a>
