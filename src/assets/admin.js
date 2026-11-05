@@ -95,9 +95,12 @@
   };
   const arr = (v) => (Array.isArray(v) ? v.map(String) : []);
 
-  /** The same card as card() in tools/site/components.mjs, for an entry without a page: it links to its repo. */
-  function card(e, aiLabels) {
-    const li = el('li', 'card');
+  /**
+   * The same card as card() in tools/site/components.mjs, for an entry without a page: clicking it (anywhere but its
+   * links and buttons) opens app.js's quick view, which links to the repo. `splinesInfo` adds the admin-only rows.
+   */
+  function card(e, aiLabels, ctx) {
+    const li = el('li', 'card admin-card');
     const tags = arr(e.tags);
     const requires = arr(e.requires);
     Object.assign(li.dataset, {
@@ -113,10 +116,11 @@
       forks: 0,
       updated: e.updated || '',
       added: e.added || '',
+      repo: https(e.repo) || '',
+      install: https(e.install) || '',
       search: [e.name, e.author, e.description, ...tags, ...requires].join(' ').toLowerCase(),
     });
-    const link = el('a', 'card-link');
-    if (https(e.repo)) link.href = e.repo;
+    const link = el('div', 'card-link');
     const title = el('span', 'card-title', e.name || e.slug);
     title.append(' ', Object.assign(el('span', 'badge listing', e.listing), { title: `${e.listing}: not on the public site` }));
     link.append(title, el('span', 'card-author', `by ${e.author || '?'}`));
@@ -142,6 +146,26 @@
       tagBox.append(a);
     }
     li.append(link, el('p', 'card-desc', e.description || ''), meta, tagBox);
+    li.splinesInfo = {
+      rows: [['listing', e.listing], ['origin', e.origin], ['status', e.status]],
+      links: [
+        ['entry', `https://github.com/${ctx.repo}/blob/${encodeURIComponent(ctx.branch)}/scripts/${encodeURIComponent(e.slug)}/index.md`, `scripts/${e.slug}/index.md`],
+        ['invited', https(e.invited), 'invitation issue'],
+      ],
+    };
+    // the tag links (filters), the invitation link and the card's buttons keep their own behaviour
+    li.tabIndex = 0;
+    li.title = 'Details and the maiden install line';
+    li.setAttribute('aria-haspopup', 'dialog');
+    li.addEventListener('click', (ev) => {
+      if (ev.target.closest('a, button') || getSelection().toString()) return; // a link, or selecting text
+      window.splinesShowInfo(li);
+    });
+    li.addEventListener('keydown', (ev) => {
+      if (ev.target !== li || (ev.key !== 'Enter' && ev.key !== ' ')) return;
+      ev.preventDefault();
+      window.splinesShowInfo(li);
+    });
     return li;
   }
 
@@ -197,7 +221,8 @@
       }
       hidden = hidden.filter((e) => !shown.has(e.slug.toLowerCase()));
       const aiLabels = JSON.parse(list.dataset.aiLabels || '{}');
-      window.splinesAddCards(hidden.map((e) => card(e, aiLabels)));
+      const ctx = { repo: list.dataset.repo, branch: list.dataset.branch };
+      window.splinesAddCards(hidden.map((e) => card(e, aiLabels, ctx)));
 
       document.querySelector('fieldset[data-group="listing"]').hidden = false;
       recountChips(list);

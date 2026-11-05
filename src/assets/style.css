@@ -115,12 +115,20 @@ code, .cmd { font-family: var(--mono); font-size: .9em; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
 .card:hover { border-color: var(--muted); }
 .card { position: relative; }
+.card:has(a.card-link[href]) { cursor: pointer; } /* app.js makes the whole card open the script page */
 .card:has(.fav-toggle) .card-link { padding-right: 26px; }
 /* favorite toggle, added by app.js; ★ in the meta row stays GitHub stars */
 .fav-toggle { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--muted); font: 20px/1 var(--sans); cursor: pointer; display: grid; place-items: center; }
 .fav-toggle:hover { color: var(--accent); background: var(--chip); }
 .fav-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .fav-toggle[aria-pressed="true"] { color: var(--accent); }
+/* quick view handle, added by app.js */
+.card:has(.card-quick) .card-tags { padding-right: 24px; min-height: 18px; }
+.card-quick { position: absolute; bottom: 4px; right: 4px; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--muted); font: 14px/1 var(--sans); cursor: pointer; display: grid; place-items: center; }
+.card-quick svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.card-quick.dots svg { stroke-width: 2.6; }
+.card-quick:hover { color: var(--accent); background: var(--chip); }
+.card-quick:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .card-link { text-decoration: none; color: var(--ink); display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .card-title { font: 600 17px/1.2 var(--mono); }
 .card-author { color: var(--muted); font-size: 13px; }
@@ -142,6 +150,21 @@ code, .cmd { font-family: var(--mono); font-size: .9em; }
 .admin-signin label { display: block; font: 13px var(--mono); color: var(--muted); margin-bottom: 4px; }
 .admin-signin input { flex: 1; min-width: 0; font: 14px var(--sans); padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
 .admin-note { color: var(--warn); }
+.admin-card { cursor: pointer; }
+.admin-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.quick-info { width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 48px); overflow-y: auto; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; font-size: 14px; }
+.quick-info::backdrop { background: rgb(0 0 0 / .5); }
+.quick-info-head { display: flex; align-items: baseline; gap: 8px; }
+.quick-info h2 { font: 600 20px/1.2 var(--mono); margin: 0; flex: 1; overflow-wrap: anywhere; }
+.quick-info h3 { font: 600 13px var(--mono); color: var(--muted); text-transform: lowercase; margin: 14px 0 6px; }
+.quick-info-close { border: 0; background: var(--chip); color: var(--muted); width: 28px; height: 28px; border-radius: 50%; font: 18px/1 var(--mono); cursor: pointer; display: grid; place-items: center; padding: 0; }
+.quick-info-close:hover { color: var(--ink); }
+.quick-info-desc { margin: 8px 0 12px; }
+.quick-info dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; }
+.quick-info dt { color: var(--muted); font: 12px/1.9 var(--mono); }
+.quick-info dd { margin: 0; overflow-wrap: anywhere; }
+.quick-info .copy-row { margin-top: 2px; }
+.quick-info-page { display: inline-block; margin-top: 14px; font: 13px var(--mono); }
 .stat.likes { color: var(--accent); }
 .like-link { font: 13px var(--mono); text-decoration: none; border: 1px solid var(--accent); border-radius: 999px; padding: 1px 10px; }
 .like-link:hover { background: var(--accent); color: var(--accent-ink); }

@@ -45,7 +45,7 @@ export function forkList(r, except) {
 export function card(r) {
   const search = [r.name, r.author, r.description, ...r.tags, ...r.requires].join(" ").toLowerCase();
   // src/assets/admin.js builds the same markup for unpublished entries: keep the two in step
-  return html`<li class="card" data-listing="${r.listing}" data-platform="${r.platform}" data-kind="${r.kind}" data-ai="${r.ai}" data-tags="${r.tags.join(" ")}" data-requires="${r.requires.join(" ")}" data-name="${r.name}" data-stars="${r.stars ?? 0}" data-likes="${r.likes}" data-forks="${r.activeForks.length}" data-updated="${r.updated}" data-added="${r.added}" data-search="${search}">
+  return html`<li class="card" data-listing="${r.listing}" data-platform="${r.platform}" data-kind="${r.kind}" data-ai="${r.ai}" data-tags="${r.tags.join(" ")}" data-requires="${r.requires.join(" ")}" data-name="${r.name}" data-stars="${r.stars ?? 0}" data-likes="${r.likes}" data-forks="${r.activeForks.length}" data-updated="${r.updated}" data-added="${r.added}" data-repo="${r.repo}" data-install="${r.install || ""}" data-search="${search}">
   <a class="card-link" href="${href(r.path)}">
     <span class="card-title">${r.name}${statusIcon(r)}${newBadge(r)}${listingBadge(r)}</span>
     <span class="card-author">by ${r.author}</span>
