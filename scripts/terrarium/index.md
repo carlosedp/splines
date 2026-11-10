@@ -1,7 +1,7 @@
 ---
 name: terrarium
 platform: norns
-repo: https://github.com/carlosedp/terrarium
+repo: https://github.com/glassgarden/terrarium
 author: carlosedp
 description: A small world of Mutable Instruments for monome norns
 tags:
