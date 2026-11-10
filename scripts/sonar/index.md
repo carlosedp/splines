@@ -1,0 +1,14 @@
+---
+name: sonar
+platform: norns
+repo: https://github.com/laserpirate/sonar
+author: laserpirate
+description: no description yet
+tags:
+  - uncategorized
+ai: unknown
+source: imported
+origin: github-search
+listing: indexed
+added: 2026-11-09
+---
