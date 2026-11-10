@@ -60,7 +60,7 @@ Some entries are **mods**: they extend norns itself instead of running as a scri
 
 ## crow, iii and teletype
 
-These scripts don't install through maiden. Their pages link to the repository; follow its README. For crow, monome's [druid](https://monome.org/docs/crow/druid/) is the usual way to upload a script. For Grid, some scripts are iii-specific and use [diii](https://diii.vfmod.com/).
+These scripts don't install through maiden. Their pages link to the repository; follow its README. For crow, monome's [druid](https://monome.org/docs/crow/druid/) is the usual way to upload a script. For grid and other iii devices, scripts are uploaded from the browser with monome's [diii](https://monome.org/diii) or [greenhouse](https://greenhouse.vfmod.com/), which also shows the device on screen.
 
 ## when something doesn't work
 
