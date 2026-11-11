@@ -35,7 +35,7 @@ export default function home(records, write) {
   <p>${records.length} scripts. Search, filter by tag or hardware, and install straight from maiden. Handmade or AI-assisted, always disclosed. <a href="${submitUrl}">Add your script</a> with a short form, or read <a href="${href("about/")}">how it works</a>.${cfg.forum && html` Questions, ideas or work in progress? Join the <a href="${cfg.forum}">forum</a>.`}</p>
   <div class="start-callout">
     <a class="start-button" href="${href("start/")}">new to norns? start here →</a>
-    <a class="start-button" href="${href("guides/")}">check our guides →</a>
+    <a class="start-button secondary" href="${href("guides/")}">browse the guides →</a>
   </div>
   </div>
 </section>
