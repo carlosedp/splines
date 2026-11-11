@@ -9,10 +9,10 @@ tags:
   - fx
   - audio-fx
   - resonator
-ai: unknown
+ai: none
 source: imported
 origin: curated
-listing: indexed
+listing: published
 added: 2026-10-21
 ---
 

@@ -9,10 +9,10 @@ tags:
   - synth
 requires:
   - midi
-ai: unknown
+ai: none
 source: imported
 origin: lines
-listing: indexed
+listing: published
 added: 2026-10-21
 discussion: https://llllllll.co/t/doubledecker/61525
 ---

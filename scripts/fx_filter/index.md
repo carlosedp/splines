@@ -9,10 +9,10 @@ tags:
   - fx
   - audio-fx
   - filter
-ai: unknown
+ai: none
 source: imported
 origin: github-topic:norns
-listing: indexed
+listing: published
 ---
 
 An effect for the [fx](../fx/) mod framework. Install and enable **fx** first, then this mod (SYSTEM > MODS), and restart norns.
