@@ -69,7 +69,9 @@ code, .cmd { font-family: var(--mono); font-size: .9em; }
 .hero p { color: var(--muted); max-width: 60ch; margin: 0; }
 .hero-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 32px; }
 .hero-row > p { flex: 1 1 420px; }
-.start-callout { flex: 0 1 280px; display: flex; flex-direction: column; align-items: stretch; gap: 8px; text-align: center; }
+/* takes the rest of the row, with the button pair centred in it (equal widths, stacked) */
+.start-callout { flex: 1 1 280px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.start-callout .start-button { width: min(100%, 280px); box-sizing: border-box; }
 .start-button.secondary { color: var(--accent); background: none; box-shadow: inset 0 0 0 1.5px var(--accent); }
 .start-button.secondary:hover { color: var(--accent-ink); background: var(--accent); filter: none; }
 .start-button { font: 600 14px var(--mono); color: var(--accent-ink); background: var(--accent); border-radius: 999px; padding: 8px 16px; text-decoration: none; white-space: nowrap; }
