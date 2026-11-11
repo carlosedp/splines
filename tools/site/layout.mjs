@@ -10,6 +10,7 @@ const nav = [
   ["updated", "updated/", "updated"],
   ["forks", "forks/", "forks"],
   ["mods", "?kind=mod", "mods"],
+  ["guides", "guides/", "guides"],
   ["about", "about/", "about"],
 ];
 
@@ -18,6 +19,7 @@ function sectionOf(canonical) {
   if (canonical == null) return null;
   if (/(^|\/)forks\//.test(canonical)) return "forks"; // forks/ and each fork's page
   if (canonical === "" || canonical.startsWith("scripts/")) return "scripts";
+  if (canonical.startsWith("guides/")) return "guides";
   return nav.find(([, p]) => p && p === canonical)?.[0] ?? null;
 }
 

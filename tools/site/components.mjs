@@ -1,7 +1,16 @@
 // Pieces several pages share: cards, badges, fork lists, the "what's new" panels, filter chips.
 import { githubSlug, PLATFORMS, KINDS, STATUSES, LISTINGS } from "../lib.mjs";
 import { html } from "./html.mjs";
-import { cfg, href, siteUrl, cache, buildDate, NEW_DAYS, FORK_MIN_AHEAD, AI_LABEL } from "./context.mjs";
+import { cfg, href, siteUrl, cache, buildDate, commentsReady, NEW_DAYS, FORK_MIN_AHEAD, AI_LABEL } from "./context.mjs";
+
+// The forum thread at the bottom of script and guide pages (`what`: "script" or "guide"). app.js loads Discourse's
+// embed.js when this scrolls near the viewport, so the forum topic is only created when someone reaches the comments.
+export const discussion = (pagePath, what) =>
+  commentsReady &&
+  html`<section class="discussion" id="discussion"><h2>discussion</h2>
+<p class="hint">Talk about this ${what} on the <a href="${cfg.discourse.url}">${cfg.title} forum</a>. Like the thread's first post to give it a ♥ here (counts update daily).</p>
+<div id="discourse-comments" data-forum="${cfg.discourse.url.replace(/\/*$/, "/")}" data-embed-url="${siteUrl}/${pagePath}"></div>
+</section>`;
 
 export const aiBadge = (ai) => html`<span class="badge ai ai-${ai}" title="${AI_LABEL[ai][1]}">${AI_LABEL[ai][0]}</span>`;
 

@@ -39,6 +39,8 @@ Node ≥ 20. There is no test suite yet. Verify changes by running `validate` an
 
 ```
 scripts/<name>/index.md   one entry per script, ANY platform (+ optional images next to it). This is catalog data, not code.
+guides/<slug>/index.md    community guides (front matter + Markdown, + optional images). Validated by `validateGuide` in lib.mjs,
+                          collected in tools/site/guides.mjs, rendered by tools/site/pages/guides.mjs. See "Guides" below
 templates/entry.md        entry template used by `npm run new`
 templates/invite.md       the opt-in invitation issue (title + body, {{placeholders}}) used by invite.mjs
 src/assets/               style.css, app.js (client filtering), favicon.svg
@@ -96,6 +98,16 @@ READMEs are rendered by `renderReadme()` in `tools/site/markdown.mjs`: raw HTML 
 The URL slug is the folder name: `/scripts/<name>/`, stable even if the platform changes. Duplicate names and duplicate repos (per platform) are rejected by `validate.mjs`. Adding a platform is one line in `PLATFORMS`.
 
 When adding a field: update `validateEntry` in `lib.mjs`, `templates/entry.md`, the issue forms (`.github/ISSUE_TEMPLATE/*.yml` + `from-issue.mjs`), the table in `README.md`/`src/about.md`, the record built in `tools/site/records.mjs`, and, if relevant, `index.json`/`catalog.json`.
+
+## Guides
+
+Long-form docs on a theme (a mod framework, nb, routing), one `guides/<slug>/index.md` each, added by PR and reviewed by the maintainer (no `ai:` field). Front matter: `title`, `summary` (≤200), `topic` (`GUIDE_TOPICS` in `lib.mjs`, groups `/guides/`), `authors`, `checked` (date), optional `scripts` (entry names, any listing), `tags`, `sources` (https). Field reference in `CONTRIBUTING.md`.
+
+- `[[name]]` in the body is a marked inline extension (`markdown(text, { resolve })`), so code is untouched. It links the script page when published, else the repo. Unknown names fail validation.
+- Guide pages show cards only for scripts in the build; the rest are listed by repo under "not listed". A guide must never publish an entry.
+- `collectGuides()` also sets `r.guides` on each covered record (script-page backlinks, and in `index.json`), so it runs before the page modules.
+- A covered script pushed after `checked` (from `.cache/github.json`) puts a "changed since" notice on the guide.
+- Images next to the guide are copied (no SVG, served from the site origin).
 
 ## Conventions and constraints
 

@@ -1,6 +1,6 @@
-// Validate every entry. `--online` also checks that each repo exists and has a .lua script at its root (not libraries).
+// Validate every entry and guide. `--online` also checks that each repo exists and has a .lua script at its root (not libraries).
 // `--changed a.md,b.md` limits online checks to those files (used on pull requests).
-import { PLATFORMS, KINDS, loadEntries, validateEntry, normalizeRepo, githubSlug, gh, hasNornsLayout, isNornsMod, isModOnly } from './lib.mjs';
+import { PLATFORMS, KINDS, loadEntries, validateEntry, loadGuides, validateGuide, normalizeRepo, githubSlug, gh, hasNornsLayout, isNornsMod, isModOnly } from './lib.mjs';
 
 const args = process.argv.slice(2);
 const online = args.includes('--online');
@@ -35,6 +35,10 @@ for (const e of entries) {
   }
 }
 
+const guides = loadGuides();
+const names = new Set(entries.map((e) => e.data?.name).filter(Boolean).map(String));
+for (const g of guides) for (const msg of validateGuide(g, names)) report(g, msg);
+
 if (online) {
   const targets = entries.filter((e) => e.data && (!changed || changed.has(e.file)));
   for (const e of targets) {
@@ -67,7 +71,7 @@ if (online) {
 }
 
 if (failures) {
-  console.error(`\n${failures} problem(s) found in ${entries.length} entries.`);
+  console.error(`\n${failures} problem(s) found in ${entries.length} entries and ${guides.length} guide(s).`);
   process.exit(1);
 }
-console.log(`✓ ${entries.length} entries valid${online ? ' (online checks done)' : ''}.`);
+console.log(`✓ ${entries.length} entries and ${guides.length} guide(s) valid${online ? ' (online checks done)' : ''}.`);

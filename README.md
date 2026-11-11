@@ -30,6 +30,7 @@ npm run new -- my-script   # scaffold scripts/my-script/index.md (--platform iii
 
 ```
 scripts/<name>/index.md   one entry per script, any platform (+ optional screenshots)
+guides/<slug>/index.md    community guides on a theme, linked to the scripts they cover (see CONTRIBUTING.md)
 templates/entry.md        entry template
 src/assets/               style.css, app.js (filtering), favicon
 src/about.md              about / submit / maiden page

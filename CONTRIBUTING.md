@@ -33,6 +33,26 @@ Entries have a `listing`: `published` (on the site), `indexed` (found by the imp
 
 To change the description, tags, hardware, AI disclosure or links, use the "edit its details" link on the script's page (or the [edit form](https://github.com/carlosedp/splines/issues/new?template=edit.yml)): it opens with the current values filled in, and a bot turns it into a pull request. For anything else, edit or delete your `scripts/<name>/` folder in a PR. Authors can always ask for their entry to be removed, or use the [opt-out form](https://github.com/carlosedp/splines/issues/new?template=optout.yml) to take it off the site.
 
+## Guides
+
+Guides are longer docs on a theme that spans many scripts: a mod framework (like [fx](https://splines.cc/guides/fx/)), nb voices, audio routing, techniques for writing scripts. They link to the scripts they cover, and those scripts' pages link back.
+
+Add one with a pull request: `guides/<slug>/index.md` (lowercase kebab-case folder), with screenshots next to it if you like (PNG, JPEG, GIF or WebP). Front matter:
+
+```yaml
+title: fx mod
+summary: One or two sentences, 200 characters max.
+topic: mods            # mods | nb | audio | crow | dev (GUIDE_TOPICS in tools/lib.mjs)
+authors: [your-handle]
+checked: 2026-11-11    # when you last checked it against the code
+scripts: [fx, fx_tanh] # entries it covers, by name (optional)
+tags: [fx]             # also list every published script with these tags (optional)
+sources:               # forum threads, repos, docs it draws on (optional)
+  - https://llllllll.co/t/fx-mod/62726
+```
+
+The body is Markdown. Write `[[name]]` to link a script: it goes to the script's page, or to its repo if it isn't on the site. Scripts not on the site are listed separately, by repo only; a guide never publishes an entry. When a covered script gets pushed to after `checked`, the guide shows a notice, so update the date when you re-check it. Credit forum posts and code you quote. `npm run validate` checks the front matter and every `[[name]]`.
+
 ## Working on the site itself
 
 No framework: `tools/build.mjs` renders plain HTML from the page modules in `tools/site/pages/` (an escaping `html` tagged template, no engine), `src/assets/app.js` filters the prerendered cards. `npm run dev` builds, serves locally, and rebuilds and reloads the page when you edit an entry, `src/` or `tools/`.

@@ -4,7 +4,7 @@ import { html, join } from "../html.mjs";
 import { cfg, siteUrl, buildDate } from "../context.mjs";
 
 /** Writes the data files; returns the maiden catalog's entry count for the build summary. */
-export default function data(records, write) {
+export default function data(records, write, guides = []) {
   // maiden catalog (same shape as monome's community.json)
   const catalog = {
     file_info: { version: 1, kind: "script_catalog" },
@@ -30,7 +30,7 @@ export default function data(records, write) {
   write("index.json", JSON.stringify({ generated: buildDate, count: records.length, entries }, null, 2));
 
   if (siteUrl) {
-    const pages = ["", "start/", "about/", "new/", "updated/", "forks/", ...records.map((r) => r.path)];
+    const pages = ["", "start/", "about/", "new/", "updated/", "forks/", "guides/", ...guides.map((g) => g.path), ...records.map((r) => r.path)];
     write(
       "sitemap.xml",
       html`<?xml version="1.0" encoding="UTF-8"?>
