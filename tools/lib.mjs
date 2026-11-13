@@ -187,6 +187,7 @@ export function validateEntry(entry) {
 export const GUIDES_DIR = 'guides';
 // groups on the /guides/ index, in this order
 export const GUIDE_TOPICS = {
+  start: 'getting started',
   mods: 'mods',
   nb: 'nb voices',
   audio: 'audio & routing',

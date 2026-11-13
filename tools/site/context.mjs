@@ -13,6 +13,16 @@ export const submitUrl = `https://github.com/${cfg.repo}/issues/new?template=sub
 export const commentsReady = !!(cfg.discourse?.url && cfg.discourse.comments && siteUrl);
 export const buildDate = new Date().toISOString();
 
+/** Placeholders in hand-written Markdown (src/*.md, guides): {{title}}, {{base}} (for site links), {{catalog}}, {{repo}}, {{branch}}, {{forum}}. */
+export const fillPlaceholders = (text) =>
+  text
+    .replaceAll("{{title}}", cfg.title)
+    .replaceAll("{{base}}", base)
+    .replaceAll("{{catalog}}", `${siteUrl}/catalog.json`)
+    .replaceAll("{{repo}}", cfg.repo)
+    .replaceAll("{{branch}}", cfg.branch)
+    .replaceAll("{{forum}}", cfg.forum || `https://github.com/${cfg.repo}/discussions`);
+
 export const cache = readJSON(path.join(ROOT, ".cache", "github.json"), {});
 // likes and comment counts of each script's forum thread, keyed by page path (written by enrich.mjs)
 export const discussions = readJSON(path.join(ROOT, ".cache", "discussions.json"), {});

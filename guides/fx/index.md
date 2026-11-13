@@ -1,6 +1,6 @@
 ---
 title: fx mod
-summary: Add reverb, delay, saturation and more to any SuperCollider script or nb voice. How the fx mod works, which effects exist, and how to wire them up.
+summary: Add effects like reverb, delay, saturation and more to any SuperCollider script or nb voice. How the fx mod works, which effects exist, and how to wire them up.
 topic: mods
 authors:
   - carlosedp
@@ -64,12 +64,12 @@ A few words that come up all the time:
 | **mod**      | an extension to norns itself, not a script. You turn it on in **SYSTEM → MODS** and it applies to every script you load.               |
 | **engine**   | the SuperCollider synth a script uses to make sound. Most synth scripts have one.                                                      |
 | **softcut**  | norns' built-in sampler/looper. It's separate from SuperCollider, which matters here (see [what works](#what-works-and-what-doesn-t)). |
-| **nb voice** | a voice from the nb ("n.b. et al.") system: a synth any nb-aware script can play. Many are mods too.                                   |
+| **nb voice** | a voice from the [nb]({{base}}/guides/nb/) ("n.b. et al.") system: a synth any nb-aware script can play. Many are mods too.            |
 | **insert**   | an effect that processes _everything_ coming out of SuperCollider, in place. It has a dry/wet mix.                                     |
 | **send**     | an effect that only hears what a voice _sends_ to it, and adds its fully wet output back to the mix.                                   |
 
 You'll need norns with maiden open in a browser
-([getting started](/start/) walks through it if you haven't done that before).
+([getting started]({{base}}/guides/getting-started/) walks through it if you haven't done that before).
 
 ## Which fx to install
 
@@ -82,7 +82,8 @@ so you can only have one at a time:
   It fixes the audio input randomly leaking into the sends, rebuilds the effects
   at every script load so they always come last, and lets several inserts be
   **chained**, each with its own dry/wet. We recommend this version for most users.
-  Get it from [the fork page](/scripts/fx/forks/sonocircuit/fx/).
+  Get it from [the splines fork page]({{base}}/scripts/fx/forks/sonocircuit/fx/) until these changes
+  are merged into sixolet/fx.
 
 **This guide describes the fork**, and it's the one to pick unless you have a
 reason not to. Where the original behaves differently, it says so. The full list
@@ -120,9 +121,9 @@ That's the whole workflow: install an effect mod, enable it, restart, then pick
 a slot in the params of whatever script you're playing. Every effect works this
 way and has its own `slot` param, so you can run several at once.
 
-> **Every effect mod needs the fx mod.** Effects are built on a class defined
-> in fx. Without it, SuperCollider fails to compile and norns shows
-> _SUPERCOLLIDER FAIL_.
+> **Every effect mod needs the fx mod and it's installed once.** Effects are
+> built on a class defined in fx. Without it, SuperCollider fails to compile
+> and norns shows _SUPERCOLLIDER FAIL_.
 
 ## Where fx sits in the audio path
 
@@ -172,11 +173,11 @@ does.
 **Which one?** Use **insert** when you want to change the whole sound of a
 script; it works with any engine. Use a **send** when you want some voices wet
 and others dry, or one shared reverb that each voice feeds by a different
-amount. Sends only work with voices that support them.
+amount. Sends only work with scripts that support them.
 
 ### Chaining inserts
 
-Each effect you switch to `insert` goes **to the end** of the insert chain. Each
+Each effect you set to `insert` goes **to the end** of the insert chain. Each
 one processes the output of the one before, with its own dry/wet.
 
 - **The order is the order you turned them on.** To put the delay before the
@@ -186,8 +187,7 @@ one processes the output of the one before, with its own dry/wet.
 
 Under the hood, each insert gets a small _replacer_ synth that mixes the effect
 back into the main bus at its dry/wet, then clears the shared wet bus so the next
-effect starts clean. In sixolet's original, only the first insert's dry/wet
-worked and stacked inserts didn't chain cleanly.
+effect starts clean.
 
 ### Sends
 
@@ -219,7 +219,7 @@ Some effects, such as fx_grains, can sound quiet. Try a send amount around
 ## Recipes
 
 Common setups, each built from the pieces above. Install the effects named, turn
-them on in SYSTEM → MODS and restart before you start.
+them on in SYSTEM → MODS and restart before you play.
 
 ### Reverb on a synth script
 
@@ -270,7 +270,7 @@ tempo changes; set its rate again after changing the tempo.
 
 ## Choosing effects
 
-The known effect mods as of October 2026, grouped by what they do. Install any of
+Here are some of the effects available for the fx mods. Install any of
 them with `;install <repo>` from their page, then turn them on in SYSTEM → MODS.
 
 ### Saturation and distortion
@@ -283,12 +283,12 @@ them with `;install <repo>` from their page, then turn them on in SYSTEM → MOD
 
 ### Delay
 
-| effect       | what it is                                                              |
-| ------------ | ----------------------------------------------------------------------- |
-| [[fx_delay]] | a simple delay with a gentle filter                                     |
-| [[fx_rele]]  | multimode delay: stereo, dual mono or ping-pong, with clock sync        |
-| [[fx_pete]]  | freeze delay / beat repeater (best as a 100% wet insert)                |
-| [[fx_llll]]  | creative multitap delay with two built-in modulators (made with an LLM) |
+| effect       | what it is                                                       |
+| ------------ | ---------------------------------------------------------------- |
+| [[fx_delay]] | a simple delay with a gentle filter                              |
+| [[fx_rele]]  | multimode delay: stereo, dual mono or ping-pong, with clock sync |
+| [[fx_pete]]  | freeze delay / beat repeater (best as a 100% wet insert)         |
+| [[fx_llll]]  | creative multitap delay with two built-in modulators             |
 
 ### Reverb and chorus
 
@@ -309,23 +309,61 @@ them with `;install <repo>` from their page, then turn them on in SYSTEM → MOD
 
 ### Granular and multi-effect
 
-| effect         | what it is                                                                                                                                                                   |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [[fx_grains]]  | Mutable Instruments Clouds with LFO/random modulation. Needs mi-UGens.                                                                                                       |
-| [[fx_miUGens]] | seven Mutable-based effects in one mod: granular, texture, reverb with freeze, lowpass, µ-law crunch, cross/ring modulation and a resonator. Has its own mi-UGens installer. |
+| effect                                                                          | what it is                                                                                                                                                                                                       |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [[fx_grains]]                                                                   | Mutable Instruments Clouds with LFO/random modulation. Needs mi-UGens.                                                                                                                                           |
+| [[fx_miUGens]]                                                                  | seven Mutable-based effects in one mod: granular, texture, reverb with freeze, lowpass, µ-law crunch, cross/ring modulation and a resonator. Has its own mi-UGens installer.                                     |
+| [fx_beads](https://github.com/glassgarden/mi-UGens/tree/main/examples/fx_beads) | Mutable Instruments Beads, Clouds' successor: quality modes, freeze, randomness and a built-in reverb. An example in the glassgarden mi-UGens repo: copy it to `dust/code/fx_beads/`. Needs mi-UGens with Beads. |
 
 ### Experimental
 
 [[fx_delayyy]], [[fx_shimmer]] (shimmer reverb) and [[fx_spring]] (spring
 reverb) are sonoCircuit's unreleased experiments: they may change or not work.
 
+### Mutable Instruments effects need mi-UGens
+
+[[fx_resonator]], [[fx_grains]], [[fx_miUGens]] and fx*beads are built on
+**mi-UGens**, the SuperCollider versions of Mutable Instruments modules. They
+aren't part of norns, so they have to be installed once. The order matters, and
+there must only ever be **one copy**: two copies stop SuperCollider from starting
+(\_SUPERCOLLIDER FAIL*).
+
+The smoothest route is to install mi-UGens **first**, before any of these
+effects:
+
+- **[glassgarden/mi-UGens](https://github.com/glassgarden/mi-UGens)**
+  (recommended): all 13 modules, including **Beads**, with newer fixes. The
+  easiest way in is through a script or mod that needs it:
+  - [[fx_miUGens]]: the first time a script loads with mi-UGens missing, it
+    asks once (K3 installs, K2 is "not now"). After that, install or update
+    from SYSTEM → MODS → `FX_MIUGENS`: **install mi-UGens** is the last row.
+  - [[terrarium]]: it asks the first time you run it, and waits on that screen
+    until mi-UGens are installed and norns has restarted.
+
+  Both use [norns-deps](https://github.com/vehka/norns-deps), which shows what
+  it will install, downloads a pinned, checksum-verified release, moves older
+  copies aside so you never have two, and offers the restart when it's done.
+  They install the same copy to the same place, so installing it for one
+  covers the other. Each can also remove it again (fx_miUGens from its menu,
+  terrarium from its params), and only removes what it installed itself. You
+  can also install it without either, with the repo's `mi-ugens-install`
+  script (its README has the steps).
+
+- **[okyeron/mi-UGens](https://github.com/okyeron/mi-UGens)**, the older norns
+  build that fx_grains, fx_resonator and emplaitress download on their own when
+  they find no copy. It has no Beads. If you need it by hand, the command is in
+  [troubleshooting](#troubleshooting).
+
+Effects that download mi-UGens themselves only do it when none is installed,
+and only after SuperCollider has started (and failed), so on their own they
+take **2–3 restarts** to work. Turn the mod on in SYSTEM → MODS _before_
+restarting. Installing mi-UGens first avoids all of that.
+
+If another script, like [[pedalboard]], offers to install mi-UGens when you
+already have them, decline or check if it's installing an older version.
+
 ### Tips
 
-- **Mi-UGens effects** (fx*resonator, fx_grains) download the Mutable
-  Instruments UGens on first run. SuperCollider has already failed by the time
-  they finish, so it can take **2–3 restarts** before they work. Turn the mod on
-  in SYSTEM → MODS \_before* restarting. fx_miUGens instead installs them from
-  its own menu (SYSTEM → MODS → `FX_MIUGENS`).
 - **CPU:** granular and resonator effects are the heaviest. Running two of them
   at once may crackle; drop one, or use the lighter effects.
 - **fx_grains:** _freeze_ and _lofi_ are continuous 0–1 params but act as on/off.
@@ -362,9 +400,17 @@ and [[orgnwrms]]. For engine authors: add to `context.xg`, or use `\addToHead`.
 **SUPERCOLLIDER FAIL right after installing an effect**
 
 - Check that the **fx** mod is installed (folder `dust/code/fx`).
-- Mutable effects (`Class 'MiRings' not found`, `MiClouds`, `MiPlaits`): turn on
-  the mod, then restart 2–3 times. If that doesn't help, install the UGens by
-  hand from the maiden REPL, then restart:
+- Mutable effects (`Class 'MiRings' not found`, `MiClouds`, `MiPlaits`,
+  `MiBeads`): mi-UGens are missing or too old. Install
+  [glassgarden/mi-UGens](https://github.com/glassgarden/mi-UGens) as described
+  in [Mutable Instruments effects need mi-UGens](#mutable-instruments-effects-need-mi-ugens),
+  then restart.
+- SuperCollider fails although mi-UGens are installed: there may be **two
+  copies** (installed by different scripts or effects, or class files inside
+  `dust/`). The glassgarden installer moves older copies aside and warns in
+  maiden about stray files in `dust/`.
+- The older okyeron build can also be installed by hand from the maiden REPL
+  (it has no Beads), then restart:
 
   ```lua
   os.execute("wget -T 180 -q -P /tmp/ https://github.com/okyeron/mi-UGens/raw/master/linux-norns-binaries/mi-UGens-linux-v.03.tar && tar -xvf /tmp/mi-UGens-linux-v.03.tar -C /tmp && mkdir -p /home/we/.local/share/SuperCollider/Extensions/ && cp -r /tmp/mi-UGens-linux-v.03/* /home/we/.local/share/SuperCollider/Extensions/ && rm -r /tmp/mi-UGens-linux-v.03 /tmp/mi-UGens-linux-v.03.tar")
@@ -506,7 +552,7 @@ Rules:
 - Several effects can live in one repo, but norns allows **one mod per repo**
   (only one `lib/mod.lua`). [[fx_miUGens]] registers seven effects from one mod.
 
-Made an effect? [Submit it](/about/) to the catalog: it shows up in this guide
+Made an effect? [Submit it]({{base}}/about/) to the catalog: it shows up in this guide
 automatically if you tag it `fx`.
 
 ## What sonoCircuit's fork changes

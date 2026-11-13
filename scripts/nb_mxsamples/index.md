@@ -11,7 +11,7 @@ tags:
   - synth
 ai: none
 source: submitted
-listing: indexed
+listing: published
 license: MIT
 added: 2026-11-02
 ---

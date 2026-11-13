@@ -1,7 +1,7 @@
 // Guides (guides/<slug>/index.md) as the records the guide pages render from, linked to the script records.
 import path from "node:path";
 import { ROOT, GUIDES_DIR, loadEntries, loadGuides, validateGuide, githubSlug, listingOf } from "../lib.mjs";
-import { cache, href } from "./context.mjs";
+import { cache, href, fillPlaceholders } from "./context.mjs";
 
 /**
  * Valid guides, sorted by title. Each lists the scripts it covers: `scripts` (its front matter list, in that
@@ -43,7 +43,7 @@ export function collectGuides(records) {
       authors: d.authors.map(String),
       checked,
       sources: (d.sources || []).map(String),
-      body: g.body.replace(/<!--[\s\S]*?(-->|$)/g, ""),
+      body: fillPlaceholders(g.body.replace(/<!--[\s\S]*?(-->|$)/g, "")),
       file: g.file,
       dir: path.join(ROOT, GUIDES_DIR, g.slug),
       scripts: listed.filter((n) => byName.has(n)).map((n) => byName.get(n)),

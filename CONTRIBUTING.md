@@ -42,7 +42,7 @@ Add one with a pull request: `guides/<slug>/index.md` (lowercase kebab-case fold
 ```yaml
 title: fx mod
 summary: One or two sentences, 200 characters max.
-topic: mods            # mods | nb | audio | crow | dev (GUIDE_TOPICS in tools/lib.mjs)
+topic: mods            # start | mods | nb | audio | crow | dev (GUIDE_TOPICS in tools/lib.mjs)
 authors: [your-handle]
 checked: 2026-11-11    # when you last checked it against the code
 scripts: [fx, fx_tanh] # entries it covers, by name (optional)
@@ -51,7 +51,7 @@ sources:               # forum threads, repos, docs it draws on (optional)
   - https://llllllll.co/t/fx-mod/62726
 ```
 
-The body is Markdown. Write `[[name]]` to link a script: it goes to the script's page, or to its repo if it isn't on the site. Scripts not on the site are listed separately, by repo only; a guide never publishes an entry. When a covered script gets pushed to after `checked`, the guide shows a notice, so update the date when you re-check it. Credit forum posts and code you quote. `npm run validate` checks the front matter and every `[[name]]`.
+The body is Markdown. Write `[[name]]` to link a script: it goes to the script's page, or to its repo if it isn't on the site. Scripts not on the site are listed separately, by repo only; a guide never publishes an entry. When a covered script gets pushed to after `checked`, the guide shows a notice, so update the date when you re-check it. Link other pages of the site with `{{base}}`, like `[the fx guide]({{base}}/guides/fx/)`; `{{title}}` and `{{forum}}` work too. Credit forum posts and code you quote. `npm run validate` checks the front matter and every `[[name]]`.
 
 ## Working on the site itself
 

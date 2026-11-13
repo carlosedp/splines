@@ -7,8 +7,8 @@ description: serge-style modular sequencer for monome norns
 tags:
   - sequencer
   - serge
-ai: unknown
+ai: none
 source: imported
 origin: github-topic:norns
-listing: indexed
+listing: published
 ---

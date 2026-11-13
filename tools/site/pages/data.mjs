@@ -30,7 +30,7 @@ export default function data(records, write, guides = []) {
   write("index.json", JSON.stringify({ generated: buildDate, count: records.length, entries }, null, 2));
 
   if (siteUrl) {
-    const pages = ["", "start/", "about/", "new/", "updated/", "forks/", "guides/", ...guides.map((g) => g.path), ...records.map((r) => r.path)];
+    const pages = ["", "about/", "new/", "updated/", "forks/", "guides/", ...guides.map((g) => g.path), ...records.map((r) => r.path)];
     write(
       "sitemap.xml",
       html`<?xml version="1.0" encoding="UTF-8"?>

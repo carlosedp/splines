@@ -17,7 +17,7 @@ function install(r) {
   <h2>install</h2>
   <p>In maiden's REPL (the <code>&gt;&gt;</code> prompt at the bottom of the editor), run:</p>
   <div class="copy-row"><code class="cmd">;install ${r.install || r.repo}</code><button type="button" class="copy" data-copy=";install ${r.install || r.repo}">copy</button></div>
-  <p class="hint">First time? <a href="${href("start/")}">Getting started</a> walks through maiden and loading a script.</p>
+  <p class="hint">First time? <a href="${href("guides/getting-started/")}">Getting started</a> walks through maiden and loading a script.</p>
   ${!r.install && html`<p class="hint">Or add the <a href="${href("about/#installing-with-maiden")}">${cfg.title} catalog</a> to maiden and install it from the project manager. Restart norns if the script ships a new engine.</p>`}
   ${r.kind === "mod" && html`<p class="hint">This is a <strong>mod</strong>: after installing, enable it in SYSTEM &gt; MODS (select it with E2, turn E3 until it shows a +), then restart norns. <a href="https://monome.org/docs/norns/mods/">About mods</a>.</p>`}
 </section>`;

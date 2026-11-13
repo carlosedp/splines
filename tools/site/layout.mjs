@@ -4,7 +4,7 @@ import { cfg, href, siteUrl, submitUrl } from "./context.mjs";
 
 // header sections: the catalog views side by side, then the guides. [key, path, label]
 const nav = [
-  ["start", "start/", "getting started"],
+  ["start", "guides/getting-started/", "getting started"],
   ["scripts", "", "scripts"],
   ["new", "new/", "new"],
   ["updated", "updated/", "updated"],
@@ -19,6 +19,7 @@ function sectionOf(canonical) {
   if (canonical == null) return null;
   if (/(^|\/)forks\//.test(canonical)) return "forks"; // forks/ and each fork's page
   if (canonical === "" || canonical.startsWith("scripts/")) return "scripts";
+  if (canonical === "guides/getting-started/") return "start"; // a guide, but it has its own header link
   if (canonical.startsWith("guides/")) return "guides";
   return nav.find(([, p]) => p && p === canonical)?.[0] ?? null;
 }

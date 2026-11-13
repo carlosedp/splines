@@ -8,10 +8,10 @@ description: an eight voice supertonic port
 tags:
   - nb
   - synth
-ai: unknown
+ai: none
 source: imported
 origin: lines
-listing: indexed
+listing: published
 added: 2026-10-21
 license: MIT
 discussion: https://llllllll.co/t/nb-tonic/74272

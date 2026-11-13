@@ -7,9 +7,9 @@ author: vehka
 description: no description yet
 tags:
   - uncategorized
-ai: unknown
+ai: none
 source: imported
 origin: github-search
-listing: indexed
+listing: published
 added: 2026-10-25
 ---

@@ -45,7 +45,6 @@ templates/entry.md        entry template used by `npm run new`
 templates/invite.md       the opt-in invitation issue (title + body, {{placeholders}}) used by invite.mjs
 src/assets/               style.css, app.js (client filtering), favicon.svg
 src/about.md              about/submit/maiden page ({{title}}, {{catalog}}, {{repo}} placeholders)
-src/start.md              /start/ getting-started guide for newcomers (same placeholders, plus {{base}} for site links)
 tools/lib.mjs             config, PLATFORMS, entry loading, front matter, VALIDATION RULES (single source of truth)
 tools/validate.mjs        CLI validator (GitHub Actions annotations when GITHUB_ACTIONS is set)
 tools/enrich.mjs          GitHub API metadata + README cache (20h TTL); likes/comments of each page's forum thread (Discourse embed; DISCOURSE_API_KEY maps new topics) → .cache/discussions.json; forks pushed to after forking, with commits ahead/behind upstream (weekly) → .cache/forks.json
@@ -103,6 +102,8 @@ When adding a field: update `validateEntry` in `lib.mjs`, `templates/entry.md`, 
 
 Long-form docs on a theme (a mod framework, nb, routing), one `guides/<slug>/index.md` each, added by PR and reviewed by the maintainer (no `ai:` field). Front matter: `title`, `summary` (≤200), `topic` (`GUIDE_TOPICS` in `lib.mjs`, groups `/guides/`), `authors`, `checked` (date), optional `scripts` (entry names, any listing), `tags`, `sources` (https). Field reference in `CONTRIBUTING.md`.
 
+- Getting started is a guide (`guides/getting-started/`, topic `start`) with its own header link and home button; `/start/` is a redirect page kept for old links (`prose.mjs`).
+- Bodies get the same `{{title}}`/`{{base}}`/`{{forum}}`… placeholders as `src/about.md` (`fillPlaceholders()` in `context.mjs`). Link site pages as `{{base}}/guides/fx/`, never `/guides/fx/`, so a non-empty `basePath` still works.
 - `[[name]]` in the body is a marked inline extension (`markdown(text, { resolve })`), so code is untouched. It links the script page when published, else the repo. Unknown names fail validation.
 - Guide pages show cards only for scripts in the build; the rest are listed by repo under "not listed". A guide must never publish an entry.
 - `collectGuides()` also sets `r.guides` on each covered record (script-page backlinks, and in `index.json`), so it runs before the page modules.

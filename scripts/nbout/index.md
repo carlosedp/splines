@@ -13,6 +13,6 @@ requires:
   - midi
 ai: none
 source: submitted
-listing: indexed
+listing: published
 added: 2026-11-02
 ---
