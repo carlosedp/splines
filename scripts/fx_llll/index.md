@@ -9,10 +9,10 @@ tags:
   - fx
   - audio-fx
   - delay
-ai: unknown
+ai: assisted
 source: imported
 origin: curated
-listing: indexed
+listing: published
 added: 2026-10-21
 ---
 

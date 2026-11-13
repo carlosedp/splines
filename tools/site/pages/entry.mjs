@@ -6,7 +6,7 @@ import { html, raw, join } from "../html.mjs";
 import { cfg, href, siteUrl, cache, commentsReady, AI_LABEL } from "../context.mjs";
 import { markdown } from "../markdown.mjs";
 import { layout } from "../layout.mjs";
-import { aiBadge, statusIcon, newBadge, listingBadge, tagLink, reqBadge, likesStat, forkList } from "../components.mjs";
+import { aiBadge, statusIcon, newBadge, listingBadge, tagLink, reqBadge, likesStat, forkList, discussion } from "../components.mjs";
 
 function install(r) {
   if (r.kind === "library")
@@ -17,20 +17,11 @@ function install(r) {
   <h2>install</h2>
   <p>In maiden's REPL (the <code>&gt;&gt;</code> prompt at the bottom of the editor), run:</p>
   <div class="copy-row"><code class="cmd">;install ${r.install || r.repo}</code><button type="button" class="copy" data-copy=";install ${r.install || r.repo}">copy</button></div>
-  <p class="hint">First time? <a href="${href("start/")}">Getting started</a> walks through maiden and loading a script.</p>
+  <p class="hint">First time? <a href="${href("guides/getting-started/")}">Getting started</a> walks through maiden and loading a script.</p>
   ${!r.install && html`<p class="hint">Or add the <a href="${href("about/#installing-with-maiden")}">${cfg.title} catalog</a> to maiden and install it from the project manager. Restart norns if the script ships a new engine.</p>`}
   ${r.kind === "mod" && html`<p class="hint">This is a <strong>mod</strong>: after installing, enable it in SYSTEM &gt; MODS (select it with E2, turn E3 until it shows a +), then restart norns. <a href="https://monome.org/docs/norns/mods/">About mods</a>.</p>`}
 </section>`;
 }
-
-// app.js loads Discourse's embed.js when this scrolls near the viewport, so the forum topic is only created
-// when someone actually reaches the comments.
-const discussion = (r) =>
-  commentsReady &&
-  html`<section class="discussion" id="discussion"><h2>discussion</h2>
-<p class="hint">Talk about this script on the <a href="${cfg.discourse.url}">${cfg.title} forum</a>. Like the thread's first post to give it a ♥ here (counts update daily).</p>
-<div id="discourse-comments" data-forum="${cfg.discourse.url.replace(/\/*$/, "/")}" data-embed-url="${siteUrl}/${r.path}"></div>
-</section>`;
 
 // always shown: "no license" matters too (the author keeps all rights). "none found" only when GitHub was asked.
 function licenseText(r, ghSlug) {
@@ -60,6 +51,7 @@ function sidebar(r, ghSlug) {
     ],
     r.updated && ["last push", r.updated],
     r.docs && ["docs", html`<a href="${r.docs}">documentation</a>`],
+    r.guides?.length > 0 && ["guides", join(r.guides.map((g) => html`<a href="${href(g.path)}">${g.title}</a>`), ", ")],
     r.discussion && ["thread", html`<a href="${r.discussion}">external discussion</a>`],
     r.requires.length > 0 && ["requires", join(r.requires.map(reqBadge), " ")],
     ["source", r.source === "imported" ? html`imported${r.origin && html` from <code>${r.origin}</code>`}` : "submitted by the author"],
@@ -105,7 +97,7 @@ export default function entries(records, write) {
           ? html`<section class="readme"><h2>readme <span class="readme-src">from <a href="${r.repo}">${ghSlug || r.repo}</a></span></h2><div class="prose">${raw(r.readme)}</div></section>`
           : html`<section class="readme"><h2>readme</h2><p class="hint">Documentation lives in <a href="${r.repo}">the repository</a>.</p></section>`
       }
-      ${discussion(r)}
+      ${discussion(r.path, "script")}
     </div>
     ${sidebar(r, ghSlug)}
   </div>

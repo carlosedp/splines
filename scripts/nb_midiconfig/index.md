@@ -7,8 +7,8 @@ author: dstroud
 description: Mod to configure Norns NB voices for MIDI devices
 tags:
   - uncategorized
-ai: unknown
+ai: none
 source: imported
 origin: github-topic:norns
-listing: indexed
+listing: published
 ---

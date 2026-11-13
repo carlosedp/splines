@@ -9,7 +9,7 @@ tags:
   - audio-fx
   - fx
   - filter
-ai: unknown
+ai: none
 source: imported
 origin: catalog:community
 listing: published

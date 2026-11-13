@@ -182,6 +182,68 @@ export function validateEntry(entry) {
   return errs;
 }
 
+// Guides: long-form docs on a theme (a mod framework, nb, audio routing…) that tie related scripts together.
+// One guides/<slug>/index.md each, front matter + Markdown body, added by pull request like entries.
+export const GUIDES_DIR = 'guides';
+// groups on the /guides/ index, in this order
+export const GUIDE_TOPICS = {
+  start: 'getting started',
+  mods: 'mods',
+  nb: 'nb voices',
+  audio: 'audio & routing',
+  crow: 'crow',
+  dev: 'writing scripts',
+};
+
+/** Load every guides/<slug>/index.md. */
+export function loadGuides() {
+  const guides = [];
+  const dir = path.join(ROOT, GUIDES_DIR);
+  if (!fs.existsSync(dir)) return guides;
+  for (const slug of fs.readdirSync(dir).sort()) {
+    const file = path.join(dir, slug, 'index.md');
+    if (!fs.existsSync(file)) continue;
+    const { data, body } = parseFrontMatter(fs.readFileSync(file, 'utf8'));
+    guides.push({ slug, file: path.relative(ROOT, file).replaceAll('\\', '/'), data, body });
+  }
+  return guides;
+}
+
+/** Errors for one guide (empty when valid). `names` = every entry name, any listing: guides may cite indexed ones. */
+export function validateGuide(guide, names) {
+  const errs = [];
+  const d = guide.data;
+  if (!d) return ['missing or malformed front matter (expected a --- YAML block at the top)'];
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(guide.slug)) errs.push(`folder name "${guide.slug}" must be lowercase kebab-case`);
+  for (const k of ['title', 'summary']) {
+    if (typeof d[k] !== 'string' || !d[k].trim()) errs.push(`"${k}" is required and must be a non-empty string`);
+  }
+  if (typeof d.summary === 'string' && d.summary.length > 200) errs.push('"summary" should be 200 characters or fewer');
+  if (!GUIDE_TOPICS[d.topic]) errs.push(`"topic" must be one of: ${Object.keys(GUIDE_TOPICS).join(', ')}`);
+  if (!Array.isArray(d.authors) || !d.authors.length || d.authors.some((a) => typeof a !== 'string' || !a.trim())) {
+    errs.push('"authors" must be a non-empty list of names');
+  }
+  // the build compares this with each script's last push to flag guides that may be out of date
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(d.checked ?? ''))) errs.push('"checked" is required: the date the guide was last checked against the code, like 2026-11-01');
+  for (const k of ['scripts', 'tags', 'sources']) {
+    if (d[k] !== undefined && !Array.isArray(d[k])) errs.push(`"${k}" must be a list`);
+  }
+  for (const n of Array.isArray(d.scripts) ? d.scripts : []) {
+    if (!names.has(String(n))) errs.push(`"scripts" lists "${n}", which is not an entry in ${ENTRIES_DIR}/`);
+  }
+  for (const t of Array.isArray(d.tags) ? d.tags : []) if (!TAG_RE.test(String(t))) errs.push(`tag "${t}" must be lowercase kebab-case`);
+  for (const u of Array.isArray(d.sources) ? d.sources : []) if (!/^https:\/\/[^\s]+$/.test(String(u))) errs.push(`source "${u}" must be an https URL`);
+  // [[name]] in the body links to a script; catch typos here rather than as dead text on the page
+  // code is left out: Lua's [[long strings]] aren't refs
+  const prose = String(guide.body).replace(/^(```|~~~)[\s\S]*?^\1/gm, '').replace(/`[^`\n]*`/g, '');
+  for (const [, n] of prose.matchAll(GUIDE_REF_RE)) {
+    if (!names.has(n)) errs.push(`[[${n}]] in the text is not an entry in ${ENTRIES_DIR}/`);
+  }
+  return errs;
+}
+// [[name]] script references in guide text (outside code: the markdown renderer only resolves them in prose)
+export const GUIDE_REF_RE = /\[\[([A-Za-z0-9_][A-Za-z0-9_.-]*)\]\]/g;
+
 export function readJSON(file, fallback) {
   try {
     return JSON.parse(fs.readFileSync(file, 'utf8'));

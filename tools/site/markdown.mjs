@@ -9,6 +9,8 @@ import { esc, safeUrl } from "./html.mjs";
 // While an upstream README renders, this holds { slug, branch, dir } so relative links and images point back
 // at the repo, the way GitHub resolves them. null for entry notes.
 let readmeCtx = null;
+// While a guide renders, resolves [[name]] to { href, title } for a script (null: shown as plain text).
+let refResolver = null;
 
 /** Rewrite a README URL: relative paths → github.com blob (links) or raw.githubusercontent.com (images). */
 function fromRepo(u, raw) {
@@ -59,8 +61,32 @@ function rawHtml(text) {
 
 const md = new Marked({ gfm: true });
 md.use({
+  // [[name]] links to a script in guides. An inline extension, so code spans and blocks are left alone.
+  extensions: [
+    {
+      name: "scriptRef",
+      level: "inline",
+      start: (src) => (refResolver ? src.indexOf("[[") : -1),
+      tokenizer(src) {
+        const m = refResolver && /^\[\[([A-Za-z0-9_][A-Za-z0-9_.-]*)\]\]/.exec(src);
+        if (m) return { type: "scriptRef", raw: m[0], name: m[1] };
+      },
+      renderer({ name }) {
+        const ref = refResolver?.(name);
+        return ref
+          ? `<a class="script-ref" href="${esc(safeUrl(ref.href))}" title="${esc(ref.title)}">${esc(name)}</a>`
+          : `<code>${esc(name)}</code>`;
+      },
+    },
+  ],
   renderer: {
     html: ({ text }) => rawHtml(text),
+    // fenced code keeps its language as data-lang, which the stylesheet shows as a label
+    code({ text, lang, escaped }) {
+      const l = (lang || "").match(/^[\w+#.-]+/)?.[0] || "";
+      const body = escaped ? text : esc(text);
+      return `<pre${l ? ` data-lang="${esc(l)}"` : ""}><code${l ? ` class="language-${esc(l)}"` : ""}>${body.replace(/\n$/, "")}\n</code></pre>\n`;
+    },
     heading({ tokens, depth, text }) {
       // the page already has an <h1>; README headings move down one level
       if (readmeCtx) depth = Math.min(depth + 1, 6);
@@ -85,8 +111,15 @@ md.use({
   },
 });
 
-/** Entry notes and site pages as sanitized HTML. */
-export const markdown = (text) => md.parse(text);
+/** Entry notes and site pages as sanitized HTML. `resolve(name)` turns [[name]] into a script link (guides). */
+export function markdown(text, { resolve } = {}) {
+  refResolver = resolve || null;
+  try {
+    return md.parse(text);
+  } finally {
+    refResolver = null;
+  }
+}
 
 /** The repo's README as sanitized HTML, from the enrich cache ('' when not cached). */
 export function renderReadme(slug, info) {
