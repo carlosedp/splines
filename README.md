@@ -17,6 +17,7 @@ No framework: one Node build script and two dependencies (`yaml`, `marked`).
 
 ```sh
 npm install
+npm test                # exercise submission automation
 npm run import -- --only community --limit 24   # seed some entries (optional)
 npm run validate        # check all entries
 npm run build           # → dist/
@@ -75,7 +76,7 @@ Optional short "catalog notes", shown above the repo's README on the script page
 2. Set `siteUrl` and `basePath` in `site.config.json`. For a custom domain, set `cname`, use `siteUrl: https://your.domain` and `basePath: ""`.
 3. `deploy.yml` builds on every push to `main` and daily, to refresh stars and last-push dates.
 4. `import.yml` runs weekly (or manually) and opens a PR with newly found scripts. `health.yml` runs weekly too: a PR that follows moved repos and sets `status: gone` / `status: archived` on entries whose repo was deleted or archived (shown as ⚠️, with a tooltip). Removing an entry is decided in review.
-5. `issue-entry.yml` turns `[submit]`, `[claim]` and `[optout]` issues (forms in `.github/ISSUE_TEMPLATE`) into PRs and comments back on the issue. PRs opened by Actions don't trigger `validate.yml`, so that workflow validates the entry itself.
+5. `issue-entry.yml` turns submission, claim, edit and opt-out issues (forms in `.github/ISSUE_TEMPLATE`) into PRs and comments back on the issue. A submission updates an existing entry matching the repository and platform, or adds a new published entry; both require review. PRs opened by Actions don't trigger `validate.yml`, so that workflow validates the entry itself.
 6. `claude.yml` (optional) lets maintainers write `@claude add https://github.com/owner/repo to the catalog` in an issue or comment; Claude Code follows `.claude/skills/add-script/SKILL.md` and opens a PR, and `@claude` comments on that PR revise it. Setup: install the [Claude GitHub app](https://github.com/apps/claude) on the repo, run `claude setup-token` and save the token as the `CLAUDE_CODE_OAUTH_TOKEN` secret. Only users with write access can trigger it. The same skill works in a local session or on claude.ai/code ("add <url> to the catalog").
 7. `invite.yml` (off until you enable it) asks the authors of indexed scripts to opt in, one issue per repo, text in `templates/invite.md`. It does nothing unless the repository variable `INVITES_ENABLED` is `true`. Its send job runs in the `invites` environment: give that environment required reviewers so each weekly run waits for your approval after posting who it would invite. It needs a personal access token that can open issues on public repos, saved as the `INVITE_TOKEN` secret. To invite by hand instead, run `npm run invite` and use the prefilled **open** links in `invites.md`.
 8. Allow Actions to create PRs: **Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests**.

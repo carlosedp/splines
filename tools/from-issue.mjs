@@ -16,8 +16,8 @@ import {
   loadEntries, listingOf, normalizeRepo, githubSlug, gh, isModOnly, stringifyFrontMatter, updateFrontMatter,
 } from './lib.mjs';
 
-const { ISSUE_TITLE = '', ISSUE_BODY = '', ISSUE_NUMBER = '0', ISSUE_AUTHOR = '' } = process.env;
-const kind = ISSUE_TITLE.match(/^\[(submit|claim|edit|optout)\]/i)?.[1].toLowerCase();
+const { ISSUE_TITLE = '', ISSUE_BODY = '', ISSUE_NUMBER = '0', ISSUE_AUTHOR = '', ISSUE_SUBMISSION = '' } = process.env;
+const kind = ISSUE_TITLE.match(/^\[(submit|claim|edit|optout)\]/i)?.[1].toLowerCase() || (ISSUE_SUBMISSION === 'true' ? 'submit' : '');
 const today = new Date().toISOString().slice(0, 10);
 
 function output(key, value) {
@@ -76,50 +76,75 @@ let name, data, file, summary;
 try {
   if (!kind) fail('the issue title must start with [submit], [claim], [edit] or [optout]');
   if (kind === 'submit') {
-    const repo = field('repository').replace(/\.git$/, '').replace(/\/+$/, '');
+    const confirmations = checked('the one rule');
+    if (!confirmations.includes("I'm the author, or I have the author's OK to list it") ||
+        !confirmations.includes('It runs on real hardware and does what the entry says') ||
+        !confirmations.includes('I understand the code well enough to answer questions and fix bugs')) {
+      fail('confirm all three statements under "The one rule"');
+    }
+    const repo = field('repository').replace(/\/+$/, '').replace(/\.git$/i, '');
     if (!https(repo)) fail('the repository must be an https URL, like https://github.com/you/my-script');
     const platform = choice('platform') || DEFAULT_PLATFORM;
     if (!PLATFORMS[platform]) fail(`platform must be one of: ${Object.keys(PLATFORMS).join(', ')}`);
     const listed = entries.find((e) => e.platform === platform && normalizeRepo(e.data?.repo) === normalizeRepo(repo));
-    if (listed) fail(`this repo is already listed as \`${listed.slug}\`. If it's yours, use the claim form to publish it instead.`);
-
-    // license and author default to what GitHub knows
-    const slug = githubSlug(repo);
-    let info = {};
-    if (slug) {
-      const res = await gh(`/repos/${slug}`);
-      if (res.status === 404) fail(`${repo} was not found. Is the repository public?`);
-      if (res.ok) info = await res.json();
-    }
-    name = field('name') || info.name || repo.split('/').pop();
-    if (!SLUG_RE.test(name)) fail(`"${name}" can't be an entry name; use letters, digits, "_", "-" or "."`);
-    const taken = entries.find((e) => e.slug.toLowerCase() === name.toLowerCase());
-    if (taken) fail(`the name "${name}" is already used by \`${taken.slug}\`; fill in the name field with another one`);
-
     const requires = hardware(checked('hardware it needs'));
-    data = {
-      name,
-      platform,
-      // not asked on the form: a norns repo with lib/mod.lua and no script at the root is a mod
-      ...(platform === 'norns' && slug && (await isModOnly(slug)) ? { kind: 'mod' } : {}),
-      repo: info.html_url || repo,
-      author: field('author') || info.owner?.login || ISSUE_AUTHOR,
-      description: field('description').replace(/\s+/g, ' '),
-      tags: tags('tags'),
-    };
-    if (requires.length) data.requires = requires;
-    data.ai = ai('ai disclosure');
-    // the form asks submitters to confirm they're the author or have the author's OK
-    data.listing = 'published';
-    const license = field('license') || (info.license?.spdx_id !== 'NOASSERTION' && info.license?.spdx_id);
-    if (license) data.license = license;
-    data.added = today;
-    if (https(field('discussion'))) data.discussion = field('discussion');
+    const description = field('description').replace(/\s+/g, ' ');
+    const submittedTags = tags('tags');
+    const disclosure = ai('ai disclosure');
+    if (field('discussion') && !https(field('discussion'))) fail('discussion must be an https link');
 
-    file = `${ENTRIES_DIR}/${name}/index.md`;
-    fs.mkdirSync(path.join(ROOT, ENTRIES_DIR, name), { recursive: true });
-    fs.writeFileSync(path.join(ROOT, file), stringifyFrontMatter(data));
-    summary = `Adds **${name}** (${platform}${data.kind ? ` ${data.kind}` : ''}) from ${data.repo}.`;
+    if (listed) {
+      name = listed.slug;
+      if (field('name') && field('name') !== name) fail(`this repo is already listed as \`${name}\`; leave the name blank or use that exact name`);
+      const changes = {
+        description, tags: submittedTags, requires: requires.length ? requires : undefined,
+        ai: disclosure, source: 'submitted', origin: undefined, listing: 'published',
+      };
+      if (!listed.data.added) changes.added = today;
+      for (const key of ['author', 'license', 'discussion']) if (field(key)) changes[key] = field(key);
+      for (const key of Object.keys(changes)) if (JSON.stringify(changes[key]) === JSON.stringify(listed.data[key])) delete changes[key];
+      if (!Object.keys(changes).length) fail(`\`${name}\` already matches this submission; there's nothing to change`);
+      data = { ...listed.data, ...changes };
+      file = listed.file;
+      const abs = path.join(ROOT, file);
+      fs.writeFileSync(abs, updateFrontMatter(fs.readFileSync(abs, 'utf8'), changes));
+      summary = `Updates **${name}** from this submission: ${Object.keys(changes).map((k) => `\`${k}\``).join(', ')}.`;
+    } else {
+      // license and author default to what GitHub knows
+      const slug = githubSlug(repo);
+      let info = {};
+      if (slug) {
+        const res = await gh(`/repos/${slug}`);
+        if (res.status === 404) fail(`${repo} was not found. Is the repository public?`);
+        if (!res.ok) throw new Error(`GitHub API returned ${res.status} for ${repo}`);
+        info = await res.json();
+      }
+      name = field('name') || info.name || repo.split('/').pop();
+      if (!SLUG_RE.test(name)) fail(`"${name}" can't be an entry name; use letters, digits, "_", "-" or "."`);
+      const taken = entries.find((e) => e.slug.toLowerCase() === name.toLowerCase());
+      if (taken) fail(`the name "${name}" is already used by \`${taken.slug}\`; fill in the name field with another one`);
+
+      data = {
+        name, platform,
+        // not asked on the form: a norns repo with lib/mod.lua and no script at the root is a mod
+        ...(platform === 'norns' && slug && (await isModOnly(slug)) ? { kind: 'mod' } : {}),
+        repo: info.html_url || repo,
+        author: field('author') || info.owner?.login || ISSUE_AUTHOR,
+        description, tags: submittedTags,
+      };
+      if (requires.length) data.requires = requires;
+      data.ai = disclosure;
+      data.listing = 'published';
+      const license = field('license') || (info.license?.spdx_id !== 'NOASSERTION' && info.license?.spdx_id);
+      if (license) data.license = license;
+      data.added = today;
+      if (field('discussion')) data.discussion = field('discussion');
+
+      file = `${ENTRIES_DIR}/${name}/index.md`;
+      fs.mkdirSync(path.join(ROOT, ENTRIES_DIR, name), { recursive: true });
+      fs.writeFileSync(path.join(ROOT, file), stringifyFrontMatter(data));
+      summary = `Adds **${name}** (${platform}${data.kind ? ` ${data.kind}` : ''}) from ${data.repo}.`;
+    }
   } else if (kind === 'claim') {
     const entry = scriptField();
     // indexed or declined entries can always be claimed: that's the author opting in (or changing their mind)
@@ -192,7 +217,7 @@ try {
   console.log(`✓ ${summary}`);
 } catch (err) {
   if (!(err instanceof FormError)) throw err;
-  fs.writeFileSync('comment.md', `Thanks! This couldn't be turned into an entry yet:\n\n- ${err.message}\n\nEdit the issue to fix it and this runs again.\n`);
+  fs.writeFileSync('comment.md', `Thanks! This couldn't be turned into an entry yet:\n\n- ${err.message}\n\nEdit the issue to fix it and this runs again. Any existing pull request was not updated and may no longer match the issue.\n`);
   output('file', '');
   console.error(`✗ ${err.message}`);
 }

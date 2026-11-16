@@ -20,6 +20,7 @@ AI-assisted scripts are welcome, but **AI disclosure is mandatory** (`ai:` field
 
 ```sh
 npm install
+npm test                    # submission automation tests
 npm run validate            # schema + duplicate checks (offline)
 npm run validate:online     # + checks repos exist and have a root .lua (uses GITHUB_TOKEN if set)
 npm run enrich              # GitHub stars/last push/license/cover → .cache/github.json, READMEs → .cache/readme/ (--only a,b)
@@ -33,7 +34,7 @@ npm run invite              # invites.md: indexed entries whose authors could be
 npm run new -- <name> [--platform crow]   # scaffold an entry from templates/entry.md
 ```
 
-Node ≥ 20. There is no test suite yet. Verify changes by running `validate` and `build`, then opening the site with `serve`. For a realistic dataset, run the importer without `--limit` in a scratch copy (≈350 entries from norns.community; all should validate).
+Node ≥ 20. Verify changes by running `npm test`, `validate` and `build`, then opening the site with `serve`. For a realistic dataset, run the importer without `--limit` in a scratch copy (≈350 entries from norns.community; all should validate).
 
 ## Layout
 

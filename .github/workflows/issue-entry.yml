@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   entry:
-    if: startsWith(github.event.issue.title, '[submit]') || startsWith(github.event.issue.title, '[claim]') || startsWith(github.event.issue.title, '[edit]') || startsWith(github.event.issue.title, '[optout]')
+    if: contains(github.event.issue.labels.*.name, 'submission') || startsWith(github.event.issue.title, '[submit]') || startsWith(github.event.issue.title, '[claim]') || startsWith(github.event.issue.title, '[edit]') || startsWith(github.event.issue.title, '[optout]')
     runs-on: ubuntu-latest
     concurrency: issue-${{ github.event.issue.number }}
     steps:
@@ -31,6 +31,7 @@ jobs:
           ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
+          ISSUE_SUBMISSION: ${{ contains(github.event.issue.labels.*.name, 'submission') }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node tools/from-issue.mjs
       - name: Validate
@@ -43,7 +44,7 @@ jobs:
           if node tools/validate.mjs --online --changed "$FILE" 2> errors.log; then
             echo "ok=true" >> "$GITHUB_OUTPUT"
           else
-            { echo "Thanks! The entry didn't pass validation yet:"; echo; grep '^✗' errors.log | sed 's/^✗ /- /'; echo; echo "Edit the issue to fix it and this runs again."; } > comment.md
+            { echo "Thanks! The entry didn't pass validation yet:"; echo; grep '^✗' errors.log | sed 's/^✗ /- /'; echo; echo "Edit the issue to fix it and this runs again. Any existing pull request was not updated and may no longer match the issue."; } > comment.md
           fi
       - name: Open pull request
         id: pr
@@ -71,3 +72,11 @@ jobs:
             none) rm -f comment.md ;; # an edit that changed nothing in the entry
           esac
           if [ -f comment.md ]; then gh issue comment "$NUMBER" --repo "$GITHUB_REPOSITORY" --body-file comment.md; fi
+      - name: Report automation failure
+        if: failure() && (steps.entry.outcome == 'failure' || steps.validate.outcome == 'failure' || steps.pr.outcome == 'failure')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUMBER: ${{ github.event.issue.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh issue comment "$NUMBER" --repo "$GITHUB_REPOSITORY" --body "The submission automation failed. A maintainer can inspect the run: $RUN_URL. Any existing pull request may not reflect the latest issue."

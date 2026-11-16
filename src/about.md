@@ -28,7 +28,7 @@ Every entry carries one of these labels, and the list can be filtered by them, s
 
 ## submitting a script
 
-**The easy way:** fill in the [submission form](https://github.com/{{repo}}/issues/new?template=submit.yml). No git needed, just a GitHub account. A bot turns it into a pull request; if something needs fixing it comments on your issue, and editing the issue runs it again.
+**The easy way:** fill in the [submission form](https://github.com/{{repo}}/issues/new?template=submit.yml). No git needed, just a GitHub account. A bot proposes a new entry or updates the existing entry for that repository and platform in a pull request for review. If something needs fixing it comments on your issue, and editing the issue runs it again.
 
 **With a pull request:**
 

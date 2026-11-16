@@ -2,7 +2,7 @@
 
 ## Add a script
 
-**The easy way:** fill in the [submission form](https://github.com/carlosedp/splines/issues/new?template=submit.yml). No git needed. A bot turns it into a pull request and comments on your issue if anything needs fixing; editing the issue runs it again.
+**The easy way:** fill in the [submission form](https://github.com/carlosedp/splines/issues/new?template=submit.yml). No git needed. A bot proposes a new published entry, or updates the existing entry for that repository and platform, in a pull request for review. It comments on your issue if anything needs fixing; editing the issue runs it again.
 
 **With a pull request:**
 

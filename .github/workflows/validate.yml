@@ -2,7 +2,7 @@ name: validate entries
 
 on:
   pull_request:
-    paths: ['scripts/**', 'tools/**', 'templates/**', 'site.config.json', 'src/**']
+    paths: ['scripts/**', 'tools/**', 'tests/**', 'templates/**', 'site.config.json', 'src/**']
 
 permissions:
   contents: read
@@ -19,6 +19,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm test
       - name: Find changed entries
         id: changed
         run: |
