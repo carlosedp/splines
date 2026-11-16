@@ -6,10 +6,12 @@ repo: https://github.com/vehka/nullcast
 author: vehka
 description: no description yet
 tags:
-  - uncategorized
-ai: unknown
+  - mod
+  - streaming
+  - internet radio
+ai: assisted
 source: imported
 origin: github-search
-listing: indexed
+listing: published
 added: 2026-11-16
 ---
