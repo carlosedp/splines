@@ -8,7 +8,7 @@ description: no description yet
 tags:
   - mod
   - streaming
-  - internet radio
+  - internet-radio
 ai: assisted
 source: imported
 origin: github-search
