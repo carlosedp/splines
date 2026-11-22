@@ -10,10 +10,10 @@ tags:
 requires:
   - grid
   - midi
-ai: unknown
+ai: none
 source: imported
 origin: lines
-listing: indexed
+listing: published
 added: 2026-10-26
 discussion: https://llllllll.co/t/fell/72593
 ---

@@ -8,10 +8,10 @@ tags:
   - grid
 requires:
   - grid
-ai: unknown
+ai: assisted
 source: imported
 origin: lines
-listing: indexed
+listing: published
 added: 2026-10-26
 discussion: https://llllllll.co/t/sluiiice-a-waterfall-for-iii-grids/74393
 ---

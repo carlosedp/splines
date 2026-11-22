@@ -6,14 +6,16 @@ author: lazzarello
 description: polyphonic 6 operator fm synth
 tags:
   - synth
+  - fm
   - grid
   - midi
 requires:
   - grid
   - midi
-ai: unknown
+ai: none
 source: imported
 origin: catalog:community
 listing: published
+added: 2026-10-26
 discussion: https://llllllll.co/t/21395
 ---
